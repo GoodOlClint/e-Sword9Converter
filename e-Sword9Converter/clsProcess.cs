@@ -14,7 +14,9 @@ namespace e_Sword9Converter
         public string DestDB { get { return this.destDB; } set { this.destDB = value; } }
         private bool run;
         /* These are our querys for mass inserts */
+        private const string ANLTable = "INSERT INTO Words (Word) VALUES (?);";
         private const string BibleTable = "INSERT INTO Bible (Book, Chapter, Verse, Scripture) VALUES (?,?,?,?);";
+        private const string ReadingPlanTable = "INSERT INTO Plan (Day, Book, StartChapter, EndChapter, Completed) VALUES (?,?,?,?,?);";
         private const string CommentaryBookTable = "INSERT INTO Books (Book, Comments) VALUES (?,?);";
         private const string CommentaryChapterTable = "INSERT INTO Chapters (Book, Chapter, Comments) VALUES (?,?,?);";
         private const string CommentaryVersesTable = "INSERT INTO Verses (Book, ChapterBegin, ChapterEnd, VerseBegin, VerseEnd, Comments) VALUES (?,?,?,?,?,?);";
@@ -27,6 +29,74 @@ namespace e_Sword9Converter
         private const string TopicsTable = "INSERT INTO Topics (Title, Notes) VALUES (?,?);";
 
         public void Skip() { run = false; }
+
+        public void BuildANL()
+        {
+            run = true;
+            while (run)
+            {
+                SQLExecuteNonQuery("CREATE TABLE Words (Word TEXT);");
+                //first lets add the details table;
+                int count = (int)MDBExecuteScalar("SELECT COUNT(*) FROM Words WHERE Word <> NULL");
+                ThreadSafeCollection<odbc.ANL.Words> wrds = new ThreadSafeCollection<odbc.ANL.Words>();
+
+                using (odbcReader dr = MDBExecuteReader("SELECT Word FROM Word;"))
+                {
+                    bool nextResult = true;
+                    while (nextResult)
+                    {
+                        while (dr.Read())
+                        {
+                            try
+                            {
+                                odbc.ANL.Words Word = new odbc.ANL.Words(dr[0]);
+                                wrds.Add(Word);
+                            }
+                            catch (Exception ex) { Error.Record(this, ex); }
+                        }
+                        nextResult = dr.NextResult();
+                    }
+                }
+                ThreadSafeCollection<SQL.ANLX.Words> wrdxs = new ThreadSafeCollection<SQL.ANLX.Words>();
+                foreach (odbc.ANL.Words Word in wrds)
+                {
+                    SQL.ANLX.Words wrdx = new SQL.ANLX.Words();
+                    wrdx.FromODBC(Word);
+                    wrdxs.Add(wrdx);
+                }
+                using (SQLiteConnection sqlCon = new SQLiteConnection("data source=\"" + DestDB + "\""))
+                {
+                    try { sqlCon.Open(); }
+                    catch (Exception ex) { Error.Record(this, ex); return; }
+                    using (SQLiteCommand sqlCmd = sqlCon.CreateCommand())
+                    {
+                        sqlCmd.CommandText = BibleTable;
+                        SQLiteParameter Word = new SQLiteParameter();
+                        sqlCmd.Parameters.Add(Word);
+                        using (SQLiteTransaction sqlTran = sqlCon.BeginTransaction())
+                        {
+                            try
+                            {
+                                foreach (SQL.ANLX.Words wrd in wrdxs)
+                                {
+                                    try
+                                    {
+                                        Word.Value = wrd.Word;
+                                        sqlCmd.ExecuteNonQuery();
+                                    }
+                                    catch (Exception ex)
+                                    { Error.Record(this, ex); }
+                                }
+                            }
+                            catch { sqlTran.Rollback(); }
+                            finally { sqlTran.Commit(); }
+                        }
+                    }
+                    sqlCon.Close();
+                }
+                run = false;
+            }
+        }
 
         public void BuildBible()
         {
@@ -157,6 +227,7 @@ namespace e_Sword9Converter
                     sqlCmd.Parameters.AddRange(Parameters);
                     results = sqlCmd.ExecuteNonQuery();
                 }
+                sqlCon.Close();
             }
             return results;
         }
@@ -172,6 +243,7 @@ namespace e_Sword9Converter
                     sqlCmd.CommandText = query;
                     results = sqlCmd.ExecuteNonQuery();
                 }
+                sqlCon.Close();
             }
             return results;
         }
@@ -237,6 +309,7 @@ namespace e_Sword9Converter
                     odbcCmd.CommandText = query;
                     results = odbcCmd.ExecuteScalar();
                 }
+                odbcCon.Close();
             }
             return results;
         }
@@ -258,16 +331,11 @@ namespace e_Sword9Converter
 
             #endregion
 
-            public object this[int index]
-            {
-                get
-                {
-                    return this.Reader[index];
-                }
-            }
+            public object this[int index] { get { return this.Reader[index]; } }
 
             public bool Read() { return this.Reader.Read(); }
             public bool NextResult() { return this.Reader.NextResult(); }
+            public void Close() { Reader.Close(); odbcCon.Close(); }
         }
     }
 }
