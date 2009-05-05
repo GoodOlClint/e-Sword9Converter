@@ -17,12 +17,14 @@ namespace e_Sword9Converter
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            Process proc = new Process();
+            //Process proc = new Process();
+            Details DetailsTable = Details.LoadFromDatabase(new oleDbFactory(), "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=BHS+.bbl"); ;
+            string s = DetailsTable.SQLCreateStatement();
             //proc.SourceDB = "WycliffeNT.bbl";
             //proc.DestDB = "WycliffeNT.bblx";
-            proc.SourceDB = "BHS+.bbl";
-            proc.DestDB = "BHS+.bblx";
-            proc.BuildBible();
+            //proc.SourceDB = "BHS+.bbl";
+            //proc.DestDB = "BHS+.bblx";
+            //proc.BuildBible();
         }
     }
 }
