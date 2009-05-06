@@ -18,8 +18,11 @@ namespace e_Sword9Converter
         private void Form1_Load(object sender, EventArgs e)
         {
             //Process proc = new Process();
-            Details DetailsTable = Details.LoadFromDatabase(new oleDbFactory(), "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=BHS+.bbl"); ;
-            string s = DetailsTable.SQLCreateStatement();
+            Bible Bible = new Bible();
+            Bible.Load("WycliffeNT.bbl");
+            Bible.Save("WycliffeNT.bblx");
+            //BibleTable BibleTable = BibleTable.LoadFromDatabase(new oleDbFactory(), "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=BHS+.bbl"); ;
+            //BibleTable.SaveToDatabase(new SQLiteDbFactory(), "data source=\"BHS+.bblx\"");
             //proc.SourceDB = "WycliffeNT.bbl";
             //proc.DestDB = "WycliffeNT.bblx";
             //proc.SourceDB = "BHS+.bbl";
