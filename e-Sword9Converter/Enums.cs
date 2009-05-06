@@ -9,7 +9,8 @@
         TEXT,
         BLOB,
         NVARCHAR,
-        BOOL
+        BOOL,
+        DATETIME
     }
     public enum columnType
     {

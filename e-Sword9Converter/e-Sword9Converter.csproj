@@ -101,10 +101,18 @@
     </Compile>
     <Compile Include="Tables\Bible.cs" />
     <Compile Include="Tables\Commentary.cs" />
+    <Compile Include="Tables\BibleReadingPlan.cs" />
+    <Compile Include="Tables\Devotions.cs" />
+    <Compile Include="Tables\Memory.cs" />
+    <Compile Include="Tables\Notes.cs" />
+    <Compile Include="Tables\Overlay.cs" />
+    <Compile Include="Tables\PrayerRequests.cs" />
     <Compile Include="Tables\Topics.cs" />
     <Compile Include="Tables\Graphics.cs" />
     <Compile Include="Tables\Harmony.cs" />
     <Compile Include="Tables\Dictionary.cs" />
+    <Compile Include="Tables\VerseList.cs" />
+    <Compile Include="VerseReferences.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
