@@ -7,7 +7,6 @@ namespace e_Sword9Converter
 {
     static class Program
     {
-        public static VerseLists VerseLists = new VerseLists();
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
