@@ -28,40 +28,52 @@ namespace e_Sword9Converter.Tables
             public int Version { get { return Convert.ToInt32(this.Rows[0]["Version"]); } set { this.Rows[0]["Version"] = value; } }
         }
 
+        [AccessTable("Copyright")]
         public class Copyright : Table<Copyright>
         {
             [AccessColumn("ID", DbType.INT)]
             public int ID { get; set; }
 
-            [AccessColumn("ID", DbType.INT)]
+            [Column("Author", DbType.TEXT)]
             public string Author { get; set; }
 
-            [AccessColumn("ID", DbType.INT)]
+            [Column("Title", DbType.TEXT)]
             public string Title { get; set; }
 
-            [AccessColumn("ID", DbType.INT)]
+            [Column("Place", DbType.TEXT)]
             public string Place { get; set; }
 
-            [AccessColumn("ID", DbType.INT)]
+            [Column("Publisher", DbType.TEXT)]
             public string Publisher { get; set; }
 
-            [AccessColumn("ID", DbType.INT)]
+            [Column("Year", DbType.TEXT)]
             public string Year { get; set; }
 
-            [AccessColumn("ID", DbType.INT)]
+            [Column("Edition", DbType.TEXT)]
             public string Edition { get; set; }
 
-            [AccessColumn("ID", DbType.INT)]
+            [Column("Copyright", DbType.TEXT)]
             public string Copyright1 { get; set; }
 
-            [AccessColumn("ID", DbType.INT)]
+            [Column("Notes", DbType.TEXT)]
             public string Notes { get; set; }
         }
+
+        [Table("Devotions")]
         public class Devotions : Table<Devotions>
         {
+            [AccessColumn("ID", DbType.INT)]
             public int ID { get; set; }
+
+            [Column("Month", DbType.INT)]
+            [Index("MonthDayIndex")]
             public int Month { get; set; }
+
+            [Column("Day", DbType.INT)]
+            [Index("MonthDayIndex")]
             public int Day { get; set; }
+
+            [Column("Devotion", DbType.TEXT)]
             public string Devotion { get; set; }
         }
     }

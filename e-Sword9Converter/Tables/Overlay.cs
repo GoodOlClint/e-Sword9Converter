@@ -14,7 +14,9 @@ namespace e_Sword9Converter.Tables
 
         public class OverlayTable : Table<OverlayTable>
         {
+            [AccessColumn("ID", DbType.INT)]
             public int ID { get; set; }
+
             public string Bible { get; set; }
             public int BookID { get; set; }
             public int Chapter { get; set; }

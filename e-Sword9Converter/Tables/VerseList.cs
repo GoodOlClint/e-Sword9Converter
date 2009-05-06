@@ -37,14 +37,19 @@ namespace e_Sword9Converter.Tables
         {
             [AccessColumn("ID", DbType.INT)]
             public int ID { get; set; }
+            
             [AccessColumn("VerseID", DbType.INT)]
             public int VerseID { get; set; }
+            
             [SqlColumn("Book", DbType.INT)]
             public int Book { get; set; }
+            
             [SqlColumn("Chapter", DbType.INT)]
             public int Chapter { get; set; }
+            
             [SqlColumn("Verse", DbType.INT)]
             public int Verse { get; set; }
+            
             [Column("Order", DbType.INT)]
             public int Order { get; set; }
         }
