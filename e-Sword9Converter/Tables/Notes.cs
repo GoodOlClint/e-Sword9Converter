@@ -19,8 +19,11 @@ namespace e_Sword9Converter.Tables
         public override void Load(string Path)
         {
             base.Load(Path);
-            foreach (ThreadSafeDictionary<string, object> Row in (from ThreadSafeDictionary<string, object> Row in ((VerseNotes)this.Tables["Verses"]).Rows
-                                                                  select Row).ToArray())
+
+            IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((VerseNotes)this.Tables["Verses"]).Rows
+                                                                      select Row).ToArray();
+            this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
+            foreach (ThreadSafeDictionary<string, object> Row in rows)
             {
                 int VerseID = Convert.ToInt32(Row["VerseID"]);
                 var reference = (from VerseReference v in this.VerseReferences
@@ -30,6 +33,7 @@ namespace e_Sword9Converter.Tables
                 Row["Book"] = reference.Book;
                 Row["Chapter"] = reference.Chapter;
                 Row["Verse"] = (VerseID - reference.StartVerse) + 1;
+                this.Parent.UpdateStatus();
             }
         }
 

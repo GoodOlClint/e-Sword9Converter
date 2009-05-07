@@ -129,4 +129,10 @@
   <metadata name="ofdSource.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>150, 17</value>
   </metadata>
+  <data name="ofdSource.Filter" xml:space="preserve">
+    <value>All e-Sword Modules|*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst|Bibles|*.bbl|Bible Reading Plans|*.brp|Commentaries|*.cmt|Dictionaries|*.dct|Devotionals|*.dev|Graphics|*.map|Gospel Harmonies|*.har|Notes|*.not|Memory Verses|*.mem|Overlays|*.ovl|Prayer Requests|*.prl|Topics|*.top|Verse Lists|*.lst</value>
+  </data>
+  <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>257, 17</value>
+  </metadata>
 </root>

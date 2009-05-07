@@ -27,8 +27,8 @@ namespace e_Sword9Converter
 
     public interface IParent
     {
-        string GetPassword(string path);
+        bool GetPassword(string path, out string password);
         void UpdateStatus();
-        void SetMaxValue(int value);
+        void SetMaxValue(int value, updateStatus Status);
     }
 }

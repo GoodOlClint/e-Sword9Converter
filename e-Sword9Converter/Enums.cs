@@ -24,4 +24,11 @@
         Both = 0,
         Sql = 1
     }
+    public enum updateStatus
+    {
+        Load,
+        Convert,
+        Save,
+        Finished
+    }
 }

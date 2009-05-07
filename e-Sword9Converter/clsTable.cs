@@ -50,7 +50,7 @@ namespace e_Sword9Converter
             }
         }
         #endregion
-        public static T LoadFromDatabase(DbProviderFactory Factory, string connectionString,IParent Parent)
+        public static T LoadFromDatabase(DbProviderFactory Factory, string connectionString, IParent Parent)
         {
             T Table = new T();
             Table.Parent = Parent;
@@ -62,7 +62,7 @@ namespace e_Sword9Converter
                 {
                     dbCmd.CommandText = string.Format("SELECT COUNT(*) FROM {0};", Table.tableName);
                     int count = (int)dbCmd.ExecuteScalar();
-                    Table.Parent.SetMaxValue(count);
+                    Table.Parent.SetMaxValue(count,updateStatus.Load);
                     dbCmd.CommandText = string.Format("SELECT * FROM {0};", Table.tableName);
                     using (DbDataReader reader = dbCmd.ExecuteReader())
                     {
@@ -102,12 +102,17 @@ namespace e_Sword9Converter
                                                 Row.Add(Column.PropertyName, Convert.ToInt32(Convert.ToDateTime(reader[Column.Name])));
                                                 break;
                                         }
-                                        
+
                                     }
                                     catch (Exception ex) { Error.Record(Table, ex); }
                                 }
-                                Table.Parent.UpdateStatus();
-                                Table.Rows.Add(Row);
+                                try
+                                {
+                                    Table.Parent.UpdateStatus();
+
+                                    Table.Rows.Add(Row);
+                                }
+                                catch (Exception ex) { Error.Record(Table, ex); }
                             }
                             nextResult = reader.NextResult();
                         }
@@ -176,7 +181,7 @@ namespace e_Sword9Converter
                 {
                     int count = (from ThreadSafeDictionary<string, object> kvp in this.Rows
                                  select kvp).Count();
-                    this.Parent.SetMaxValue(count);
+                    this.Parent.SetMaxValue(count, updateStatus.Save);
                     string Command = string.Format("INSERT INTO {0} (", tableName);
                     IDictionary<string, IColumn> sqlColumns = (from KeyValuePair<string, IColumn> C in this.Columns
                                                                where C.Value.colType != columnType.Access
@@ -219,6 +224,7 @@ namespace e_Sword9Converter
                     }
                 }
             }
+            this.Parent.SetMaxValue(100, updateStatus.Finished);
         }
         public void Load(DbProviderFactory Factory, string connectionString)
         {

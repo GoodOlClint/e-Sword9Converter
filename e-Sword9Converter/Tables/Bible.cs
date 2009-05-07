@@ -19,11 +19,14 @@ namespace e_Sword9Converter.Tables
             base.Load(File);
 
             //Remove Invalid Scripture Entries;
-            foreach (ThreadSafeDictionary<string, object> Row in (from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
-                                                                  where ((string)Row["Scripture"]) == ""
-                                                                  select Row).ToArray())
+            IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
+                                                                      where ((string)Row["Scripture"]) == ""
+                                                                      select Row).ToArray();
+            this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
+            foreach (ThreadSafeDictionary<string, object> Row in rows)
             {
                 ((BibleTable)this.Tables["Bible"]).Rows.Remove(Row);
+                this.Parent.UpdateStatus();
             }
             ((Details)this.Tables["Details"]).NT = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
                                                                       where ((int)Row["BookID"]) == 66

@@ -11,6 +11,7 @@ namespace e_Sword9Converter.Tables
             : base(Parent)
         {
             this.Tables.Add("Plan", new Plan());
+            this.Tables["Plan"].Parent = Parent;
         }
         [Table("Requests")]
         public class Plan : Table<Plan>

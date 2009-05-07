@@ -19,7 +19,7 @@ namespace e_Sword9Converter
         public ThreadSafeDictionary<string, ITable> Tables = new ThreadSafeDictionary<string, ITable>();
         private oleDbFactory oleDbFactory = new oleDbFactory();
         private SQLiteDbFactory SQLiteFactory = new SQLiteDbFactory();
-        private IParent Parent;
+        protected IParent Parent;
         private string SourceConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source={file};";
         private string DestConnectionString = "data source=\"{file}\"";
 
@@ -48,13 +48,14 @@ namespace e_Sword9Converter
         }
         public virtual void Load(string Path)
         {
-            string pass = this.Parent.GetPassword(Path);
-            if (pass != "")
+            string pass;
+            if (this.Parent.GetPassword(Path, out pass))
             {
-                SourceConnectionString += "Jet OLEDB:Database Password=\"" + pass + "\";";
+                if (pass != "")
+                { SourceConnectionString += "Jet OLEDB:Database Password=\"" + pass + "\";"; }
+                foreach (KeyValuePair<string, ITable> Table in this.Tables)
+                { Table.Value.Load(oleDbFactory, this.SourceConnectionString.Replace("{file}", Path)); }
             }
-            foreach (KeyValuePair<string, ITable> Table in this.Tables)
-            { Table.Value.Load(oleDbFactory, this.SourceConnectionString.Replace("{file}", Path)); }
         }
     }
 }

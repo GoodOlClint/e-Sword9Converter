@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-using System.Threading;
-using System.IO;
 using System.Collections;
+using System.Data.OleDb;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace e_Sword9Converter
 {
@@ -16,27 +13,112 @@ namespace e_Sword9Converter
         public frmMain()
         {
             InitializeComponent();
+            this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
+            passwordForm = new frmPassword();
+            this.AddOwnedForm(passwordForm);
+        }
+        private frmPassword passwordForm;
+
+        void prgMain_MouseHover(object sender, EventArgs e)
+        {
+            int Percent = (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d);
+            this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% Completed", Percent));
         }
 
-        #region IParent Members
-
-        public string GetPassword(string path)
+        public bool GetPassword(string path, out string password)
         {
-            return "";
-        }
-
-        private delegate void SetMaxValueDelegate(int value);
-        private delegate void UpdateStatusDelegate();
-
-        public void SetMaxValue(int value)
-        {
-            if (this.prgMain.InvokeRequired)
+            password = "";
+            if (this.InvokeRequired)
             {
-                this.prgMain.Invoke(new SetMaxValueDelegate(SetMaxValue), value);
+                object[] args = new object[] { path, password };
+                bool ret = (bool)this.Invoke(new GetPasswordDelegate(this.GetPassword), args);
+                password = (string)args[1];
+                return ret;
             }
             else
             {
-                this.prgMain.Maximum += value;
+                return this.GetPassword(path, false, out password);
+            }
+        }
+        public static void OpenDatabase(string Path, string password)
+        {
+            OleDbConnection odbcCon = new OleDbConnection();
+            string str = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source={file};".Replace("{file}", Path);
+            str = str + "Jet OLEDB:Database Password=\"" + password + "\";";
+            odbcCon.ConnectionString = str;
+            odbcCon.Open();
+            odbcCon.Close();
+            odbcCon.Dispose();
+        }
+
+        private bool GetPassword(string path, bool tried, out string password) { return this.GetPassword(path, tried, 0, out password); }
+        private bool GetPassword(string path, bool tried, int passCount, out string password) { return this.GetPassword(path, tried, passCount, "", out password); }
+        private bool GetPassword(string path, bool tried, int passCount, string password, out string outPassword)
+        {
+            
+            try
+            {
+                OpenDatabase(path, password);
+                outPassword = password;
+                return true;
+            }
+            catch
+            {
+                if (tried)
+                { passwordForm.Text = "Invalid Password"; }
+                else { passwordForm.Text = "Password"; }
+                string pass = "Password";
+                if (!System.IO.File.Exists("Passwords.txt"))
+                {
+                    if (passwordForm.ShowDialog() == DialogResult.OK)
+                    {
+                        pass = passwordForm.Password;
+                        tried = true;
+                    }
+                    else { outPassword = ""; return false; }
+                }
+                else
+                {
+                    StreamReader SR = new StreamReader("Passwords.txt", Encoding.Default);
+                    ArrayList passList = new ArrayList();
+                    while (!SR.EndOfStream)
+                    {
+                        passList.Add(SR.ReadLine());
+                    }
+                    if (passCount >= passList.ToArray().Length)
+                    {
+                        if (passwordForm.ShowDialog() == DialogResult.OK)
+                        {
+                            pass = passwordForm.Password;
+                            tried = true;
+                        }
+                        else { outPassword = ""; return false; }
+                    }
+                    else
+                    {
+                        pass = (string)passList.ToArray()[passCount];
+                    }
+                }
+                return GetPassword(path, tried, passCount + 1, pass, out outPassword);
+            }
+        }
+
+        #region IParent Members
+        private delegate void SetMaxValueDelegate(int value, updateStatus Status);
+        private delegate void UpdateStatusDelegate();
+        private delegate bool GetPasswordDelegate(string path, out string password);
+
+        public void SetMaxValue(int value, updateStatus Status)
+        {
+            if (this.prgMain.InvokeRequired)
+            {
+                this.prgMain.Invoke(new SetMaxValueDelegate(SetMaxValue), value, Status);
+            }
+            else
+            {
+                this.prgMain.Maximum = value + 1;
+                this.prgMain.Value = 0;
+                this.lblStatus.Text = Status.ToString();
             }
         }
 
@@ -72,7 +154,9 @@ namespace e_Sword9Converter
             if (!ValidSource(this.txtSource.Text))
             { MessageBox.Show("", "Source file invalid", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
             string ext = this.txtSource.Text.Substring(this.txtSource.Text.Length - 4, 4);
-            this.ofdDest.FileName = this.txtSource.Text.Replace(ext, ext + "x");
+            string path = this.ConvertFilePath(this.txtSource.Text);
+            this.ofdDest.FileName = this.txtSource.Text.Replace(ext, ext + "x").Replace(path + @"\", "");
+            this.ofdDest.InitialDirectory = path;
             this.grpDest.Enabled = true;
         }
 
@@ -84,26 +168,41 @@ namespace e_Sword9Converter
                 case ".bbl":
                     this.ofdDest.Filter = "e-Sword Bible|*.bblx";
                     break;
+                case ".brp":
+                    this.ofdDest.Filter = "e-Sword Bible Reading Plan|*.brpx";
+                    break;
                 case ".cmt":
                     this.ofdDest.Filter = "e-Sword Commentary|*.cmtx";
                     break;
                 case ".dct":
                     this.ofdDest.Filter = "e-Sword Dictionary|*.dctx";
                     break;
-                case ".har":
-                    this.ofdDest.Filter = "e-Sword Gospel Harmoy|*.harx";
-                    break;
-                case ".lst":
-                    this.ofdDest.Filter = "e-Sword Verse List|*.lstx";
+                case ".dev":
+                    this.ofdDest.Filter = "e-Sword Devotional|*.devx";
                     break;
                 case ".map":
                     this.ofdDest.Filter = "e-Sword Graphics|*.mapx";
                     break;
+                case ".har":
+                    this.ofdDest.Filter = "e-Sword Gospel Harmony|*.harx";
+                    break;
                 case ".not":
                     this.ofdDest.Filter = "e-Sword Notes|*.notx";
                     break;
+                case ".mem":
+                    this.ofdDest.Filter = "e-Sword Memory Verses|*.memx";
+                    break;
+                case ".ovl":
+                    this.ofdDest.Filter = "e-Sword Overlay|*.ovlx";
+                    break;
+                case ".prl":
+                    this.ofdDest.Filter = "e-Sword Prayer Requests|*.prlx";
+                    break;
                 case ".top":
                     this.ofdDest.Filter = "e-Sword Topic|*.topx";
+                    break;
+                case ".lst":
+                    this.ofdDest.Filter = "e-Sword Verse List|*.lstx";
                     break;
                 default:
                     return false;
@@ -226,13 +325,21 @@ namespace e_Sword9Converter
             db.SourceDB = this.txtSource.Text;
             Thread t = new Thread(new ThreadStart(db.ConvertFormat));
             t.Start();
-            
+
+        }
+
+        private void lnkBatch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            frmAdvanced advanced = new frmAdvanced();
+            this.AddOwnedForm(advanced);
+            this.Hide();
+            advanced.ShowDialog();
         }
 
 
-        //private string ConvertFilePath(string OldPath)
-        //{
-
-        //}
+        private string ConvertFilePath(string OldPath)
+        {
+            return new FileInfo(OldPath).DirectoryName;
+        }
     }
 }

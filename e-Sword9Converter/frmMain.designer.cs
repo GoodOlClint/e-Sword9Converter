@@ -28,8 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.btnSource = new System.Windows.Forms.Button();
             this.grpSource = new System.Windows.Forms.GroupBox();
+            this.txtSource = new AutoComplete.AutoCompleteTextBox();
             this.grpDest = new System.Windows.Forms.GroupBox();
             this.btnDest = new System.Windows.Forms.Button();
             this.txtDest = new System.Windows.Forms.TextBox();
@@ -38,7 +41,8 @@
             this.ofdDest = new System.Windows.Forms.SaveFileDialog();
             this.ofdSource = new System.Windows.Forms.OpenFileDialog();
             this.lnkBatch = new System.Windows.Forms.LinkLabel();
-            this.txtSource = new AutoComplete.AutoCompleteTextBox();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.lblStatus = new System.Windows.Forms.Label();
             this.grpSource.SuspendLayout();
             this.grpDest.SuspendLayout();
             this.SuspendLayout();
@@ -66,6 +70,17 @@
             this.grpSource.TabIndex = 4;
             this.grpSource.TabStop = false;
             this.grpSource.Text = "File to Convert";
+            // 
+            // txtSource
+            // 
+            this.txtSource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtSource.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
+            this.txtSource.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystem;
+            this.txtSource.Location = new System.Drawing.Point(6, 16);
+            this.txtSource.Name = "txtSource";
+            this.txtSource.Size = new System.Drawing.Size(311, 20);
+            this.txtSource.TabIndex = 2;
             // 
             // grpDest
             // 
@@ -130,9 +145,7 @@
             // 
             // ofdSource
             // 
-            this.ofdSource.Filter = "All e-Sword Modules|*.bbl;*.cmt;*.dct;*.har;*.top;*.lst;*.map;*.not|Bibles|*.bbl|" +
-                "Commentaries|*.cmt|Dictionaries|*.dct|Harmonies|*.har|Topic Notes|*.top|Verse Li" +
-                "sts|*.lst|Graphics|*.map|Notes|*.not";
+            this.ofdSource.Filter = resources.GetString("ofdSource.Filter");
             // 
             // lnkBatch
             // 
@@ -144,23 +157,22 @@
             this.lnkBatch.TabIndex = 7;
             this.lnkBatch.TabStop = true;
             this.lnkBatch.Text = "Batch Mode";
+            this.lnkBatch.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkBatch_LinkClicked);
             // 
-            // txtSource
+            // lblStatus
             // 
-            this.txtSource.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSource.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
-            this.txtSource.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.FileSystem;
-            this.txtSource.Location = new System.Drawing.Point(6, 16);
-            this.txtSource.Name = "txtSource";
-            this.txtSource.Size = new System.Drawing.Size(311, 20);
-            this.txtSource.TabIndex = 2;
+            this.lblStatus.AutoSize = true;
+            this.lblStatus.Location = new System.Drawing.Point(15, 139);
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(0, 13);
+            this.lblStatus.TabIndex = 8;
             // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(428, 161);
+            this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.lnkBatch);
             this.Controls.Add(this.btnConvert);
             this.Controls.Add(this.prgMain);
@@ -192,6 +204,8 @@
         private System.Windows.Forms.OpenFileDialog ofdSource;
         private System.Windows.Forms.LinkLabel lnkBatch;
         private AutoComplete.AutoCompleteTextBox txtSource;
+        private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.Label lblStatus;
     }
 }
 
