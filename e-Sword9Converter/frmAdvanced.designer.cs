@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.lnkNormal = new System.Windows.Forms.LinkLabel();
             this.btnDest = new System.Windows.Forms.Button();
             this.btnConvert = new System.Windows.Forms.Button();
@@ -38,10 +39,11 @@
             this.txtDest = new System.Windows.Forms.TextBox();
             this.grpSource = new System.Windows.Forms.GroupBox();
             this.chkSkip = new System.Windows.Forms.CheckBox();
-            this.openFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.saveFolderDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.ofdSource = new System.Windows.Forms.FolderBrowserDialog();
+            this.sfdDest = new System.Windows.Forms.FolderBrowserDialog();
             this.chkOverwrite = new System.Windows.Forms.CheckBox();
             this.chkSubDir = new System.Windows.Forms.CheckBox();
+            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.grpDest.SuspendLayout();
             this.grpSource.SuspendLayout();
             this.SuspendLayout();
@@ -67,6 +69,7 @@
             this.btnDest.TabIndex = 1;
             this.btnDest.Text = "&Destination";
             this.btnDest.UseVisualStyleBackColor = true;
+            this.btnDest.Click += new System.EventHandler(this.btnDest_Click);
             // 
             // btnConvert
             // 
@@ -78,6 +81,7 @@
             this.btnConvert.TabIndex = 8;
             this.btnConvert.Text = "&Convert";
             this.btnConvert.UseVisualStyleBackColor = true;
+            this.btnConvert.Click += new System.EventHandler(this.btnConvert_Click);
             // 
             // prgMain
             // 
@@ -97,6 +101,7 @@
             this.btnSource.TabIndex = 1;
             this.btnSource.Text = "&Source";
             this.btnSource.UseVisualStyleBackColor = true;
+            this.btnSource.Click += new System.EventHandler(this.btnSource_Click);
             // 
             // txtSource
             // 
@@ -205,7 +210,6 @@
 
         #endregion
 
-        private System.Windows.Forms.LinkLabel lnkNormal;
         private System.Windows.Forms.Button btnDest;
         private System.Windows.Forms.Button btnConvert;
         private System.Windows.Forms.ProgressBar prgMain;
@@ -215,10 +219,12 @@
         private System.Windows.Forms.TextBox txtDest;
         private System.Windows.Forms.GroupBox grpSource;
         private System.Windows.Forms.CheckBox chkSkip;
-        private System.Windows.Forms.FolderBrowserDialog openFolderDialog;
-        private System.Windows.Forms.FolderBrowserDialog saveFolderDialog;
+        private System.Windows.Forms.FolderBrowserDialog ofdSource;
+        private System.Windows.Forms.FolderBrowserDialog sfdDest;
         private System.Windows.Forms.CheckBox chkOverwrite;
         private System.Windows.Forms.CheckBox chkSubDir;
+        public System.Windows.Forms.LinkLabel lnkNormal;
+        private System.Windows.Forms.ToolTip toolTip;
 
 
     }

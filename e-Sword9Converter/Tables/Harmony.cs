@@ -21,7 +21,8 @@ namespace e_Sword9Converter.Tables
         public override void Load(string File)
         {
             base.Load(File);
-            ((Details)this.Tables["Details"]).Version = 2;
+            if (!skip)
+            { ((Details)this.Tables["Details"]).Version = 2; }
         }
 
         [Table("Details")]

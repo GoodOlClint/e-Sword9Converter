@@ -22,14 +22,17 @@ namespace e_Sword9Converter.Tables
         public override void Load(string File)
         {
             base.Load(File);
-            ((Details)this.Tables["Details"]).Version = 2;
-            IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Verses)this.Tables["Verses"]).Rows
-                                                                      select Row).ToArray();
-            this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
-            foreach (ThreadSafeDictionary<string, object> Row in rows)
+            if (!skip)
             {
-                Row["ChapterEnd"] = Row["ChapterBegin"];
-                this.Parent.UpdateStatus();
+                ((Details)this.Tables["Details"]).Version = 2;
+                IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Verses)this.Tables["Verses"]).Rows
+                                                                          select Row).ToArray();
+                this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
+                foreach (ThreadSafeDictionary<string, object> Row in rows)
+                {
+                    Row["ChapterEnd"] = Row["ChapterBegin"];
+                    this.Parent.UpdateStatus();
+                }
             }
         }
         [Table("Details")]

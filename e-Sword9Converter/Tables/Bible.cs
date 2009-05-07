@@ -17,25 +17,27 @@ namespace e_Sword9Converter.Tables
         public override void Load(string File)
         {
             base.Load(File);
-
-            //Remove Invalid Scripture Entries;
-            IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
-                                                                      where ((string)Row["Scripture"]) == ""
-                                                                      select Row).ToArray();
-            this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
-            foreach (ThreadSafeDictionary<string, object> Row in rows)
+            if (!this.skip)
             {
-                ((BibleTable)this.Tables["Bible"]).Rows.Remove(Row);
-                this.Parent.UpdateStatus();
+                //Remove Invalid Scripture Entries;
+                IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
+                                                                          where ((string)Row["Scripture"]) == ""
+                                                                          select Row).ToArray();
+                this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
+                foreach (ThreadSafeDictionary<string, object> Row in rows)
+                {
+                    ((BibleTable)this.Tables["Bible"]).Rows.Remove(Row);
+                    this.Parent.UpdateStatus();
+                }
+                ((Details)this.Tables["Details"]).NT = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
+                                                                          where ((int)Row["BookID"]) == 66
+                                                                          select Row).Count() > 0);
+                ((Details)this.Tables["Details"]).OT = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
+                                                                          where ((int)Row["BookID"]) == 1
+                                                                          select Row).Count() > 0);
+                ((Details)this.Tables["Details"]).Version = 2;
+                ((Details)this.Tables["Details"]).RightToLeft = (((Details)this.Tables["Details"]).Font.ToUpper() == "HEBREW");
             }
-            ((Details)this.Tables["Details"]).NT = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
-                                                                      where ((int)Row["BookID"]) == 66
-                                                                      select Row).Count() > 0);
-            ((Details)this.Tables["Details"]).OT = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
-                                                                      where ((int)Row["BookID"]) == 1
-                                                                      select Row).Count() > 0);
-            ((Details)this.Tables["Details"]).Version = 2;
-            ((Details)this.Tables["Details"]).RightToLeft = (((Details)this.Tables["Details"]).Font.ToUpper() == "HEBREW");
         }
         [Table("Details")]
         public class Details : Table<Details>

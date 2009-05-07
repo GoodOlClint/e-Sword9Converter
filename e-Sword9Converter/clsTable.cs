@@ -108,9 +108,9 @@ namespace e_Sword9Converter
                                 }
                                 try
                                 {
+                                    Table.Rows.Add(Row);
                                     Table.Parent.UpdateStatus();
 
-                                    Table.Rows.Add(Row);
                                 }
                                 catch (Exception ex) { Error.Record(Table, ex); }
                             }

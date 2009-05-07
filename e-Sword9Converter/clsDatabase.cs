@@ -11,10 +11,13 @@ namespace e_Sword9Converter
     {
         public string SourceDB { get; set; }
         public string DestDB { get; set; }
+        protected bool skip;
         public void ConvertFormat()
         {
+            skip = false;
             this.Load(SourceDB);
             this.Save(DestDB);
+
         }
         public ThreadSafeDictionary<string, ITable> Tables = new ThreadSafeDictionary<string, ITable>();
         private oleDbFactory oleDbFactory = new oleDbFactory();
@@ -26,30 +29,34 @@ namespace e_Sword9Converter
         public Database(IParent Parent) { this.Parent = Parent; }
         public virtual void Save(string Path)
         {
-            if (File.Exists(Path))
-                File.Delete(Path);
-
-            using (DbConnection sqlCon = SQLiteFactory.CreateConnection())
+            if (!skip)
             {
-                sqlCon.ConnectionString = this.DestConnectionString.Replace("{file}", Path);
-                sqlCon.Open();
-                using (DbCommand sqlCmd = sqlCon.CreateCommand())
+                if (File.Exists(Path))
+                    File.Delete(Path);
+
+                using (DbConnection sqlCon = SQLiteFactory.CreateConnection())
                 {
-                    foreach (string str in (from KeyValuePair<string, ITable> Table in this.Tables
-                                            select Table.Value.SQLCreateStatement()))
+                    sqlCon.ConnectionString = this.DestConnectionString.Replace("{file}", Path);
+                    sqlCon.Open();
+                    using (DbCommand sqlCmd = sqlCon.CreateCommand())
                     {
-                        sqlCmd.CommandText = str;
-                        sqlCmd.ExecuteNonQuery();
+                        foreach (string str in (from KeyValuePair<string, ITable> Table in this.Tables
+                                                select Table.Value.SQLCreateStatement()))
+                        {
+                            sqlCmd.CommandText = str;
+                            sqlCmd.ExecuteNonQuery();
+                        }
                     }
                 }
+                foreach (KeyValuePair<string, ITable> Table in this.Tables)
+                { Table.Value.SaveToDatabase(SQLiteFactory, this.DestConnectionString.Replace("{file}", Path)); }
             }
-            foreach (KeyValuePair<string, ITable> Table in this.Tables)
-            { Table.Value.SaveToDatabase(SQLiteFactory, this.DestConnectionString.Replace("{file}", Path)); }
         }
         public virtual void Load(string Path)
         {
             string pass;
-            if (this.Parent.GetPassword(Path, out pass))
+            skip = !this.Parent.GetPassword(Path, out pass);
+            if (!skip)
             {
                 if (pass != "")
                 { SourceConnectionString += "Jet OLEDB:Database Password=\"" + pass + "\";"; }

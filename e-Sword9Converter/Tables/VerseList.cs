@@ -19,20 +19,23 @@ namespace e_Sword9Converter.Tables
         public override void Load(string Path)
         {
             base.Load(Path);
-            IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Verses)this.Tables["Verses"]).Rows
-                                                                      select Row).ToArray();
-            this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
-            foreach (ThreadSafeDictionary<string, object> Row in rows)
+            if (!skip)
             {
-                int VerseID = Convert.ToInt32(Row["VerseID"]);
-                var reference = (from VerseReference v in this.VerseReferences
-                                 where v.EndVerse <= VerseID
-                                 where v.StartVerse >= VerseID
-                                 select v).First<VerseReference>();
-                Row["Book"] = reference.Book;
-                Row["Chapter"] = reference.Chapter;
-                Row["Verse"] = (VerseID - reference.StartVerse) + 1;
+                IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Verses)this.Tables["Verses"]).Rows
+                                                                          select Row).ToArray();
                 this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
+                foreach (ThreadSafeDictionary<string, object> Row in rows)
+                {
+                    int VerseID = Convert.ToInt32(Row["VerseID"]);
+                    var reference = (from VerseReference v in this.VerseReferences
+                                     where v.EndVerse <= VerseID
+                                     where v.StartVerse >= VerseID
+                                     select v).First<VerseReference>();
+                    Row["Book"] = reference.Book;
+                    Row["Chapter"] = reference.Chapter;
+                    Row["Verse"] = (VerseID - reference.StartVerse) + 1;
+                    this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
+                }
             }
         }
 

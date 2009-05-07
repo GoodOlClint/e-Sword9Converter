@@ -15,9 +15,26 @@ namespace e_Sword9Converter
             InitializeComponent();
             this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
             passwordForm = new frmPassword();
+            advancedForm = new frmAdvanced();
             this.AddOwnedForm(passwordForm);
+            this.advancedForm.lnkNormal.Click += new EventHandler(lnkNormal_Click);
+            this.advancedForm.FormClosed += new FormClosedEventHandler(advancedForm_FormClosed);
+
         }
+
+        void advancedForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            this.Close();
+        }
+
+        void lnkNormal_Click(object sender, EventArgs e)
+        {
+            this.Show();
+            this.advancedForm.Hide();
+        }
+
         private frmPassword passwordForm;
+        private frmAdvanced advancedForm;
 
         void prgMain_MouseHover(object sender, EventArgs e)
         {
@@ -55,7 +72,7 @@ namespace e_Sword9Converter
         private bool GetPassword(string path, bool tried, int passCount, out string password) { return this.GetPassword(path, tried, passCount, "", out password); }
         private bool GetPassword(string path, bool tried, int passCount, string password, out string outPassword)
         {
-            
+
             try
             {
                 OpenDatabase(path, password);
@@ -330,10 +347,8 @@ namespace e_Sword9Converter
 
         private void lnkBatch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            frmAdvanced advanced = new frmAdvanced();
-            this.AddOwnedForm(advanced);
             this.Hide();
-            advanced.ShowDialog();
+            advancedForm.Show();
         }
 
 

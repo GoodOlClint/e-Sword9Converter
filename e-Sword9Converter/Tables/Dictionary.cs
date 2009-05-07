@@ -18,8 +18,11 @@ namespace e_Sword9Converter.Tables
         public override void Load(string File)
         {
             base.Load(File);
-            ((Details)this.Tables["Details"]).Version = 2;
-            ((Details)this.Tables["Details"]).Strong = false;
+            if (!skip)
+            {
+                ((Details)this.Tables["Details"]).Version = 2;
+                ((Details)this.Tables["Details"]).Strong = false;
+            }
         }
         [Table("Details")]
         public class Details : Table<Details>
