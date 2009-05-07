@@ -50,9 +50,10 @@ namespace e_Sword9Converter
             }
         }
         #endregion
-        public static T LoadFromDatabase(DbProviderFactory Factory, string connectionString)
+        public static T LoadFromDatabase(DbProviderFactory Factory, string connectionString,IParent Parent)
         {
             T Table = new T();
+            Table.Parent = Parent;
             using (DbConnection dbCon = Factory.CreateConnection())
             {
                 dbCon.ConnectionString = connectionString;
@@ -74,7 +75,7 @@ namespace e_Sword9Converter
                                 foreach (KeyValuePair<string, IColumn> Pair in (from KeyValuePair<string, IColumn> c in Table.Columns where c.Value.colType != columnType.Sql select c))
                                 {
                                     IColumn Column = Pair.Value;
-                                    PropertyInfo Prop = Table.GetType().GetProperty(Column.PropertyName);
+                                    //PropertyInfo Prop = Table.GetType().GetProperty(Column.PropertyName);
                                     try
                                     {
                                         switch (Column.Type)
@@ -101,10 +102,11 @@ namespace e_Sword9Converter
                                                 Row.Add(Column.PropertyName, Convert.ToInt32(Convert.ToDateTime(reader[Column.Name])));
                                                 break;
                                         }
-                                        Table.Parent.UpdateStatus();
+                                        
                                     }
                                     catch (Exception ex) { Error.Record(Table, ex); }
                                 }
+                                Table.Parent.UpdateStatus();
                                 Table.Rows.Add(Row);
                             }
                             nextResult = reader.NextResult();
@@ -172,7 +174,7 @@ namespace e_Sword9Converter
                 dbCon.Open();
                 using (DbCommand dbCmd = dbCon.CreateCommand())
                 {
-                    int count = (from KeyValuePair<string, object> kvp in this.Rows
+                    int count = (from ThreadSafeDictionary<string, object> kvp in this.Rows
                                  select kvp).Count();
                     this.Parent.SetMaxValue(count);
                     string Command = string.Format("INSERT INTO {0} (", tableName);
@@ -202,12 +204,16 @@ namespace e_Sword9Converter
                     {
                         foreach (ThreadSafeDictionary<string, object> Row in this.Rows)
                         {
-                            dbCmd.Parameters.Clear();
-                            foreach (KeyValuePair<string, object> Column in (from KeyValuePair<string, object> kvp in Row where sqlColumns.ContainsKey(kvp.Key) select kvp))
-                            { dbParams[Column.Key].Value = Column.Value; }
-                            dbCmd.Parameters.AddRange(dbParams.Values.ToArray());
-                            dbCmd.ExecuteNonQuery();
-                            this.Parent.UpdateStatus();
+                            try
+                            {
+                                dbCmd.Parameters.Clear();
+                                foreach (KeyValuePair<string, object> Column in (from KeyValuePair<string, object> kvp in Row where sqlColumns.ContainsKey(kvp.Key) select kvp))
+                                { dbParams[Column.Key].Value = Column.Value; }
+                                dbCmd.Parameters.AddRange(dbParams.Values.ToArray());
+                                dbCmd.ExecuteNonQuery();
+                            }
+                            catch (Exception ex) { Error.Record(this, ex); }
+                            finally { this.Parent.UpdateStatus(); }
                         }
                         dbTrans.Commit();
                     }
@@ -216,7 +222,7 @@ namespace e_Sword9Converter
         }
         public void Load(DbProviderFactory Factory, string connectionString)
         {
-            T Table = global::e_Sword9Converter.Table<T>.LoadFromDatabase(Factory, connectionString);
+            T Table = global::e_Sword9Converter.Table<T>.LoadFromDatabase(Factory, connectionString, this.Parent);
             this.Rows = (ThreadSafeCollection<ThreadSafeDictionary<string, object>>)Table.Rows.Clone();
             this.Columns = (ThreadSafeDictionary<string, IColumn>)Table.Columns.Clone();
             this.Indexes = (ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>)Table.Indexes.Clone();

@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using System.Threading;
 using System.IO;
 using System.Collections;
+
 namespace e_Sword9Converter
 {
     public partial class frmMain : Form, IParent
@@ -21,17 +22,34 @@ namespace e_Sword9Converter
 
         public string GetPassword(string path)
         {
-            throw new NotImplementedException();
+            return "";
         }
+
+        private delegate void SetMaxValueDelegate(int value);
+        private delegate void UpdateStatusDelegate();
 
         public void SetMaxValue(int value)
         {
-            throw new NotImplementedException();
+            if (this.prgMain.InvokeRequired)
+            {
+                this.prgMain.Invoke(new SetMaxValueDelegate(SetMaxValue), value);
+            }
+            else
+            {
+                this.prgMain.Maximum += value;
+            }
         }
 
         public void UpdateStatus()
         {
-            throw new NotImplementedException();
+            if (this.prgMain.InvokeRequired)
+            {
+                this.prgMain.Invoke(new UpdateStatusDelegate(UpdateStatus));
+            }
+            else
+            {
+                this.prgMain.Value++;
+            }
         }
 
         #endregion
@@ -54,9 +72,8 @@ namespace e_Sword9Converter
             if (!ValidSource(this.txtSource.Text))
             { MessageBox.Show("", "Source file invalid", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
             string ext = this.txtSource.Text.Substring(this.txtSource.Text.Length - 4, 4);
-            this.txtDest.Text = this.txtSource.Text.Replace(ext, ext + "x");
+            this.ofdDest.FileName = this.txtSource.Text.Replace(ext, ext + "x");
             this.grpDest.Enabled = true;
-            this.ValidateDestination();
         }
 
         private bool ValidSource(string path)
@@ -159,7 +176,6 @@ namespace e_Sword9Converter
         private void btnConvert_Click(object sender, EventArgs e)
         {
             this.ValidateSource();
-            this.ValidateDestination();
             Database db;
             string ext = this.txtDest.Text.Substring(this.txtDest.Text.Length - 5, 5);
             switch (ext)
@@ -206,6 +222,10 @@ namespace e_Sword9Converter
                 default:
                     return;
             }
+            db.DestDB = this.txtDest.Text;
+            db.SourceDB = this.txtSource.Text;
+            Thread t = new Thread(new ThreadStart(db.ConvertFormat));
+            t.Start();
             
         }
 
