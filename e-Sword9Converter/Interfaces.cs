@@ -22,12 +22,13 @@ namespace e_Sword9Converter
         void SaveToDatabase(DbProviderFactory Factory, string connectionString);
         string SQLCreateStatement();
         void Load(DbProviderFactory Factory, string connectionString);
+        IParent Parent { get; set; }
     }
 
     public interface IParent
     {
         string GetPassword(string path);
-        void Update();
+        void UpdateStatus();
         void SetMaxValue(int value);
     }
 }

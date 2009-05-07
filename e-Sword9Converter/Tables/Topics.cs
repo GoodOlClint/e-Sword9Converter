@@ -11,6 +11,7 @@ namespace e_Sword9Converter.Tables
             : base(Parent)
         {
             this.Tables.Add("Topics", new Topics());
+            this.Tables["Topics"].Parent = Parent;
         }
 
         [SqlTable("Topics")]

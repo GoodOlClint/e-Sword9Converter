@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace e_Sword9Converter
+namespace e_Sword9Converter.Tables
 {
     public class Bible : Database
     {
@@ -11,6 +11,8 @@ namespace e_Sword9Converter
         {
             this.Tables.Add("Details", new Details());
             this.Tables.Add("Bible", new BibleTable());
+            this.Tables["Details"].Parent = Parent;
+            this.Tables["Bible"].Parent = Parent;
         }
         public override void Load(string File)
         {

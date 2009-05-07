@@ -13,6 +13,7 @@ namespace e_Sword9Converter.Tables
         {
             this.Tables.Add("VerseNotes", new VerseNotes());
             this.VerseReferences = new VerseReferences();
+            this.Tables["VerseNotes"].Parent = Parent;
         }
 
         public override void Load(string Path)

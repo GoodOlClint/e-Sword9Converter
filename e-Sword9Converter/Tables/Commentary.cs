@@ -14,6 +14,10 @@ namespace e_Sword9Converter.Tables
             this.Tables.Add("Books", new Books());
             this.Tables.Add("Chapters", new Chapters());
             this.Tables.Add("Verses", new Verses());
+            this.Tables["Details"].Parent = Parent;
+            this.Tables["Books"].Parent = Parent;
+            this.Tables["Chapters"].Parent = Parent;
+            this.Tables["Verses"].Parent = Parent;
         }
         public override void Load(string File)
         {

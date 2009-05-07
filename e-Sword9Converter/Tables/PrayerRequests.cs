@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace e_Sword9Converter
+namespace e_Sword9Converter.Tables
 {
     public class PrayerRequests : Database
     {

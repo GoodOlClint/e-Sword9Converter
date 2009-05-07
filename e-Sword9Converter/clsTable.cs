@@ -13,6 +13,7 @@ namespace e_Sword9Converter
         public ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>> Indexes = new ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>();
         public ThreadSafeCollection<ThreadSafeDictionary<string, object>> Rows = new ThreadSafeCollection<ThreadSafeDictionary<string, object>>();
         public string tableName;
+        public IParent Parent { get; set; }
 
         #region Constructor
         public Table()
@@ -58,6 +59,9 @@ namespace e_Sword9Converter
                 dbCon.Open();
                 using (DbCommand dbCmd = dbCon.CreateCommand())
                 {
+                    dbCmd.CommandText = string.Format("SELECT COUNT(*) FROM {0};", Table.tableName);
+                    int count = (int)dbCmd.ExecuteScalar();
+                    Table.Parent.SetMaxValue(count);
                     dbCmd.CommandText = string.Format("SELECT * FROM {0};", Table.tableName);
                     using (DbDataReader reader = dbCmd.ExecuteReader())
                     {
@@ -97,6 +101,7 @@ namespace e_Sword9Converter
                                                 Row.Add(Column.PropertyName, Convert.ToInt32(Convert.ToDateTime(reader[Column.Name])));
                                                 break;
                                         }
+                                        Table.Parent.UpdateStatus();
                                     }
                                     catch (Exception ex) { Error.Record(Table, ex); }
                                 }
@@ -167,6 +172,9 @@ namespace e_Sword9Converter
                 dbCon.Open();
                 using (DbCommand dbCmd = dbCon.CreateCommand())
                 {
+                    int count = (from KeyValuePair<string, object> kvp in this.Rows
+                                 select kvp).Count();
+                    this.Parent.SetMaxValue(count);
                     string Command = string.Format("INSERT INTO {0} (", tableName);
                     IDictionary<string, IColumn> sqlColumns = (from KeyValuePair<string, IColumn> C in this.Columns
                                                                where C.Value.colType != columnType.Access
@@ -199,6 +207,7 @@ namespace e_Sword9Converter
                             { dbParams[Column.Key].Value = Column.Value; }
                             dbCmd.Parameters.AddRange(dbParams.Values.ToArray());
                             dbCmd.ExecuteNonQuery();
+                            this.Parent.UpdateStatus();
                         }
                         dbTrans.Commit();
                     }

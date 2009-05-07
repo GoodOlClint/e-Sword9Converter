@@ -9,6 +9,13 @@ namespace e_Sword9Converter
 {
     public class Database
     {
+        public string SourceDB { get; set; }
+        public string DestDB { get; set; }
+        public void ConvertFormat()
+        {
+            this.Load(SourceDB);
+            this.Save(DestDB);
+        }
         public ThreadSafeDictionary<string, ITable> Tables = new ThreadSafeDictionary<string, ITable>();
         private oleDbFactory oleDbFactory = new oleDbFactory();
         private SQLiteDbFactory SQLiteFactory = new SQLiteDbFactory();

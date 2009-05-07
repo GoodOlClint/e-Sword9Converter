@@ -10,6 +10,10 @@ namespace e_Sword9Converter.Tables
         public Devotion(IParent Parent)
             : base(Parent)
         {
+            this.Tables.Add("Details", new Details());
+            this.Tables.Add("Devotion", new Devotions());
+            this.Tables["Details"].Parent = Parent;
+            this.Tables["Devotion"].Parent = Parent;
         }
 
         [Table("Details")]

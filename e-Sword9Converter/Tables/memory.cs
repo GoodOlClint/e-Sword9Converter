@@ -11,6 +11,7 @@ namespace e_Sword9Converter.Tables
             : base(Parent)
         {
             this.Tables.Add("Memorize", new Memorize());
+            this.Tables["Memorize"].Parent = Parent;
         }
         [Table("Memorize")]
         public class Memorize : Table<Memorize>

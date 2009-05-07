@@ -12,6 +12,8 @@ namespace e_Sword9Converter.Tables
         {
             this.Tables.Add("Details", new Details());
             this.Tables.Add("Dictionary", new DictionaryTable());
+            this.Tables["Details"].Parent = Parent;
+            this.Tables["Dictionary"].Parent = Parent;
         }
         public override void Load(string File)
         {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace e_Sword9Converter
+namespace e_Sword9Converter.Tables
 {
     public class Graphic : Database
     {
@@ -12,6 +12,8 @@ namespace e_Sword9Converter
         {
             this.Tables.Add("Details", new Details());
             this.Tables.Add("Graphics", new Graphics());
+            this.Tables["Details"].Parent = Parent;
+            this.Tables["Graphics"].Parent = Parent;
         }
         public override void Load(string File)
         {
