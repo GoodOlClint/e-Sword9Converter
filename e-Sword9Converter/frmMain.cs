@@ -10,6 +10,7 @@ namespace e_Sword9Converter
 {
     public partial class frmMain : Form, IParent
     {
+        #region Constructor
         public frmMain()
         {
             InitializeComponent();
@@ -20,15 +21,17 @@ namespace e_Sword9Converter
             this.advancedForm.lnkNormal.Click += new EventHandler(lnkNormal_Click);
             this.advancedForm.FormClosed += new FormClosedEventHandler(advancedForm_FormClosed);
         }
+        #endregion
 
         object threadLock = new object();
-        //private int maxValue;
         private int progress;
         updateStatus status;
-        //public int MaxValue { get { lock (threadLock) { return maxValue; } } set { lock (threadLock) { maxValue = value; } } }
         public int Progress { get { lock (threadLock) { return progress; } } set { lock (threadLock) { progress = value; } } }
         public updateStatus Status { get { lock (threadLock) { return status; } } set { lock (threadLock) { status = value; } } }
+        private frmPassword passwordForm;
+        private frmAdvanced advancedForm;
 
+        #region Event Handlers
         void advancedForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             this.Close();
@@ -40,9 +43,6 @@ namespace e_Sword9Converter
             this.advancedForm.Hide();
         }
 
-        private frmPassword passwordForm;
-        private frmAdvanced advancedForm;
-
         void prgMain_MouseHover(object sender, EventArgs e)
         {
             try
@@ -52,6 +52,81 @@ namespace e_Sword9Converter
             }
             catch (Exception ex) { Error.Record(this, ex); }
         }
+        private void btnSource_Click(object sender, EventArgs e)
+        {
+            if (this.ofdSource.ShowDialog() == DialogResult.OK)
+            {
+                this.txtSource.Text = this.ofdSource.FileName;
+                this.ValidateSource();
+            }
+        }
+        private void btnConvert_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                this.ValidateSource();
+                Database db;
+                string ext = this.txtDest.Text.Substring(this.txtDest.Text.Length - 5, 5);
+                switch (ext)
+                {
+                    case ".bblx":
+                        db = new Tables.Bible(this);
+                        break;
+                    case ".brpx":
+                        db = new Tables.BibleReadingPlan(this);
+                        break;
+                    case ".cmtx":
+                        db = new Tables.Commentary(this);
+                        break;
+                    case ".dctx":
+                        db = new Tables.Dictionary(this);
+                        break;
+                    case ".devx":
+                        db = new Tables.Devotion(this);
+                        break;
+                    case ".mapx":
+                        db = new Tables.Graphic(this);
+                        break;
+                    case ".harx":
+                        db = new Tables.Harmony(this);
+                        break;
+                    case ".notx":
+                        db = new Tables.Notes(this);
+                        break;
+                    case ".memx":
+                        db = new Tables.Memory(this);
+                        break;
+                    case ".ovlx":
+                        db = new Tables.Overlay(this);
+                        break;
+                    case ".prlx":
+                        db = new Tables.PrayerRequests(this);
+                        break;
+                    case ".topx":
+                        db = new Tables.Topic(this);
+                        break;
+                    case ".lstx":
+                        db = new Tables.VerseList(this);
+                        break;
+                    default:
+                        return;
+                }
+                db.DestDB = this.txtDest.Text;
+                db.SourceDB = this.txtSource.Text;
+                Thread t = new Thread(new ThreadStart(db.ConvertFormat));
+                t.Start();
+                Thread w = new Thread(new ThreadStart(WatchStatus));
+                w.Start();
+            }
+            catch (Exception ex) { Error.Record(this, ex); }
+        }
+
+        private void lnkBatch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            this.Hide();
+            advancedForm.Show();
+        }
+        #endregion
 
         public bool GetPassword(string path, out string password)
         {
@@ -92,6 +167,7 @@ namespace e_Sword9Converter
             try
             {
                 OpenDatabase(path, password);
+                Error.Log(this, "Password for " + path + "is: '" + password + "'");
                 outPassword = password;
                 return true;
             }
@@ -178,15 +254,6 @@ namespace e_Sword9Converter
         }
 
         #endregion
-
-        private void btnSource_Click(object sender, EventArgs e)
-        {
-            if (this.ofdSource.ShowDialog() == DialogResult.OK)
-            {
-                this.txtSource.Text = this.ofdSource.FileName;
-                this.ValidateSource();
-            }
-        }
 
         private void ValidateSource()
         {
@@ -322,85 +389,11 @@ namespace e_Sword9Converter
             catch (Exception ex) { Error.Record(this, ex); }
         }
 
-        private void btnDest_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (this.ofdDest.ShowDialog() == DialogResult.OK)
-                {
-                    this.txtDest.Text = this.ofdDest.FileName;
-                    ValidateDestination(true);
-                }
-            }
-            catch (Exception ex) { Error.Record(this, ex); }
-        }
-
-        private void btnConvert_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                this.ValidateSource();
-                Database db;
-                string ext = this.txtDest.Text.Substring(this.txtDest.Text.Length - 5, 5);
-                switch (ext)
-                {
-                    case ".bblx":
-                        db = new Tables.Bible(this);
-                        break;
-                    case ".brpx":
-                        db = new Tables.BibleReadingPlan(this);
-                        break;
-                    case ".cmtx":
-                        db = new Tables.Commentary(this);
-                        break;
-                    case ".dctx":
-                        db = new Tables.Dictionary(this);
-                        break;
-                    case ".devx":
-                        db = new Tables.Devotion(this);
-                        break;
-                    case ".mapx":
-                        db = new Tables.Graphic(this);
-                        break;
-                    case ".harx":
-                        db = new Tables.Harmony(this);
-                        break;
-                    case ".notx":
-                        db = new Tables.Notes(this);
-                        break;
-                    case ".memx":
-                        db = new Tables.Memory(this);
-                        break;
-                    case ".ovlx":
-                        db = new Tables.Overlay(this);
-                        break;
-                    case ".prlx":
-                        db = new Tables.PrayerRequests(this);
-                        break;
-                    case ".topx":
-                        db = new Tables.Topic(this);
-                        break;
-                    case ".lstx":
-                        db = new Tables.VerseList(this);
-                        break;
-                    default:
-                        return;
-                }
-                db.DestDB = this.txtDest.Text;
-                db.SourceDB = this.txtSource.Text;
-                Thread t = new Thread(new ThreadStart(db.ConvertFormat));
-                t.Start();
-                Thread w = new Thread(new ThreadStart(WatchStatus));
-                w.Start();
-            }
-            catch (Exception ex) { Error.Record(this, ex); }
-        }
-
         private void WatchStatus()
         {
             try
             {
-                if (this.Status != updateStatus.Finishing)
+                if (this.Status != updateStatus.Finished)
                 {
                     this.UpdateProgress();
                     Thread.Sleep(100);
@@ -425,13 +418,18 @@ namespace e_Sword9Converter
             catch (Exception ex) { Error.Record(this, ex); }
         }
 
-        private void lnkBatch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void btnDest_Click(object sender, EventArgs e)
         {
-            this.Hide();
-            advancedForm.Show();
+            try
+            {
+                if (this.ofdDest.ShowDialog() == DialogResult.OK)
+                {
+                    this.txtDest.Text = this.ofdDest.FileName;
+                    ValidateDestination(true);
+                }
+            }
+            catch (Exception ex) { Error.Record(this, ex); }
         }
-
-
         private string ConvertFilePath(string OldPath)
         {
             try

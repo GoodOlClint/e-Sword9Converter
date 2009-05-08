@@ -25,6 +25,7 @@ namespace e_Sword9Converter
             this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
             this.passwordForm = new frmPassword();
             this.FormClosing += new FormClosingEventHandler(frmAdvanced_FormClosing);
+            DB = new Database(this);
         }
 
         void frmAdvanced_FormClosing(object sender, FormClosingEventArgs e)
@@ -69,6 +70,7 @@ namespace e_Sword9Converter
             try
             {
                 OpenDatabase(path, password);
+                Error.Log(this, "Password for " + path + "is: '" + password + "'");
                 outPassword = password;
                 return true;
             }
@@ -130,7 +132,7 @@ namespace e_Sword9Converter
             }
             else
             {
-                if (Status != updateStatus.Finishing)
+                if (Status != updateStatus.Finished)
                 { this.prgMain.Maximum = value + 1; }
                 this.progress = 0;
                 this.Status = Status;

@@ -7,7 +7,7 @@ using System.Data.Common;
 
 namespace e_Sword9Converter
 {
-    public class Database
+    public class Database:IDatabase
     {
         public string SourceDB { get; set; }
         public string DestDB { get; set; }
@@ -27,7 +27,7 @@ namespace e_Sword9Converter
                 this.Load(SourceDB);
                 this.FileName = DestDB;
                 this.Save(DestDB);
-                this.Parent.SetMaxValue(100, updateStatus.Finishing);
+                this.Parent.SetMaxValue(100, updateStatus.Finished);
                 running = false;
             }
             catch (Exception ex) { Error.Record(this, ex); }
@@ -82,11 +82,13 @@ namespace e_Sword9Converter
                 { SourceConnectionString += "Jet OLEDB:Database Password=\"" + pass + "\";"; }
                 foreach (KeyValuePair<string, ITable> Table in this.Tables)
                 {
+                    Table.Value.DB = this;
                     try
                     { Table.Value.Load(oleDbFactory, this.SourceConnectionString.Replace("{file}", Path)); }
                     catch (Exception ex) { Error.Record(this, ex); }
                 }
             }
+            else { this.Running = false; }
         }
     }
 }

@@ -29,6 +29,6 @@
         Loading,
         Converting,
         Saving,
-        Finishing
+        Finished
     }
 }

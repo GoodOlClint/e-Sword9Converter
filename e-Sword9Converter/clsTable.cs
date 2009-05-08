@@ -14,7 +14,7 @@ namespace e_Sword9Converter
         public ThreadSafeCollection<ThreadSafeDictionary<string, object>> Rows = new ThreadSafeCollection<ThreadSafeDictionary<string, object>>();
         public string TableName { get; set; }
         public IParent Parent { get; set; }
-
+        public IDatabase DB { get; set; }
         #region Constructor
         public Table()
         {
@@ -50,7 +50,7 @@ namespace e_Sword9Converter
             }
         }
         #endregion
-        public static T LoadFromDatabase(DbProviderFactory Factory, string connectionString, IParent Parent)
+        public static T LoadFromDatabase(DbProviderFactory Factory, string connectionString, IParent Parent, IDatabase Db)
         {
             T Table = new T();
             Table.Parent = Parent;
@@ -62,7 +62,7 @@ namespace e_Sword9Converter
                 {
                     dbCmd.CommandText = string.Format("SELECT COUNT(*) FROM {0};", Table.TableName);
                     int count = (int)dbCmd.ExecuteScalar();
-                    Table.Parent.SetMaxValue(count,updateStatus.Loading);
+                    Table.Parent.SetMaxValue(count, updateStatus.Loading);
                     dbCmd.CommandText = string.Format("SELECT * FROM {0};", Table.TableName);
                     using (DbDataReader reader = dbCmd.ExecuteReader())
                     {
@@ -104,7 +104,12 @@ namespace e_Sword9Converter
                                         }
 
                                     }
-                                    catch (Exception ex) { Error.Record(Table, ex); }
+                                    catch (Exception ex)
+                                    {
+                                        //Build useful error message
+                                        string msg = string.Format("{0}\t{1}\tRow:{2}\tColumn:{3}\tType:{4}\tValue:{5}\tMessage:{6}", Db.FileName, Table.TableName, Table.Rows.Count, Column.Name, Column.Type, Convert.ToString(reader[Column.Name]), ex.Message);
+                                        Error.Record(Table, new SQLiteException(msg));
+                                    }
                                 }
                                 try
                                 {
@@ -227,7 +232,7 @@ namespace e_Sword9Converter
         }
         public void Load(DbProviderFactory Factory, string connectionString)
         {
-            T Table = global::e_Sword9Converter.Table<T>.LoadFromDatabase(Factory, connectionString, this.Parent);
+            T Table = global::e_Sword9Converter.Table<T>.LoadFromDatabase(Factory, connectionString, this.Parent, this.DB);
             this.Rows = (ThreadSafeCollection<ThreadSafeDictionary<string, object>>)Table.Rows.Clone();
             this.Columns = (ThreadSafeDictionary<string, IColumn>)Table.Columns.Clone();
             this.Indexes = (ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>)Table.Indexes.Clone();
