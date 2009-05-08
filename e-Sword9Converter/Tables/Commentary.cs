@@ -27,7 +27,7 @@ namespace e_Sword9Converter.Tables
                 ((Details)this.Tables["Details"]).Version = 2;
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Verses)this.Tables["Verses"]).Rows
                                                                           select Row).ToArray();
-                this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
+                this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     Row["ChapterEnd"] = Row["ChapterBegin"];
@@ -52,7 +52,7 @@ namespace e_Sword9Converter.Tables
         }
 
         [SqlTable("Books")]
-        [AccessTable("Book Notes")]
+        [AccessTable("[Book Notes]")]
         public class Books : Table<Books>
         {
             [AccessColumn("ID", DbType.INT)]
@@ -68,7 +68,7 @@ namespace e_Sword9Converter.Tables
         }
 
         [SqlTable("Chapters")]
-        [AccessTable("Chapter Notes")]
+        [AccessTable("[Chapter Notes]")]
         public class Chapters : Table<Chapters>
         {
             [AccessColumn("ID", DbType.INT)]
@@ -88,7 +88,7 @@ namespace e_Sword9Converter.Tables
         }
 
         [SqlTable("Verses")]
-        [AccessTable("Comments")]
+        [AccessTable("Commentary")]
         public class Verses : Table<Verses>
         {
             [AccessColumn("ID", DbType.INT)]

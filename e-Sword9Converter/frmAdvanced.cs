@@ -12,12 +12,25 @@ namespace e_Sword9Converter
     public partial class frmAdvanced : Form, IParent
     {
         private frmPassword passwordForm;
+        object threadLock = new object();
+        private int progress;
+        updateStatus status;
+        public int Progress { get { lock (threadLock) { return progress; } } set { lock (threadLock) { progress = value; } } }
+        public updateStatus Status { get { lock (threadLock) { return status; } } set { lock (threadLock) { status = value; } } }
 
+        private Database DB;
         public frmAdvanced()
         {
             InitializeComponent();
             this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
             this.passwordForm = new frmPassword();
+            this.FormClosing += new FormClosingEventHandler(frmAdvanced_FormClosing);
+        }
+
+        void frmAdvanced_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (DB.Running)
+                DB.Stop();
         }
 
         #region IParent Members
@@ -67,12 +80,15 @@ namespace e_Sword9Converter
                 string pass = "Password";
                 if (!System.IO.File.Exists("Passwords.txt"))
                 {
+                    this.passwordForm = new frmPassword();
+                    this.AddOwnedForm(passwordForm);
                     if (!this.chkSkip.Checked && passwordForm.ShowDialog() == DialogResult.OK)
                     {
-                            pass = passwordForm.Password;
-                            tried = true;
-                    }else { outPassword = ""; return false; }
-                    
+                        pass = passwordForm.Password;
+                        tried = true;
+                    }
+                    else { outPassword = ""; return false; }
+
                 }
                 else
                 {
@@ -84,6 +100,8 @@ namespace e_Sword9Converter
                     }
                     if (passCount >= passList.ToArray().Length)
                     {
+                        this.passwordForm = new frmPassword();
+                        this.AddOwnedForm(passwordForm);
                         if (!this.chkSkip.Checked && passwordForm.ShowDialog() == DialogResult.OK)
                         {
                             pass = passwordForm.Password;
@@ -112,22 +130,15 @@ namespace e_Sword9Converter
             }
             else
             {
-                this.prgMain.Maximum = value + 1;
-                this.prgMain.Value = 0;
+                if (Status != updateStatus.Finishing)
+                { this.prgMain.Maximum = value + 1; }
+                this.progress = 0;
+                this.Status = Status;
             }
         }
 
         public void UpdateStatus()
-        {
-            if (this.prgMain.InvokeRequired)
-            {
-                this.prgMain.Invoke(new UpdateStatusDelegate(UpdateStatus));
-            }
-            else
-            {
-                this.prgMain.Value++;
-            }
-        }
+        { this.Progress++; }
 
         #endregion
 
@@ -170,78 +181,85 @@ namespace e_Sword9Converter
                         if (MessageBox.Show(string.Format("{0} Already exists, do you want to overwrite?", DestPath), "File Already Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
                         { break; }
                     }
-                    Database db;
                     string ext = fi.FullName.Substring(fi.FullName.Length - 4, 4);
                     switch (ext)
                     {
                         case ".bbl":
-                            db = new Tables.Bible(this);
+                            DB = new Tables.Bible(this);
                             break;
                         case ".brp":
-                            db = new Tables.BibleReadingPlan(this);
+                            DB = new Tables.BibleReadingPlan(this);
                             break;
                         case ".cmt":
-                            db = new Tables.Commentary(this);
+                            DB = new Tables.Commentary(this);
                             break;
                         case ".dct":
-                            db = new Tables.Dictionary(this);
+                            DB = new Tables.Dictionary(this);
                             break;
                         case ".dev":
-                            db = new Tables.Devotion(this);
+                            DB = new Tables.Devotion(this);
                             break;
                         case ".map":
-                            db = new Tables.Graphic(this);
+                            DB = new Tables.Graphic(this);
                             break;
                         case ".har":
-                            db = new Tables.Harmony(this);
+                            DB = new Tables.Harmony(this);
                             break;
                         case ".not":
-                            db = new Tables.Notes(this);
+                            DB = new Tables.Notes(this);
                             break;
                         case ".mem":
-                            db = new Tables.Memory(this);
+                            DB = new Tables.Memory(this);
                             break;
                         case ".ovl":
-                            db = new Tables.Overlay(this);
+                            DB = new Tables.Overlay(this);
                             break;
                         case ".prl":
-                            db = new Tables.PrayerRequests(this);
+                            DB = new Tables.PrayerRequests(this);
                             break;
                         case ".top":
-                            db = new Tables.Topic(this);
+                            DB = new Tables.Topic(this);
                             break;
                         case ".lst":
-                            db = new Tables.VerseList(this);
+                            DB = new Tables.VerseList(this);
                             break;
                         default:
                             return;
                     }
-                    db.SourceDB = fi.FullName;
-                    db.DestDB = DestPath;
-                    Thread t = new Thread(new ThreadStart(db.ConvertFormat));
+                    DB.SourceDB = fi.FullName;
+                    DB.DestDB = DestPath;
+                    Thread t = new Thread(new ThreadStart(DB.ConvertFormat));
                     t.Start();
-                    while (t.IsAlive)
+                    Thread w = new Thread(new ThreadStart(WatchStatus));
+                    w.Start();
+                    while (DB.Running)
                     { Application.DoEvents(); }
+                    DB.Clear();
                 }
             }
+            this.Text = "e-Sword 9 Converter: Batch Mode: Finished";
         }
 
         private bool ValidateSource(string path)
         {
-            FileStream fs = new FileStream(path, FileMode.Open);
-            System.IO.BinaryReader br = new BinaryReader(fs);
-            long pos = 0;
-            bool reading = true;
-            string header = "";
-            br.BaseStream.Position = 4;
-            while (reading)
+            try
             {
-                header += br.ReadChar();
-                pos = fs.Position;
-                reading = !(pos >= 19);
+                FileStream fs = new FileStream(path, FileMode.Open);
+                System.IO.BinaryReader br = new BinaryReader(fs);
+                long pos = 0;
+                bool reading = true;
+                string header = "";
+                br.BaseStream.Position = 4;
+                while (reading)
+                {
+                    header += br.ReadChar();
+                    pos = fs.Position;
+                    reading = !(pos >= 19);
+                }
+                br.Close();
+                return (header == "Standard Jet DB");
             }
-            br.Close();
-            return (header == "Standard Jet DB");
+            catch (Exception ex) { Error.Record(this, ex); return false; }
         }
 
         private bool ValidateDest(string path)
@@ -259,16 +277,56 @@ namespace e_Sword9Converter
         private FileInfo[] GetFiles(DirectoryInfo dir, string searchPatterns, params char[] separator)
         {
             List<FileInfo> files = new List<FileInfo>();
-            string[] patterns = searchPatterns.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string pattern in patterns)
+            try
             {
-                if (chkSubDir.Checked)
-                { files.AddRange(dir.GetFiles(pattern, SearchOption.AllDirectories)); }
-                else
-                { files.AddRange(dir.GetFiles(pattern)); }
+                string[] patterns = searchPatterns.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string pattern in patterns)
+                {
+                    if (chkSubDir.Checked)
+                    { files.AddRange(dir.GetFiles(pattern, SearchOption.AllDirectories)); }
+                    else
+                    { files.AddRange(dir.GetFiles(pattern)); }
+                }
             }
+            catch (Exception ex)
+            { Error.Record(this, ex); }
             return files.ToArray();
         }
 
+        private void WatchStatus()
+        {
+            if (DB.Running)
+            {
+                this.UpdateProgress();
+                Thread.Sleep(100);
+                WatchStatus();
+            }
+        }
+        void UpdateProgress()
+        {
+            if (this.prgMain.InvokeRequired)
+            {
+                this.prgMain.Invoke(new UpdateStatusDelegate(this.UpdateProgress));
+            }
+            else
+            {
+                if (DB.Running)
+                {
+                    if (this.Progress > this.prgMain.Maximum)
+                    { this.prgMain.Value = this.prgMain.Maximum; Error.Record(this, new Exception("Progress exceded max allowed")); }
+                    else
+                    { this.prgMain.Value = this.Progress; }
+                    FileInfo fi = new FileInfo(DB.FileName);
+                    this.Text = string.Format("e-Sword 9 Converter: Batch Mode: {2}% {0} {1}", Status.ToString(), DB.FileName.Replace(fi.DirectoryName + @"\", ""), (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d));
+                    Application.DoEvents();
+                }
+                else
+                {
+                    this.prgMain.Value = 0;
+                    this.prgMain.Maximum = 100;
+                    this.Text = "e-Sword 9 Converter: Batch Mode Finished";
+                }
+            }
+        }
     }
 }

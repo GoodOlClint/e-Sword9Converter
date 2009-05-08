@@ -53,7 +53,7 @@ namespace e_Sword9Converter.Tables
             [Index("TopicIndex")]
             public string Topic { get; set; }
             
-            [Column("Definition ", DbType.TEXT)]
+            [Column("Definition", DbType.TEXT)]
             public string Definition { get; set; }
         }
     }

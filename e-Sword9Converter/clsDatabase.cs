@@ -11,14 +11,29 @@ namespace e_Sword9Converter
     {
         public string SourceDB { get; set; }
         public string DestDB { get; set; }
+        public string FileName { get; set; }
+        public void Stop() { skip = true; }
+        public bool Running { get { lock (threadLock) { return this.running; } } set { lock (threadLock) { this.running = value; } } }
+        private object threadLock = new object();
         protected bool skip;
+        private bool running;
         public void ConvertFormat()
         {
-            skip = false;
-            this.Load(SourceDB);
-            this.Save(DestDB);
-
+            try
+            {
+                skip = false;
+                running = true;
+                this.FileName = SourceDB;
+                this.Load(SourceDB);
+                this.FileName = DestDB;
+                this.Save(DestDB);
+                this.Parent.SetMaxValue(100, updateStatus.Finishing);
+                running = false;
+            }
+            catch (Exception ex) { Error.Record(this, ex); }
         }
+        public void Clear()
+        { this.Tables.Clear(); }
         public ThreadSafeDictionary<string, ITable> Tables = new ThreadSafeDictionary<string, ITable>();
         private oleDbFactory oleDbFactory = new oleDbFactory();
         private SQLiteDbFactory SQLiteFactory = new SQLiteDbFactory();
@@ -49,7 +64,12 @@ namespace e_Sword9Converter
                     }
                 }
                 foreach (KeyValuePair<string, ITable> Table in this.Tables)
-                { Table.Value.SaveToDatabase(SQLiteFactory, this.DestConnectionString.Replace("{file}", Path)); }
+                {
+                    try
+                    { Table.Value.SaveToDatabase(SQLiteFactory, this.DestConnectionString.Replace("{file}", Path)); }
+                    catch (Exception ex) { Error.Record(this, ex); }
+                }
+
             }
         }
         public virtual void Load(string Path)
@@ -61,7 +81,11 @@ namespace e_Sword9Converter
                 if (pass != "")
                 { SourceConnectionString += "Jet OLEDB:Database Password=\"" + pass + "\";"; }
                 foreach (KeyValuePair<string, ITable> Table in this.Tables)
-                { Table.Value.Load(oleDbFactory, this.SourceConnectionString.Replace("{file}", Path)); }
+                {
+                    try
+                    { Table.Value.Load(oleDbFactory, this.SourceConnectionString.Replace("{file}", Path)); }
+                    catch (Exception ex) { Error.Record(this, ex); }
+                }
             }
         }
     }

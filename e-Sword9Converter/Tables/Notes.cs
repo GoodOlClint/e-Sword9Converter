@@ -21,15 +21,14 @@ namespace e_Sword9Converter.Tables
             base.Load(Path);
             if (!skip)
             {
-                IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((VerseNotes)this.Tables["Verses"]).Rows
+                IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((VerseNotes)this.Tables["VerseNotes"]).Rows
                                                                           select Row).ToArray();
-                this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
+                this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     int VerseID = Convert.ToInt32(Row["VerseID"]);
                     var reference = (from VerseReference v in this.VerseReferences
-                                     where v.EndVerse <= VerseID
-                                     where v.StartVerse >= VerseID
+                                     where v.EndVerse >= VerseID && v.StartVerse <= VerseID
                                      select v).First<VerseReference>();
                     Row["Book"] = reference.Book;
                     Row["Chapter"] = reference.Chapter;
@@ -39,12 +38,14 @@ namespace e_Sword9Converter.Tables
             }
         }
 
+        [AccessTable("[Verse Notes]")]
+        [SqlTable("Verse")]
         public class VerseNotes : Table<VerseNotes>
         {
             [AccessColumn("ID", DbType.INT)]
             public int ID { get; set; }
 
-            [AccessColumn("VerseID", DbType.INT)]
+            [AccessColumn("Verse ID", DbType.INT)]
             public int VerseID { get; set; }
             
             [SqlColumn("Book", DbType.INT)]

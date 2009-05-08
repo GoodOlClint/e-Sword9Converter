@@ -50,8 +50,7 @@
             // 
             // lnkNormal
             // 
-            this.lnkNormal.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lnkNormal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.lnkNormal.AutoSize = true;
             this.lnkNormal.Location = new System.Drawing.Point(370, 173);
             this.lnkNormal.Name = "lnkNormal";
@@ -73,7 +72,7 @@
             // 
             // btnConvert
             // 
-            this.btnConvert.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnConvert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnConvert.Enabled = false;
             this.btnConvert.Location = new System.Drawing.Point(335, 137);
             this.btnConvert.Name = "btnConvert";
@@ -85,7 +84,8 @@
             // 
             // prgMain
             // 
-            this.prgMain.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.prgMain.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.prgMain.Enabled = false;
             this.prgMain.Location = new System.Drawing.Point(18, 137);
             this.prgMain.Name = "prgMain";

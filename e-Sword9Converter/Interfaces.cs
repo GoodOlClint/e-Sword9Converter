@@ -23,6 +23,7 @@ namespace e_Sword9Converter
         string SQLCreateStatement();
         void Load(DbProviderFactory Factory, string connectionString);
         IParent Parent { get; set; }
+        string TableName { get; set; }
     }
 
     public interface IParent

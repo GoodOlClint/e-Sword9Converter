@@ -15,7 +15,7 @@ namespace e_Sword9Converter.Tables
         }
 
         [SqlTable("Topics")]
-        [AccessTable("Tpoic Notes")]
+        [AccessTable("[Topic Notes]")]
         public class Topics : Table<Topics>
         {
             [AccessColumn("ID", DbType.INT)]

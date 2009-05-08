@@ -12,13 +12,13 @@ namespace e_Sword9Converter
         public ThreadSafeDictionary<string, IColumn> Columns = new ThreadSafeDictionary<string, IColumn>();
         public ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>> Indexes = new ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>();
         public ThreadSafeCollection<ThreadSafeDictionary<string, object>> Rows = new ThreadSafeCollection<ThreadSafeDictionary<string, object>>();
-        public string tableName;
+        public string TableName { get; set; }
         public IParent Parent { get; set; }
 
         #region Constructor
         public Table()
         {
-            tableName = (from TableAttribute ta in (TableAttribute[])this.GetType().GetCustomAttributes(typeof(TableAttribute), false)
+            TableName = (from TableAttribute ta in (TableAttribute[])this.GetType().GetCustomAttributes(typeof(TableAttribute), false)
                          where ta.Type != tableType.Sql
                          select ta.Name).First();
             var query = from PropertyInfo Prop in this.GetType().GetProperties()
@@ -60,10 +60,10 @@ namespace e_Sword9Converter
                 dbCon.Open();
                 using (DbCommand dbCmd = dbCon.CreateCommand())
                 {
-                    dbCmd.CommandText = string.Format("SELECT COUNT(*) FROM {0};", Table.tableName);
+                    dbCmd.CommandText = string.Format("SELECT COUNT(*) FROM {0};", Table.TableName);
                     int count = (int)dbCmd.ExecuteScalar();
-                    Table.Parent.SetMaxValue(count,updateStatus.Load);
-                    dbCmd.CommandText = string.Format("SELECT * FROM {0};", Table.tableName);
+                    Table.Parent.SetMaxValue(count,updateStatus.Loading);
+                    dbCmd.CommandText = string.Format("SELECT * FROM {0};", Table.TableName);
                     using (DbDataReader reader = dbCmd.ExecuteReader())
                     {
                         bool nextResult = true;
@@ -130,11 +130,11 @@ namespace e_Sword9Converter
         /// <returns>a string containing the SQL Create statement for the current table, including all indexes</returns>
         public string SQLCreateStatement()
         {
-            tableName = (from TableAttribute ta in (TableAttribute[])this.GetType().GetCustomAttributes(typeof(TableAttribute), false)
+            TableName = (from TableAttribute ta in (TableAttribute[])this.GetType().GetCustomAttributes(typeof(TableAttribute), false)
                          where ta.Type != tableType.Access
                          select ta.Name).First();
             string sql = "";
-            sql = string.Format("CREATE TABLE '{0}' (", tableName);
+            sql = string.Format("CREATE TABLE '{0}' (", TableName);
             /* We're going to loop through all the columns and append the column name to the sql string */
             foreach (KeyValuePair<string, IColumn> Column in (from KeyValuePair<string, IColumn> C in this.Columns where C.Value.colType != columnType.Access select C))
             {
@@ -160,7 +160,7 @@ namespace e_Sword9Converter
                 /* If we do loop through them all*/
                 foreach (KeyValuePair<string, ThreadSafeCollection<IColumn>> index in this.Indexes)
                 {
-                    sql += string.Format("CREATE INDEX {0} ON {1} (", index.Key, tableName);
+                    sql += string.Format("CREATE INDEX {0} ON {1} (", index.Key, TableName);
                     foreach (ColumnAttribute Column in index.Value)
                     { if (Column.colType != columnType.Access) { sql += string.Format("{0}, ", Column.Name); } }
                     sql = sql.Remove(sql.Length - 2, 2);
@@ -181,8 +181,8 @@ namespace e_Sword9Converter
                 {
                     int count = (from ThreadSafeDictionary<string, object> kvp in this.Rows
                                  select kvp).Count();
-                    this.Parent.SetMaxValue(count, updateStatus.Save);
-                    string Command = string.Format("INSERT INTO {0} (", tableName);
+                    this.Parent.SetMaxValue(count, updateStatus.Saving);
+                    string Command = string.Format("INSERT INTO {0} (", TableName);
                     IDictionary<string, IColumn> sqlColumns = (from KeyValuePair<string, IColumn> C in this.Columns
                                                                where C.Value.colType != columnType.Access
                                                                select C.Value).ToDictionary(v => v.PropertyName);
@@ -224,7 +224,6 @@ namespace e_Sword9Converter
                     }
                 }
             }
-            this.Parent.SetMaxValue(100, updateStatus.Finished);
         }
         public void Load(DbProviderFactory Factory, string connectionString)
         {
@@ -232,7 +231,7 @@ namespace e_Sword9Converter
             this.Rows = (ThreadSafeCollection<ThreadSafeDictionary<string, object>>)Table.Rows.Clone();
             this.Columns = (ThreadSafeDictionary<string, IColumn>)Table.Columns.Clone();
             this.Indexes = (ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>)Table.Indexes.Clone();
-            this.tableName = Table.tableName;
+            this.TableName = Table.TableName;
         }
 
         #endregion

@@ -26,9 +26,9 @@
     }
     public enum updateStatus
     {
-        Load,
-        Convert,
-        Save,
-        Finished
+        Loading,
+        Converting,
+        Saving,
+        Finishing
     }
 }

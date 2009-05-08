@@ -23,18 +23,17 @@ namespace e_Sword9Converter.Tables
             {
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Verses)this.Tables["Verses"]).Rows
                                                                           select Row).ToArray();
-                this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
+                this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     int VerseID = Convert.ToInt32(Row["VerseID"]);
                     var reference = (from VerseReference v in this.VerseReferences
-                                     where v.EndVerse <= VerseID
-                                     where v.StartVerse >= VerseID
+                                     where v.EndVerse >= VerseID && v.StartVerse <= VerseID
                                      select v).First<VerseReference>();
                     Row["Book"] = reference.Book;
                     Row["Chapter"] = reference.Chapter;
                     Row["Verse"] = (VerseID - reference.StartVerse) + 1;
-                    this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
+                    this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
                 }
             }
         }
@@ -45,7 +44,7 @@ namespace e_Sword9Converter.Tables
             [AccessColumn("ID", DbType.INT)]
             public int ID { get; set; }
             
-            [AccessColumn("VerseID", DbType.INT)]
+            [AccessColumn("Verse ID", DbType.INT)]
             public int VerseID { get; set; }
             
             [SqlColumn("Book", DbType.INT)]

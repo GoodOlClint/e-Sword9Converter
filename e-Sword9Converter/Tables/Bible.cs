@@ -23,7 +23,7 @@ namespace e_Sword9Converter.Tables
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
                                                                           where ((string)Row["Scripture"]) == ""
                                                                           select Row).ToArray();
-                this.Parent.SetMaxValue(rows.Count(), updateStatus.Convert);
+                this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     ((BibleTable)this.Tables["Bible"]).Rows.Remove(Row);
