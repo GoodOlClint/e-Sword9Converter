@@ -49,7 +49,7 @@ namespace e_Sword9Converter.Tables
             [Column("Details", DbType.TEXT)]
             public string Details { get; set; }
 
-            [Column("Picture", DbType.TEXT)]
+            [Column("Picture", DbType.BLOB)]
             public object Picture { get; set; }
         }
     }
