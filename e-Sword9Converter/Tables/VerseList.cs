@@ -48,15 +48,19 @@ namespace e_Sword9Converter.Tables
             public int VerseID { get; set; }
             
             [SqlColumn("Book", DbType.INT)]
+            [Index("BookChapterVerseIndex")]
             public int Book { get; set; }
             
             [SqlColumn("Chapter", DbType.INT)]
+            [Index("BookChapterVerseIndex")]
             public int Chapter { get; set; }
             
             [SqlColumn("Verse", DbType.INT)]
+            [Index("BookChapterVerseIndex")]
             public int Verse { get; set; }
             
-            [Column("Order", DbType.INT)]
+            [AccessColumn("Order", DbType.INT)]
+            [SqlColumn("Position", DbType.INT)]
             public int Order { get; set; }
         }
     }
