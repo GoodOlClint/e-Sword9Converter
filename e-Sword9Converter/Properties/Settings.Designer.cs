@@ -25,23 +25,10 @@ namespace e_Sword9Converter.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\\Users\\GoodOlClint\\Desktop\\Project" +
-            "s\\e-Sword\\Bibles\\BHS+.bbl")]
-        public string BHS_ConnectionString {
+        [global::System.Configuration.DefaultSettingValueAttribute("http://goodolclint/eSword.xml")]
+        public string UpdateURL {
             get {
-                return ((string)(this["BHS_ConnectionString"]));
-            }
-        }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.ConnectionString)]
-        [global::System.Configuration.DefaultSettingValueAttribute("Data Source=GOODOLCLINT-LAP\\SQLEXPRESS;Initial Catalog=WOYSQL;Integrated Security" +
-            "=True")]
-        public string WOYSQLConnectionString {
-            get {
-                return ((string)(this["WOYSQLConnectionString"]));
+                return ((string)(this["UpdateURL"]));
             }
         }
     }
