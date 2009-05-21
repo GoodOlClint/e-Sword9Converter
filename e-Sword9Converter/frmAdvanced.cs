@@ -70,7 +70,7 @@ namespace e_Sword9Converter
             try
             {
                 OpenDatabase(path, password);
-                Error.Log(this, "Password for " + path + "is: '" + password + "'");
+                Error.Log("Password for " + path + "is: '" + password + "'");
                 outPassword = password;
                 return true;
             }
@@ -171,6 +171,22 @@ namespace e_Sword9Converter
 
         private void btnConvert_Click(object sender, EventArgs e)
         {
+            this.RunBatch();
+        }
+
+
+        private void RunBatch()
+        {
+            Application.DoEvents();
+            this.btnConvert.Enabled = false;
+            this.txtDest.Enabled = false;
+            this.txtSource.Enabled = false;
+            this.btnDest.Enabled = false;
+            this.btnSource.Enabled = false;
+            this.chkOverwrite.Enabled = false;
+            this.chkSkip.Enabled = false;
+            this.chkSubDir.Enabled = false;
+            this.lnkNormal.Enabled = false;
             DirectoryInfo di = new DirectoryInfo(this.txtSource.Text);
             FileInfo[] files = GetFiles(di, "*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst", ';');
             foreach (FileInfo fi in files)
@@ -240,8 +256,17 @@ namespace e_Sword9Converter
                 }
             }
             this.Text = "e-Sword 9 Converter: Batch Mode: Finished";
+            this.grpDest.Enabled = false;
+            this.txtDest.Enabled = true;
+            this.btnDest.Enabled = true;
+            this.txtDest.Text = "";
+            this.btnSource.Enabled = true;
+            this.txtSource.Enabled = true;
+            this.chkOverwrite.Enabled = true;
+            this.chkSkip.Enabled = true;
+            this.chkSubDir.Enabled = true;
+            this.lnkNormal.Enabled = true;
         }
-
         private bool ValidateSource(string path)
         {
             try

@@ -8,29 +8,26 @@ namespace e_Sword9Converter
     public class Error
     {
         private static object threadLock = new object();
-        private static TextWriter errorWriter = new StreamWriter("error.log");
-        private static TextWriter logWriter = new StreamWriter("app.log");
         public static void Record(object sender, Exception ex)
         {
             lock (threadLock)
             {
-                try
+                using (StreamWriter sw = new StreamWriter("e-Sword9Converter.log"))
                 {
-                    Database db = (Database)sender;
-                    errorWriter.WriteLine(string.Format("{0} {1}", db.DestDB, ex.Message));
-                    errorWriter.Flush();
-                }
-                catch
-                {
-                    errorWriter.WriteLine(ex.Message);
-                    errorWriter.Flush();
+                    try
+                    { sw.WriteLine(string.Format("Error: {0} {1}", ((Database)sender).DestDB, ex.Message)); }
+                    catch
+                    { sw.WriteLine("Error: " + ex.Message); }
                 }
             }
         }
-        public static void Log(object sender, string message)
+        public static void Log(string message)
         {
-            logWriter.WriteLine(sender.ToString() + "\t" + message);
-            logWriter.Flush();
+            lock (threadLock)
+            {
+                using (StreamWriter sw = new StreamWriter("e-Sword9Converter.log"))
+                { sw.WriteLine("Warning: " + message); }
+            }
         }
     }
 }

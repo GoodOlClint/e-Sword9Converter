@@ -20,6 +20,17 @@ namespace e_Sword9Converter
             this.AddOwnedForm(passwordForm);
             this.advancedForm.lnkNormal.Click += new EventHandler(lnkNormal_Click);
             this.advancedForm.FormClosed += new FormClosedEventHandler(advancedForm_FormClosed);
+            this.FormClosing += new FormClosingEventHandler(frmMain_FormClosing);
+        }
+
+        void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            try
+            {
+                this.advancedForm.Dispose();
+                this.passwordForm.Dispose();
+            }
+            catch { }
         }
         #endregion
 
@@ -34,7 +45,11 @@ namespace e_Sword9Converter
         #region Event Handlers
         void advancedForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.Close();
+            try
+            {
+                this.Close();
+            }
+            catch { }
         }
 
         void lnkNormal_Click(object sender, EventArgs e)
@@ -123,8 +138,8 @@ namespace e_Sword9Converter
 
         private void lnkBatch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            this.Hide();
             advancedForm.Show();
+            this.Hide();
         }
         #endregion
 
@@ -167,7 +182,7 @@ namespace e_Sword9Converter
             try
             {
                 OpenDatabase(path, password);
-                Error.Log(this, "Password for " + path + "is: '" + password + "'");
+                Error.Log("Password for " + path + "is: '" + password + "'");
                 outPassword = password;
                 return true;
             }
@@ -438,5 +453,23 @@ namespace e_Sword9Converter
             }
             catch (Exception ex) { Error.Record(this, ex); return OldPath; }
         }
+        public delegate void ProcessParametersDelegate(object sender, string[] args);
+        public void ProcessParameters(object sender, string[] args)
+        {
+            // The form has loaded, and initialization will have been be done.
+
+            // Add the command-line arguments to our textbox, just to confirm that
+            // it reached here.
+            if (args != null && args.Length != 0)
+            {
+                //txtArgs.Text += DateTime.Now.ToString("mm:ss.ff") + " ";
+                //for (int i = 0; i < args.Length; i++)
+                {
+                    //txtArgs.Text += args[i] + " ";
+                }
+                //txtArgs.Text += "\r\n";
+            }
+        }
     }
+
 }
