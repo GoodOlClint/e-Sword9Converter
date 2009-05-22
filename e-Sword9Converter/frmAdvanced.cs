@@ -70,15 +70,15 @@ namespace e_Sword9Converter
             try
             {
                 OpenDatabase(path, password);
-                Error.Log("Password for " + path + "is: '" + password + "'");
+                Error.Log(string.Format(Globalization.CurrentLanguage.PasswordFound, path, password));
                 outPassword = password;
                 return true;
             }
             catch
             {
                 if (tried)
-                { passwordForm.Text = "Invalid Password"; }
-                else { passwordForm.Text = "Password"; }
+                { passwordForm.Text = Globalization.CurrentLanguage.InvalidPassword; }
+                else { passwordForm.Text = Globalization.CurrentLanguage.Password; }
                 string pass = "Password";
                 if (!System.IO.File.Exists("Passwords.txt"))
                 {
@@ -196,7 +196,7 @@ namespace e_Sword9Converter
                 {
                     if (!this.ValidateDest(DestPath) && !this.chkOverwrite.Checked)
                     {
-                        if (MessageBox.Show(string.Format("{0} Already exists, do you want to overwrite?", DestPath), "File Already Exists", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
+                        if (MessageBox.Show(string.Format("{0} {1} {2}", DestPath, Globalization.CurrentLanguage.FileExists, Globalization.CurrentLanguage.Overwrite), Globalization.CurrentLanguage.FileExists, MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
                         { break; }
                     }
                     string ext = fi.FullName.Substring(fi.FullName.Length - 4, 4);
@@ -255,7 +255,7 @@ namespace e_Sword9Converter
                     DB.Clear();
                 }
             }
-            this.Text = "e-Sword 9 Converter: Batch Mode: Finished";
+            this.Text = Globalization.CurrentLanguage.AdvancedTitle + " " + Globalization.CurrentLanguage.Finished;
             this.grpDest.Enabled = false;
             this.txtDest.Enabled = true;
             this.btnDest.Enabled = true;
@@ -295,7 +295,7 @@ namespace e_Sword9Converter
         void prgMain_MouseHover(object sender, EventArgs e)
         {
             int Percent = (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d);
-            this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% Completed", Percent));
+            this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% {2}", Percent, Globalization.CurrentLanguage.Completed));
         }
 
         private string ConvertFilePath(string OldPath)
@@ -340,20 +340,35 @@ namespace e_Sword9Converter
                 if (DB.Running)
                 {
                     if (this.Progress > this.prgMain.Maximum)
-                    { this.prgMain.Value = this.prgMain.Maximum; Error.Record(this, new Exception("Progress exceded max allowed")); }
+                    { this.prgMain.Value = this.prgMain.Maximum; Error.Record(this, new Exception(Globalization.CurrentLanguage.ProgressExceededMax)); }
                     else
                     { this.prgMain.Value = this.Progress; }
                     FileInfo fi = new FileInfo(DB.FileName);
-                    this.Text = string.Format("e-Sword 9 Converter: Batch Mode: {2}% {0} {1}", Status.ToString(), DB.FileName.Replace(fi.DirectoryName + @"\", ""), (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d));
+                    this.Text = string.Format("{0}: {3}% {1} {2}", Globalization.CurrentLanguage.AdvancedTitle, Status.ToString(), DB.FileName.Replace(fi.DirectoryName + @"\", ""), (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d));
                     Application.DoEvents();
                 }
                 else
                 {
                     this.prgMain.Value = 0;
                     this.prgMain.Maximum = 100;
-                    this.Text = "e-Sword 9 Converter: Batch Mode Finished";
+                    this.Text = Globalization.CurrentLanguage.AdvancedTitle + " " + Globalization.CurrentLanguage.Finished;
                 }
             }
+        }
+
+        private void frmAdvanced_Load(object sender, EventArgs e)
+        {
+            this.Text = Globalization.CurrentLanguage.AdvancedTitle;
+            this.grpDest.Text = Globalization.CurrentLanguage.DestinationDirectory;
+            this.grpSource.Text = Globalization.CurrentLanguage.SourceDirectory;
+            this.btnConvert.Text = Globalization.CurrentLanguage.Convert;
+            this.btnDest.Text = Globalization.CurrentLanguage.Destination;
+            this.btnSource.Text = Globalization.CurrentLanguage.Source;
+            this.lnkNormal.Text = Globalization.CurrentLanguage.Normal;
+            this.chkOverwrite.Text = Globalization.CurrentLanguage.AutomaticallyOverwrite;
+            this.chkSkip.Text = Globalization.CurrentLanguage.SkipPasswordProtectedFiles;
+            this.chkSubDir.Text = Globalization.CurrentLanguage.IncludeSubdirectories;
+
         }
     }
 }

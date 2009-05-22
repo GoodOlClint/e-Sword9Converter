@@ -77,6 +77,7 @@
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Password";
+            this.Load += new System.EventHandler(this.frmPassword_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

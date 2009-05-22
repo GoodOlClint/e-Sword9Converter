@@ -182,6 +182,7 @@
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "e-Sword 9 Converter";
+            this.Load += new System.EventHandler(this.frmMain_Load);
             this.grpSource.ResumeLayout(false);
             this.grpSource.PerformLayout();
             this.grpDest.ResumeLayout(false);

@@ -24,9 +24,16 @@ namespace e_Sword9Converter
             if (this.txtPassword.Text != "")
             { this.DialogResult = DialogResult.OK; }
             else
-            { MessageBox.Show("Password cannot be blank"); }
+            { MessageBox.Show(Globalization.CurrentLanguage.PasswordBlank); }
         }
 
         public string Password { get { return this.txtPassword.Text; } }
+
+        private void frmPassword_Load(object sender, EventArgs e)
+        {
+            this.Text = Globalization.CurrentLanguage.Password;
+            this.btnCancel.Text = Globalization.CurrentLanguage.Cancel;
+            this.btnOk.Text = Globalization.CurrentLanguage.Ok;
+        }
     }
 }

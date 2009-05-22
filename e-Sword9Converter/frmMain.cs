@@ -63,7 +63,7 @@ namespace e_Sword9Converter
             try
             {
                 int Percent = (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d);
-                this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% Completed", Percent));
+                this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% {1}", Percent, Globalization.CurrentLanguage.Completed));
             }
             catch (Exception ex) { Error.Record(this, ex); }
         }
@@ -182,7 +182,7 @@ namespace e_Sword9Converter
             try
             {
                 OpenDatabase(path, password);
-                Error.Log("Password for " + path + "is: '" + password + "'");
+                Error.Log(string.Format(Globalization.CurrentLanguage.PasswordFound, path, password));
                 outPassword = password;
                 return true;
             }
@@ -191,8 +191,8 @@ namespace e_Sword9Converter
                 try
                 {
                     if (tried)
-                    { passwordForm.Text = "Invalid Password"; }
-                    else { passwordForm.Text = "Password"; }
+                    { passwordForm.Text = Globalization.CurrentLanguage.InvalidPassword; }
+                    else { passwordForm.Text = Globalization.CurrentLanguage.Password; }
                     string pass = "Password";
                     if (!System.IO.File.Exists("Passwords.txt"))
                     {
@@ -277,9 +277,9 @@ namespace e_Sword9Converter
                 if (this.txtSource.Text == "")
                     return;
                 if (!File.Exists(this.txtSource.Text))
-                { MessageBox.Show("", "Source file does not exist!", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+                { MessageBox.Show("", Globalization.CurrentLanguage.SourceFileNotExist, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                 if (!ValidSource(this.txtSource.Text))
-                { MessageBox.Show("", "Source file invalid", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+                { MessageBox.Show("", Globalization.CurrentLanguage.SourceFileInvalid, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                 string ext = this.txtSource.Text.Substring(this.txtSource.Text.Length - 4, 4);
                 string path = this.ConvertFilePath(this.txtSource.Text);
                 this.ofdDest.FileName = this.txtSource.Text.Replace(ext, ext + "x").Replace(path + @"\", "");
@@ -469,6 +469,17 @@ namespace e_Sword9Converter
                 }
                 //txtArgs.Text += "\r\n";
             }
+        }
+
+        private void frmMain_Load(object sender, EventArgs e)
+        {
+            this.Text = Globalization.CurrentLanguage.MainTitle;
+            this.grpDest.Text = Globalization.CurrentLanguage.ConvertedFile;
+            this.grpSource.Text = Globalization.CurrentLanguage.FileToConvert;
+            this.btnConvert.Text = Globalization.CurrentLanguage.Convert;
+            this.btnDest.Text = Globalization.CurrentLanguage.Destination;
+            this.btnSource.Text = Globalization.CurrentLanguage.Source;
+            this.lnkBatch.Text = Globalization.CurrentLanguage.BatchMode;
         }
     }
 

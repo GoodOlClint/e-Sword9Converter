@@ -107,7 +107,8 @@ namespace e_Sword9Converter
                                     catch (Exception ex)
                                     {
                                         //Build useful error message
-                                        string msg = string.Format("{0}\t{1}\tRow:{2}\tColumn:{3}\tType:{4}\tValue:{5}\tMessage:{6}", Db.FileName, Table.TableName, Table.Rows.Count, Column.Name, Column.Type, Convert.ToString(reader[Column.Name]), ex.Message);
+                                        //string msg = string.Format("{0}\t{1}\tRow:{2}\tColumn:{3}\tType:{4}\tValue:{5}\tMessage:{6}", Db.FileName, Table.TableName, Table.Rows.Count, Column.Name, Column.Type, Convert.ToString(reader[Column.Name]), ex.Message);
+                                        string msg = string.Format(Globalization.CurrentLanguage.sqlErrorString, Db.FileName, Table.TableName, Table.Rows.Count, Column.Name, Column.Type, Convert.ToString(reader[Column.Name]), ex.Message);
                                         Error.Record(Table, new SQLiteException(msg));
                                     }
                                 }

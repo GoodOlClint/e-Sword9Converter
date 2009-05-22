@@ -79,6 +79,7 @@
     <Compile Include="clsDatabase.cs" />
     <Compile Include="clsDatabase.old.cs" />
     <Compile Include="clsError.cs" />
+    <Compile Include="clsGlobalization.cs" />
     <Compile Include="clsTable.cs" />
     <Compile Include="clsThreadSafeCollection.cs">
       <SubType>Code</SubType>
@@ -145,6 +146,7 @@
     <Compile Include="Tables\Commentary.cs" />
     <Compile Include="Tables\BibleReadingPlan.cs" />
     <Compile Include="Tables\Devotions.cs" />
+    <Compile Include="Tables\Illustrations.cs" />
     <Compile Include="Tables\Memory.cs" />
     <Compile Include="Tables\Notes.cs" />
     <Compile Include="Tables\Overlay.cs" />
