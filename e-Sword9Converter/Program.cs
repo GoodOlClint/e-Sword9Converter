@@ -16,7 +16,7 @@ namespace e_Sword9Converter
         [STAThread]
         static void Main(string[] Args)
         {
-            switch (Thread.CurrentThread.CurrentCulture.Name.Remove(2,3))
+            switch (CultureInfo.CurrentUICulture.Name.Remove(2, 3))
             {
                 case "es":
                     Globalization.CurrentLanguage = new Globalization.Spanish();
