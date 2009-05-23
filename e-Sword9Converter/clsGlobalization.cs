@@ -107,7 +107,7 @@ namespace e_Sword9Converter
             public override string PasswordFound { get { return "Password for {0} is {1}"; } }
             public override string Ok { get { return "Ok"; } }
             public override string Cancel { get { return "Cancel"; } }
-            public override string SourceFileNotExist { get { return "Source files does not exist!"; } }
+            public override string SourceFileNotExist { get { return "Source file does not exist!"; } }
             public override string SourceFileInvalid { get { return "Source file is invalid"; } }
             public override string Loading { get { return "Loading"; } }
             public override string Converting { get { return "Converting"; } }
@@ -166,21 +166,21 @@ namespace e_Sword9Converter
             public override string PasswordFound { get { return "Contraseña para {0} es {1}"; } }
             public override string Ok { get { return "Correcto"; } }
             public override string Cancel { get { return "Cancelar"; } }
-            public override string Loading { get { return "Loading"; } }
-            public override string Converting { get { return "Converting"; } }
-            public override string Saving { get { return "Saving"; } }
-            public override string PasswordBlank { get { return "Password cannot be blank"; } }
-            public override string PrayerRequests { get { return "Prayer Requests"; } }
-            public override string Overlay { get { return "Overlay"; } }
-            public override string MemoryVerses { get { return "Memory Verses"; } }
-            public override string BibleReadingPlan { get { return "Bible Reading Plan"; } }
-            public override string Devotional { get { return "Devotional"; } }
-            public override string ProgressExceededMax { get { return "Progress exceeded max allowed"; } }
-            public override string Completed { get { return "Completed"; } }
-            public override string Overwrite { get { return "do you want to overwrite?"; } }
-            public override string FileExists { get { return "File Already Exists"; } }
-            public override string SourceFileNotExist { get { return "Source files does not exist!"; } }
-            public override string SourceFileInvalid { get { return "Source file is invalid"; } }
+            public override string Loading { get { return "Cargando"; } }
+            public override string Converting { get { return "Convirtiendo"; } }
+            public override string Saving { get { return "Guardando"; } }
+            public override string PasswordBlank { get { return "Debe escribir la contraseña"; } }
+            public override string PrayerRequests { get { return "Peticiones de oración"; } }
+            public override string Overlay { get { return "Superposición"; } }
+            public override string MemoryVerses { get { return "Versos a memorizar"; } }
+            public override string BibleReadingPlan { get { return "Plan de lectura Bíblica"; } }
+            public override string Devotional { get { return "Devocional"; } }
+            public override string ProgressExceededMax { get { return "El proceso rebasó el máximo permitido"; } }
+            public override string Completed { get { return "Completado"; } }
+            public override string Overwrite { get { return "¿Quieres sobrescribirlo?"; } }
+            public override string FileExists { get { return "Ya existe este archivo"; } }
+            public override string SourceFileNotExist { get { return "Archivo de origen no existen"; } }
+            public override string SourceFileInvalid { get { return "Archivo de origen es inválido"; } }
             public override string Bible { get { return "Biblia"; } }
             public override string Commentary { get { return "Comentario"; } }
             public override string Dictionary { get { return "Dictionarie"; } }
