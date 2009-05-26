@@ -13,6 +13,25 @@ namespace e_Sword9Converter.Tables
             this.Tables.Add("Plan", new Plan());
             this.Tables["Plan"].Parent = Parent;
         }
+        public override void Load(string File)
+        {
+            base.Load(File);
+            if (!this.skip)
+            {
+                //Convert Access State DateTime to SQLite Int
+                IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Plan)this.Tables["Plan"]).Rows
+                                                                          select Row).ToArray();
+                this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
+                foreach (ThreadSafeDictionary<string, object> Row in rows)
+                {
+                    DateTime epoch = new DateTime(1900, 1, 1);
+                    TimeSpan span = new TimeSpan();
+                    span = ((Plan)this.Tables["Plan"]).accessStart.Subtract(epoch);
+                    ((Plan)this.Tables["Plan"]).Start = span.Days + 1;
+                    this.Parent.UpdateStatus();
+                }
+            }
+        }
         [Table("Requests")]
         public class Plan : Table<Plan>
         {
@@ -29,6 +48,8 @@ namespace e_Sword9Converter.Tables
             public int Frequency { get; set; }
 
             [AccessColumn("Start", DbType.DATETIME)]
+            public DateTime accessStart { get; set; }
+
             [SqlColumn("Start", DbType.INT)]
             public int Start { get; set; }
 

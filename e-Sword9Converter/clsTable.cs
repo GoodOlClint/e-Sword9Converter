@@ -99,7 +99,7 @@ namespace e_Sword9Converter
                                                 Row.Add(Column.PropertyName, Convert.ToDouble(reader[Column.Name]));
                                                 break;
                                             case DbType.DATETIME:
-                                                Row.Add(Column.PropertyName, Convert.ToInt32(Convert.ToDateTime(reader[Column.Name])));
+                                                Row.Add(Column.PropertyName, Convert.ToDateTime(reader[Column.Name]));
                                                 break;
                                         }
 

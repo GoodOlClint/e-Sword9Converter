@@ -10,6 +10,7 @@ namespace e_Sword9Converter
             InitializeComponent();
             this.txtPassword.KeyDown += new KeyEventHandler(txtPassword_KeyDown);
         }
+        public string FileName { get { return this.lblFile.Text; } set { this.lblFile.Text = value; } }
 
         void txtPassword_KeyDown(object sender, KeyEventArgs e)
         {

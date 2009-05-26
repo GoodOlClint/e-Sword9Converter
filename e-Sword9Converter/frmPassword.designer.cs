@@ -31,11 +31,12 @@
             this.txtPassword = new System.Windows.Forms.TextBox();
             this.btnOk = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.lblFile = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // txtPassword
             // 
-            this.txtPassword.Location = new System.Drawing.Point(12, 12);
+            this.txtPassword.Location = new System.Drawing.Point(12, 32);
             this.txtPassword.Name = "txtPassword";
             this.txtPassword.PasswordChar = '*';
             this.txtPassword.Size = new System.Drawing.Size(260, 20);
@@ -43,7 +44,7 @@
             // 
             // btnOk
             // 
-            this.btnOk.Location = new System.Drawing.Point(197, 38);
+            this.btnOk.Location = new System.Drawing.Point(197, 58);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(75, 23);
             this.btnOk.TabIndex = 1;
@@ -54,19 +55,29 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(116, 38);
+            this.btnCancel.Location = new System.Drawing.Point(116, 58);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 2;
             this.btnCancel.Text = "&Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
             // 
+            // lblFile
+            // 
+            this.lblFile.AutoSize = true;
+            this.lblFile.Location = new System.Drawing.Point(12, 9);
+            this.lblFile.Name = "lblFile";
+            this.lblFile.Size = new System.Drawing.Size(56, 13);
+            this.lblFile.TabIndex = 3;
+            this.lblFile.Text = "{fileName}";
+            // 
             // frmPassword
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(284, 72);
+            this.ClientSize = new System.Drawing.Size(284, 93);
+            this.Controls.Add(this.lblFile);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.txtPassword);
@@ -88,5 +99,6 @@
         private System.Windows.Forms.TextBox txtPassword;
         private System.Windows.Forms.Button btnOk;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Label lblFile;
     }
 }

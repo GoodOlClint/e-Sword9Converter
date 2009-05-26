@@ -84,6 +84,7 @@ namespace e_Sword9Converter
                 {
                     this.passwordForm = new frmPassword();
                     this.AddOwnedForm(passwordForm);
+                    passwordForm.FileName = GetFileName(path);
                     if (!this.chkSkip.Checked && passwordForm.ShowDialog() == DialogResult.OK)
                     {
                         pass = passwordForm.Password;
@@ -300,6 +301,8 @@ namespace e_Sword9Converter
 
         private string ConvertFilePath(string OldPath)
         { return new FileInfo(OldPath).DirectoryName; }
+        private string GetFileName(string Path)
+        { return new FileInfo(Path).Name; }
 
         private FileInfo[] GetFiles(DirectoryInfo dir, string searchPatterns, params char[] separator)
         {
