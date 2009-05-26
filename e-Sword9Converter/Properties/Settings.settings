@@ -1,0 +1,12 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="eSword9Converter.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="UpdateURL" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://goodolclint.com/eSword.xml</Value>
+    </Setting>
+    <Setting Name="UpdateChannel" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Beta</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
