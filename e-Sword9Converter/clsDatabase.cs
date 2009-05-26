@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using System.Data.Common;
 
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     public class Database:IDatabase
     {

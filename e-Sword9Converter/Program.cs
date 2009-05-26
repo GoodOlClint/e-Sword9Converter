@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 using Microsoft.VisualBasic.ApplicationServices;
 using System.Threading;
 using System.Globalization;
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     static class Program
     {

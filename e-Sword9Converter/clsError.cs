@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     public class Error
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     public class ThreadSafeDictionary<Key, Value> : IDictionary<Key, Value>, IDisposable, ICloneable
     {

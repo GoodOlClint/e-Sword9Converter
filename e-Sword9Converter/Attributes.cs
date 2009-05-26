@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     public class ColumnAttribute : Attribute, IColumn

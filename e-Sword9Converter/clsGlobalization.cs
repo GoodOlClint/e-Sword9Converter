@@ -1,5 +1,5 @@
 ﻿
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     public class Globalization
     {

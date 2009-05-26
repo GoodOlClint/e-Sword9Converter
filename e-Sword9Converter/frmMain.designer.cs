@@ -1,4 +1,4 @@
-﻿namespace e_Sword9Converter
+﻿namespace eSword9Converter
 {
     partial class frmMain
     {
@@ -32,7 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.btnSource = new System.Windows.Forms.Button();
             this.grpSource = new System.Windows.Forms.GroupBox();
-            this.txtSource = new AutoComplete.AutoCompleteTextBox();
+            this.txtSource = new System.Windows.Forms.TextBox();
             this.grpDest = new System.Windows.Forms.GroupBox();
             this.btnDest = new System.Windows.Forms.Button();
             this.txtDest = new System.Windows.Forms.TextBox();
@@ -204,7 +204,7 @@
         private System.Windows.Forms.SaveFileDialog ofdDest;
         private System.Windows.Forms.OpenFileDialog ofdSource;
         private System.Windows.Forms.LinkLabel lnkBatch;
-        private AutoComplete.AutoCompleteTextBox txtSource;
+        private System.Windows.Forms.TextBox txtSource;
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.Label lblStatus;
     }

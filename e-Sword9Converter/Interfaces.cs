@@ -1,6 +1,6 @@
 ﻿using System.Data.Common;
 
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     public interface IColumn
     {

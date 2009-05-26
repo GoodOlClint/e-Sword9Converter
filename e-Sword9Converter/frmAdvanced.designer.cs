@@ -1,4 +1,4 @@
-﻿namespace e_Sword9Converter
+﻿namespace eSword9Converter
 {
     partial class frmAdvanced
     {

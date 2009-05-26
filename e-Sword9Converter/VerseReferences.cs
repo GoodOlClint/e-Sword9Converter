@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     #region Verse List
     public class VerseReference

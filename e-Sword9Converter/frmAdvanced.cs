@@ -7,7 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     public partial class frmAdvanced : Form, IParent
     {

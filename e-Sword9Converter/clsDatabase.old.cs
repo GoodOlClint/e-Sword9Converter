@@ -5,7 +5,7 @@ using System.Data.SQLite;
 using System.Data.OleDb;
 using System;
 
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     //namespace odbc
     //{

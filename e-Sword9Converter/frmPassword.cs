@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     public partial class frmPassword : Form
     {

@@ -7,7 +7,7 @@ using System.Data.OleDb;
 using System.Windows.Forms;
 using System.IO;
 using System.Collections;
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     public static class Converter
     {

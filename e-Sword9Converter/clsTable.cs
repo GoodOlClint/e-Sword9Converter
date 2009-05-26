@@ -5,7 +5,7 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Reflection;
 
-namespace e_Sword9Converter
+namespace eSword9Converter
 {
     public abstract class Table<T> : ITable where T : Table<T>, new()
     {
@@ -233,7 +233,7 @@ namespace e_Sword9Converter
         }
         public void Load(DbProviderFactory Factory, string connectionString)
         {
-            T Table = global::e_Sword9Converter.Table<T>.LoadFromDatabase(Factory, connectionString, this.Parent, this.DB);
+            T Table = global::eSword9Converter.Table<T>.LoadFromDatabase(Factory, connectionString, this.Parent, this.DB);
             this.Rows = (ThreadSafeCollection<ThreadSafeDictionary<string, object>>)Table.Rows.Clone();
             this.Columns = (ThreadSafeDictionary<string, IColumn>)Table.Columns.Clone();
             this.Indexes = (ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>)Table.Indexes.Clone();
