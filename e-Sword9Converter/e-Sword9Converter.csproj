@@ -74,10 +74,9 @@
   <ItemGroup>
     <Compile Include="Attributes.cs" />
     <Compile Include="clsDatabase.cs" />
-    <Compile Include="clsDatabase.old.cs" />
     <Compile Include="clsError.cs" />
     <Compile Include="clsGlobalization.cs" />
-    <Compile Include="clsProcess.cs" />
+    <Compile Include="clsController.cs" />
     <Compile Include="clsTable.cs" />
     <Compile Include="clsThreadSafeCollection.cs">
       <SubType>Code</SubType>

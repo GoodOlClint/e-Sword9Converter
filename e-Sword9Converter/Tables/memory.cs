@@ -7,11 +7,9 @@ namespace eSword9Converter.Tables
 {
     public class Memory : Database
     {
-        public Memory(IParent Parent)
-            : base(Parent)
+        public Memory()
         {
             this.Tables.Add("Memorize", new Memorize());
-            this.Tables["Memorize"].Parent = Parent;
         }
         [Table("Memorize")]
         public class Memorize : Table<Memorize>

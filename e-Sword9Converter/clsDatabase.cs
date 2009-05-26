@@ -7,7 +7,7 @@ using System.Data.Common;
 
 namespace eSword9Converter
 {
-    public class Database:IDatabase
+    public class Database : IDatabase
     {
         public string SourceDB { get; set; }
         public string DestDB { get; set; }
@@ -27,7 +27,7 @@ namespace eSword9Converter
                 this.Load(SourceDB);
                 this.FileName = DestDB;
                 this.Save(DestDB);
-                this.Parent.SetMaxValue(100, updateStatus.Finished);
+                Controller.RaiseStatusChanged(updateStatus.Finished);
                 running = false;
             }
             catch (Exception ex) { Error.Record(this, ex); }
@@ -37,11 +37,9 @@ namespace eSword9Converter
         public ThreadSafeDictionary<string, ITable> Tables = new ThreadSafeDictionary<string, ITable>();
         private oleDbFactory oleDbFactory = new oleDbFactory();
         private SQLiteDbFactory SQLiteFactory = new SQLiteDbFactory();
-        protected IParent Parent;
         private string SourceConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source={file};";
         private string DestConnectionString = "data source=\"{file}\"";
 
-        public Database(IParent Parent) { this.Parent = Parent; }
         public virtual void Save(string Path)
         {
             if (!skip)
@@ -74,12 +72,14 @@ namespace eSword9Converter
         }
         public virtual void Load(string Path)
         {
-            string pass;
-            skip = !this.Parent.GetPassword(Path, out pass);
+            if (Controller.NeedPassword(Path))
+            {
+                string pass = Controller.GetPassword(Path);
+                SourceConnectionString += "Jet OLEDB:Database Password=\"" + pass + "\";";
+                skip = (pass == "");
+            }
             if (!skip)
             {
-                if (pass != "")
-                { SourceConnectionString += "Jet OLEDB:Database Password=\"" + pass + "\";"; }
                 foreach (KeyValuePair<string, ITable> Table in this.Tables)
                 {
                     Table.Value.DB = this;

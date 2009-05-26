@@ -31,4 +31,10 @@
         Saving,
         Finished
     }
+    public enum messageType
+    {
+        Error,
+        Warning,
+        Information
+    }
 }

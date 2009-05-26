@@ -8,12 +8,10 @@ namespace eSword9Converter.Tables
     public class VerseList : Database
     {
         private VerseReferences VerseReferences;
-        public VerseList(IParent Parent)
-            : base(Parent)
+        public VerseList()
         {
             this.Tables.Add("Verses", new Verses());
             this.VerseReferences = new VerseReferences();
-            this.Tables["Verses"].Parent = Parent;
         }
 
         public override void Load(string Path)
@@ -23,7 +21,9 @@ namespace eSword9Converter.Tables
             {
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Verses)this.Tables["Verses"]).Rows
                                                                           select Row).ToArray();
-                this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
+                Controller.RaiseStatusChanged(updateStatus.Converting);
+                Controller.SetMaxValue(rows.Count());
+                int count = 0;
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     int VerseID = Convert.ToInt32(Row["VerseID"]);
@@ -33,7 +33,8 @@ namespace eSword9Converter.Tables
                     Row["Book"] = reference.Book;
                     Row["Chapter"] = reference.Chapter;
                     Row["Verse"] = (VerseID - reference.StartVerse) + 1;
-                    this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
+                    count++;
+                    Controller.RaiseProgressChanged(count);
                 }
             }
         }

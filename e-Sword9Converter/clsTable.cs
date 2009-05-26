@@ -13,7 +13,6 @@ namespace eSword9Converter
         public ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>> Indexes = new ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>();
         public ThreadSafeCollection<ThreadSafeDictionary<string, object>> Rows = new ThreadSafeCollection<ThreadSafeDictionary<string, object>>();
         public string TableName { get; set; }
-        public IParent Parent { get; set; }
         public IDatabase DB { get; set; }
         #region Constructor
         public Table()
@@ -50,10 +49,9 @@ namespace eSword9Converter
             }
         }
         #endregion
-        public static T LoadFromDatabase(DbProviderFactory Factory, string connectionString, IParent Parent, IDatabase Db)
+        public static T LoadFromDatabase(DbProviderFactory Factory, string connectionString, IDatabase Db)
         {
             T Table = new T();
-            Table.Parent = Parent;
             using (DbConnection dbCon = Factory.CreateConnection())
             {
                 dbCon.ConnectionString = connectionString;
@@ -62,8 +60,10 @@ namespace eSword9Converter
                 {
                     dbCmd.CommandText = string.Format("SELECT COUNT(*) FROM {0};", Table.TableName);
                     int count = (int)dbCmd.ExecuteScalar();
-                    Table.Parent.SetMaxValue(count, updateStatus.Loading);
+                    Controller.RaiseStatusChanged(updateStatus.Loading);
+                    Controller.SetMaxValue(count);
                     dbCmd.CommandText = string.Format("SELECT * FROM {0};", Table.TableName);
+                    int currentCount = 0;
                     using (DbDataReader reader = dbCmd.ExecuteReader())
                     {
                         bool nextResult = true;
@@ -115,8 +115,8 @@ namespace eSword9Converter
                                 try
                                 {
                                     Table.Rows.Add(Row);
-                                    Table.Parent.UpdateStatus();
-
+                                    currentCount++;
+                                    Controller.RaiseProgressChanged(currentCount);
                                 }
                                 catch (Exception ex) { Error.Record(Table, ex); }
                             }
@@ -187,7 +187,8 @@ namespace eSword9Converter
                 {
                     int count = (from ThreadSafeDictionary<string, object> kvp in this.Rows
                                  select kvp).Count();
-                    this.Parent.SetMaxValue(count, updateStatus.Saving);
+                    Controller.RaiseStatusChanged(updateStatus.Saving);
+                    Controller.SetMaxValue(count);
                     string Command = string.Format("INSERT INTO {0} (", TableName);
                     IDictionary<string, IColumn> sqlColumns = (from KeyValuePair<string, IColumn> C in this.Columns
                                                                where C.Value.colType != columnType.Access
@@ -213,6 +214,7 @@ namespace eSword9Converter
 
                     using (DbTransaction dbTrans = dbCon.BeginTransaction())
                     {
+                        int currentCount = 0;
                         foreach (ThreadSafeDictionary<string, object> Row in this.Rows)
                         {
                             try
@@ -224,7 +226,7 @@ namespace eSword9Converter
                                 dbCmd.ExecuteNonQuery();
                             }
                             catch (Exception ex) { Error.Record(this, ex); }
-                            finally { this.Parent.UpdateStatus(); }
+                            finally { currentCount++; Controller.RaiseProgressChanged(currentCount); }
                         }
                         dbTrans.Commit();
                     }
@@ -233,7 +235,7 @@ namespace eSword9Converter
         }
         public void Load(DbProviderFactory Factory, string connectionString)
         {
-            T Table = global::eSword9Converter.Table<T>.LoadFromDatabase(Factory, connectionString, this.Parent, this.DB);
+            T Table = global::eSword9Converter.Table<T>.LoadFromDatabase(Factory, connectionString, this.DB);
             this.Rows = (ThreadSafeCollection<ThreadSafeDictionary<string, object>>)Table.Rows.Clone();
             this.Columns = (ThreadSafeDictionary<string, IColumn>)Table.Columns.Clone();
             this.Indexes = (ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>)Table.Indexes.Clone();

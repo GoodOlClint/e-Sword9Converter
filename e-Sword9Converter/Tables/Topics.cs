@@ -7,11 +7,9 @@ namespace eSword9Converter.Tables
 {
     public class Topic : Database
     {
-        public Topic(IParent Parent)
-            : base(Parent)
+        public Topic()
         {
             this.Tables.Add("Topics", new Topics());
-            this.Tables["Topics"].Parent = Parent;
         }
 
         [SqlTable("Topics")]

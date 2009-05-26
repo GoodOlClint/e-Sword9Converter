@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace eSword9Converter
 {
-    public partial class frmMain : Form, IParent
+    public partial class frmMain : Form
     {
         #region Constructor
         public frmMain()
@@ -21,6 +21,45 @@ namespace eSword9Converter
             this.advancedForm.lnkNormal.Click += new EventHandler(lnkNormal_Click);
             this.advancedForm.FormClosed += new FormClosedEventHandler(advancedForm_FormClosed);
             this.FormClosing += new FormClosingEventHandler(frmMain_FormClosing);
+            Controller.StatusChangedEvent += new Controller.StatusChangedEventHandler(Controller_StatusChangedEvent);
+            Controller.MaxValueChangedEvent += new Controller.MaxValueChangedEventHandler(Controller_MaxValueChangedEvent);
+            Controller.ProgressChangedEvent += new Controller.ProgressChangedEventHandler(Controller_ProgressChangedEvent);
+        }
+
+        void Controller_ProgressChangedEvent(int count)
+        {
+            if (this.prgMain.InvokeRequired)
+            {
+                this.prgMain.Invoke(new Controller.ProgressChangedEventHandler(this.Controller_ProgressChangedEvent), new object[] { count });
+            }
+            else
+            {
+                this.prgMain.Value = count;
+            }
+        }
+
+        void Controller_MaxValueChangedEvent(int value)
+        {
+            if (this.prgMain.InvokeRequired)
+            {
+                this.prgMain.Invoke(new Controller.MaxValueChangedEventHandler(this.Controller_MaxValueChangedEvent), new object[] { value });
+            }
+            else
+            {
+                this.prgMain.Maximum = value;
+            }
+        }
+
+        void Controller_StatusChangedEvent(updateStatus status)
+        {
+            if (this.lblStatus.InvokeRequired)
+            {
+                this.lblStatus.Invoke(new Controller.StatusChangedEventHandler(this.Controller_StatusChangedEvent), new object[] { status });
+            }
+            else
+            {
+                this.lblStatus.Text = status.ToString();
+            }
         }
 
         void frmMain_FormClosing(object sender, FormClosingEventArgs e)
@@ -77,63 +116,66 @@ namespace eSword9Converter
         }
         private void btnConvert_Click(object sender, EventArgs e)
         {
-            try
-            {
-                this.ValidateSource();
-                Database db;
-                string ext = this.txtDest.Text.Substring(this.txtDest.Text.Length - 5, 5);
-                switch (ext)
-                {
-                    case ".bblx":
-                        db = new Tables.Bible(this);
-                        break;
-                    case ".brpx":
-                        db = new Tables.BibleReadingPlan(this);
-                        break;
-                    case ".cmtx":
-                        db = new Tables.Commentary(this);
-                        break;
-                    case ".dctx":
-                        db = new Tables.Dictionary(this);
-                        break;
-                    case ".devx":
-                        db = new Tables.Devotion(this);
-                        break;
-                    case ".mapx":
-                        db = new Tables.Graphic(this);
-                        break;
-                    case ".harx":
-                        db = new Tables.Harmony(this);
-                        break;
-                    case ".notx":
-                        db = new Tables.Notes(this);
-                        break;
-                    case ".memx":
-                        db = new Tables.Memory(this);
-                        break;
-                    case ".ovlx":
-                        db = new Tables.Overlay(this);
-                        break;
-                    case ".prlx":
-                        db = new Tables.PrayerRequests(this);
-                        break;
-                    case ".topx":
-                        db = new Tables.Topic(this);
-                        break;
-                    case ".lstx":
-                        db = new Tables.VerseList(this);
-                        break;
-                    default:
-                        return;
-                }
-                db.DestDB = this.txtDest.Text;
-                db.SourceDB = this.txtSource.Text;
-                Thread t = new Thread(new ThreadStart(db.ConvertFormat));
-                t.Start();
-                Thread w = new Thread(new ThreadStart(WatchStatus));
-                w.Start();
-            }
-            catch (Exception ex) { Error.Record(this, ex); }
+            FileConversionInfo FCI = new FileConversionInfo(this.txtSource.Text, this.txtDest.Text);
+            Controller.FileNames.Add(FCI);
+            Controller.Begin();
+            //try
+            //{
+            //    this.ValidateSource();
+            //    Database db;
+            //    string ext = this.txtDest.Text.Substring(this.txtDest.Text.Length - 5, 5);
+            //    switch (ext)
+            //    {
+            //        case ".bblx":
+            //            db = new Tables.Bible();
+            //            break;
+            //        case ".brpx":
+            //            db = new Tables.BibleReadingPlan();
+            //            break;
+            //        case ".cmtx":
+            //            db = new Tables.Commentary();
+            //            break;
+            //        case ".dctx":
+            //            db = new Tables.Dictionary();
+            //            break;
+            //        case ".devx":
+            //            db = new Tables.Devotion();
+            //            break;
+            //        case ".mapx":
+            //            db = new Tables.Graphic();
+            //            break;
+            //        case ".harx":
+            //            db = new Tables.Harmony();
+            //            break;
+            //        case ".notx":
+            //            db = new Tables.Notes();
+            //            break;
+            //        case ".memx":
+            //            db = new Tables.Memory();
+            //            break;
+            //        case ".ovlx":
+            //            db = new Tables.Overlay();
+            //            break;
+            //        case ".prlx":
+            //            db = new Tables.PrayerRequests();
+            //            break;
+            //        case ".topx":
+            //            db = new Tables.Topic();
+            //            break;
+            //        case ".lstx":
+            //            db = new Tables.VerseList();
+            //            break;
+            //        default:
+            //            return;
+            //    }
+            //    db.DestDB = this.txtDest.Text;
+            //    db.SourceDB = this.txtSource.Text;
+            //    Thread t = new Thread(new ThreadStart(db.ConvertFormat));
+            //    t.Start();
+            //    Thread w = new Thread(new ThreadStart(WatchStatus));
+            //    w.Start();
+            //}
+            //catch (Exception ex) { Error.Record(this, ex); }
         }
 
         private void lnkBatch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

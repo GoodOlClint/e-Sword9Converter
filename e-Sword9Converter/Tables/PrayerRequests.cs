@@ -7,11 +7,9 @@ namespace eSword9Converter.Tables
 {
     public class PrayerRequests : Database
     {
-        public PrayerRequests(IParent Parent)
-            : base(Parent)
+        public PrayerRequests()
         {
             this.Tables.Add("Plan", new Plan());
-            this.Tables["Plan"].Parent = Parent;
         }
         public override void Load(string File)
         {
@@ -21,14 +19,17 @@ namespace eSword9Converter.Tables
                 //Convert Access State DateTime to SQLite Int
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Plan)this.Tables["Plan"]).Rows
                                                                           select Row).ToArray();
-                this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
+                Controller.RaiseStatusChanged(updateStatus.Converting);
+                Controller.SetMaxValue(rows.Count());
+                int count = 0;
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     DateTime epoch = new DateTime(1900, 1, 1);
                     TimeSpan span = new TimeSpan();
                     span = ((Plan)this.Tables["Plan"]).accessStart.Subtract(epoch);
                     ((Plan)this.Tables["Plan"]).Start = span.Days + 1;
-                    this.Parent.UpdateStatus();
+                    count++;
+                    Controller.RaiseProgressChanged(count);
                 }
             }
         }

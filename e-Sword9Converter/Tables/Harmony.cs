@@ -7,15 +7,11 @@ namespace eSword9Converter.Tables
 {
     public class Harmony : Database
     {
-        public Harmony(IParent Parent)
-            : base(Parent)
+        public Harmony()
         {
             this.Tables.Add("Details", new Details());
             this.Tables.Add("Sections", new Sections());
             this.Tables.Add("Parts", new Parts());
-            this.Tables["Details"].Parent = Parent;
-            this.Tables["Sections"].Parent = Parent;
-            this.Tables["Parts"].Parent = Parent;
         }
 
         public override void Load(string File)

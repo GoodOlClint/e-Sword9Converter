@@ -22,17 +22,10 @@ namespace eSword9Converter
         void SaveToDatabase(DbProviderFactory Factory, string connectionString);
         string SQLCreateStatement();
         void Load(DbProviderFactory Factory, string connectionString);
-        IParent Parent { get; set; }
         string TableName { get; set; }
         IDatabase DB { get; set; }
     }
 
-    public interface IParent
-    {
-        bool GetPassword(string path, out string password);
-        void UpdateStatus();
-        void SetMaxValue(int value, updateStatus Status);
-    }
     public interface IDatabase
     {
         string SourceDB { get; set; }

@@ -7,12 +7,10 @@ namespace eSword9Converter.Tables
 {
     public class Bible : Database
     {
-        public Bible(IParent Parent) : base(Parent)
+        public Bible()
         {
             this.Tables.Add("Details", new Details());
             this.Tables.Add("Bible", new BibleTable());
-            this.Tables["Details"].Parent = Parent;
-            this.Tables["Bible"].Parent = Parent;
         }
         public override void Load(string File)
         {
@@ -23,11 +21,14 @@ namespace eSword9Converter.Tables
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
                                                                           where ((string)Row["Scripture"]) == ""
                                                                           select Row).ToArray();
-                this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
+                Controller.RaiseStatusChanged(updateStatus.Converting);
+                Controller.SetMaxValue(rows.Count());
+                int count = 0;
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     ((BibleTable)this.Tables["Bible"]).Rows.Remove(Row);
-                    this.Parent.UpdateStatus();
+                        count++;
+                    Controller.RaiseProgressChanged(count);
                 }
                 ((Details)this.Tables["Details"]).NT = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
                                                                           where ((int)Row["BookID"]) == 66

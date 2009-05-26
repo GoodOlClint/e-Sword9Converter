@@ -7,13 +7,10 @@ namespace eSword9Converter.Tables
 {
     public class Graphic : Database
     {
-        public Graphic(IParent Parent)
-            : base(Parent)
+        public Graphic()
         {
             this.Tables.Add("Details", new Details());
             this.Tables.Add("Graphics", new Graphics());
-            this.Tables["Details"].Parent = Parent;
-            this.Tables["Graphics"].Parent = Parent;
         }
         public override void Load(string File)
         {

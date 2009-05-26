@@ -7,13 +7,10 @@ namespace eSword9Converter.Tables
 {
     public class Devotion : Database
     {
-        public Devotion(IParent Parent)
-            : base(Parent)
+        public Devotion()
         {
             this.Tables.Add("Details", new Details());
             this.Tables.Add("Devotion", new Devotions());
-            this.Tables["Details"].Parent = Parent;
-            this.Tables["Devotion"].Parent = Parent;
         }
 
         [Table("Details")]

@@ -7,17 +7,12 @@ namespace eSword9Converter.Tables
 {
     public class Commentary : Database
     {
-        public Commentary(IParent Parent)
-            : base(Parent)
+        public Commentary()
         {
             this.Tables.Add("Details", new Details());
             this.Tables.Add("Books", new Books());
             this.Tables.Add("Chapters", new Chapters());
             this.Tables.Add("Verses", new Verses());
-            this.Tables["Details"].Parent = Parent;
-            this.Tables["Books"].Parent = Parent;
-            this.Tables["Chapters"].Parent = Parent;
-            this.Tables["Verses"].Parent = Parent;
         }
         public override void Load(string File)
         {
@@ -27,11 +22,14 @@ namespace eSword9Converter.Tables
                 ((Details)this.Tables["Details"]).Version = 2;
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Verses)this.Tables["Verses"]).Rows
                                                                           select Row).ToArray();
-                this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
+                Controller.RaiseStatusChanged(updateStatus.Converting);
+                Controller.SetMaxValue(rows.Count());
+                int count = 0;
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     Row["ChapterEnd"] = Row["ChapterBegin"];
-                    this.Parent.UpdateStatus();
+                    count++;
+                    Controller.RaiseProgressChanged(count);
                 }
             }
         }
@@ -40,13 +38,13 @@ namespace eSword9Converter.Tables
         {
             [Column("Description", DbType.NVARCHAR, 255)]
             public string Description { get { return Convert.ToString(this.Rows[0]["Description"]); } set { this.Rows[0]["Description"] = value; } }
-            
+
             [Column("Abbreviation", DbType.NVARCHAR, 50)]
             public string Abbreviation { get { return Convert.ToString(this.Rows[0]["Abbreviation"]); } set { this.Rows[0]["Abbreviation"] = value; } }
-            
+
             [Column("Comments", DbType.TEXT)]
             public string Comments { get { return Convert.ToString(this.Rows[0]["string"]); } set { this.Rows[0]["Font"] = value; } }
-            
+
             [SqlColumn("Version", DbType.INT)]
             public int Version { get { return Convert.ToInt32(this.Rows[0]["Version"]); } set { this.Rows[0]["Version"] = value; } }
         }

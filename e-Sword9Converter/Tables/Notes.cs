@@ -8,12 +8,10 @@ namespace eSword9Converter.Tables
     public class Notes : Database
     {
         private VerseReferences VerseReferences;
-        public Notes(IParent Parent)
-            : base(Parent)
+        public Notes()
         {
             this.Tables.Add("VerseNotes", new VerseNotes());
             this.VerseReferences = new VerseReferences();
-            this.Tables["VerseNotes"].Parent = Parent;
         }
 
         public override void Load(string Path)
@@ -23,7 +21,9 @@ namespace eSword9Converter.Tables
             {
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((VerseNotes)this.Tables["VerseNotes"]).Rows
                                                                           select Row).ToArray();
-                this.Parent.SetMaxValue(rows.Count(), updateStatus.Converting);
+                Controller.RaiseStatusChanged(updateStatus.Converting);
+                Controller.SetMaxValue(rows.Count());
+                int count = 0;
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     int VerseID = Convert.ToInt32(Row["VerseID"]);
@@ -33,7 +33,8 @@ namespace eSword9Converter.Tables
                     Row["Book"] = reference.Book;
                     Row["Chapter"] = reference.Chapter;
                     Row["Verse"] = (VerseID - reference.StartVerse) + 1;
-                    this.Parent.UpdateStatus();
+                    count++;
+                    Controller.RaiseProgressChanged(count);
                 }
             }
         }
@@ -47,16 +48,16 @@ namespace eSword9Converter.Tables
 
             [AccessColumn("Verse ID", DbType.INT)]
             public int VerseID { get; set; }
-            
+
             [SqlColumn("Book", DbType.INT)]
             public int Book { get; set; }
-            
+
             [SqlColumn("Chapter", DbType.INT)]
             public int Chapter { get; set; }
-            
+
             [SqlColumn("Verse", DbType.INT)]
             public int Verse { get; set; }
-            
+
             [Column("Comments", DbType.TEXT)]
             public string Comments { get; set; }
         }

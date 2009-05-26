@@ -7,11 +7,9 @@ namespace eSword9Converter.Tables
 {
     public class Overlay : Database
     {
-        public Overlay(IParent Parent)
-            : base(Parent)
+        public Overlay()
         {
             this.Tables.Add("Overlay", new OverlayTable());
-            this.Tables["Overlay"].Parent = Parent;
         }
 
         public class OverlayTable : Table<OverlayTable>

@@ -7,13 +7,10 @@ namespace eSword9Converter.Tables
 {
     public class Dictionary : Database
     {
-        public Dictionary(IParent Parent)
-            : base(Parent)
+        public Dictionary()
         {
             this.Tables.Add("Details", new Details());
             this.Tables.Add("Dictionary", new DictionaryTable());
-            this.Tables["Details"].Parent = Parent;
-            this.Tables["Dictionary"].Parent = Parent;
         }
         public override void Load(string File)
         {

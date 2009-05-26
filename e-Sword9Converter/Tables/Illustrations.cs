@@ -7,11 +7,9 @@ namespace eSword9Converter.Tables
 {
     public class Illustration : Database
     {
-        public Illustration(IParent Parent)
-            : base(Parent)
+        public Illustration()
         {
             this.Tables.Add("Illustrations", new Illustrations());
-            this.Tables["Illustrations"].Parent = Parent;
         }
 
         [Table("Illustrations")]
