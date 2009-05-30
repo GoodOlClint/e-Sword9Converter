@@ -1,30 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Data;
 using System.Data.OleDb;
-using System.Windows.Forms;
 using System.IO;
-using System.Collections;
-using System.ComponentModel;
+using System.Text;
 using System.Threading;
+using System.Windows.Forms;
+using System.ComponentModel;
 
 namespace eSword9Converter
 {
     public static class Controller
     {
         public static ThreadSafeCollection<FileConversionInfo> FileNames;
+        public static bool AutomaticallyOverwrite { get; set; }
 
         #region Private Members
         private static ThreadSafeCollection<string> passwords;
         private static frmPassword passwordForm;
         private static object threadLock;
+        private static SynchronizationContext sync;
+        public static Database DB;
+        public static Form CurrentForm;
         #endregion
 
         #region Constructor
         static Controller()
         {
+            sync = SynchronizationContext.Current;
             FileNames = new ThreadSafeCollection<FileConversionInfo>();
             passwords = new ThreadSafeCollection<string>();
             passwordForm = new frmPassword();
@@ -43,62 +45,92 @@ namespace eSword9Converter
         #endregion
 
         #region Events
-        public delegate void StatusChangedEventHandler(updateStatus status);
+        public delegate void StatusChangedEventHandler(object sender, updateStatus status);
         public static event StatusChangedEventHandler StatusChangedEvent;
-        public static void RaiseStatusChanged(updateStatus status) { if (StatusChangedEvent != null) { StatusChangedEvent(status); } SetMaxValue(100); }
+        public static void RaiseStatusChanged(object sender, updateStatus status)
+        {
+            if (StatusChangedEvent != null)
+            { sync.Send(new SendOrPostCallback(delegate { StatusChangedEvent(sender, status); }), null); }
+            SetMaxValue("Controller.RaiseStatusChangedEvent", 100);
+        }
 
-        public delegate void ProgressChangedEventHandler(int count);
+        public delegate void ProgressChangedEventHandler(object sender, int count);
         public static event ProgressChangedEventHandler ProgressChangedEvent;
-        public static void RaiseProgressChanged(int count) { if (ProgressChangedEvent != null) { ProgressChangedEvent(count); } }
+        public static void RaiseProgressChanged(object sender, int count)
+        {
+            if (ProgressChangedEvent != null)
+            { sync.Post(new SendOrPostCallback(delegate { ProgressChangedEvent(sender, count); }), null); }
+        }
 
-        public delegate void MaxValueChangedEventHandler(int value);
+        public delegate void MaxValueChangedEventHandler(object sender, int value);
         public static event MaxValueChangedEventHandler MaxValueChangedEvent;
-        public static void RaiseMaxValueChanged(int value) { if (MaxValueChangedEvent != null) { MaxValueChangedEvent(value); } }
+        public static void RaiseMaxValueChanged(object sender, int value)
+        {
+            if (MaxValueChangedEvent != null)
+            { sync.Send(new SendOrPostCallback(delegate { MaxValueChangedEvent(sender, value); }), null); }
+        }
 
-        public delegate void LogMessageEventHandler(messageType mesageType, string message);
+        public delegate void LogMessageEventHandler(object sender, messageType mesageType, string message);
         public static event LogMessageEventHandler LogMessageEvent;
-        public static void RaiseLogMessage(messageType type, string message) { if (LogMessageEvent != null) { LogMessageEvent(type, message); } }
+        public static void RaiseLogMessage(object sender, messageType type, string message)
+        {
+            if (LogMessageEvent != null)
+            { sync.Send(new SendOrPostCallback(delegate { LogMessageEvent(sender, type, message); }), null); }
+        }
 
-        public delegate string ShowPasswordEventHandler(string path, bool tried);
+        public delegate void ShowPasswordEventHandler(object sender, string path, bool tried, out string pass);
         public static event ShowPasswordEventHandler ShowPasswordBoxEvent;
-        public static string RaiseShowPasswordBox(string path, bool tried) { if (ShowPasswordBoxEvent != null) { return ShowPasswordBoxEvent(path, tried); } else { RaiseLogMessage(messageType.Error, "No Subscribers to GetPasswordEvent"); return ""; } }
+        public static void RaiseShowPasswordBox(object sender, string path, bool tried, out string pass)
+        {
+            if (ShowPasswordBoxEvent != null)
+            {
+                string p = "";
+                sync.Send(new SendOrPostCallback(delegate { ShowPasswordBoxEvent(sender, path, tried, out p); }), null);
+                pass = p;
+            }
+            else
+            { RaiseLogMessage(sender, messageType.Error, "No Subscribers to GetPasswordEvent"); pass = ""; }
+        }
         #endregion
 
         #region Event Handlers
-        private static string Controller_GetPasswordEvent(string path, bool tried)
-        {
-            if (passwordForm.InvokeRequired)
-            {
-                return (string)passwordForm.Invoke(new Controller.ShowPasswordEventHandler(ShowPasswordBox), new object[] { path, tried });
-            }
-            else
-            {
-                return ShowPasswordBox(path, tried);
-            }
-        }
+        private static void Controller_GetPasswordEvent(object sender, string path, bool tried, out string pass)
+        { ShowPasswordBox(sender, path, tried, out pass); }
 
-        private static string ShowPasswordBox(string Path, bool tried)
+        private static void ShowPasswordBox(object sender, string Path, bool tried, out string pass)
         {
+            //passwordForm.Parent = Controller.CurrentForm;
+            Controller.CurrentForm.AddOwnedForm(passwordForm);
             passwordForm.FileName = Path;
             if (tried)
             { passwordForm.Text = Globalization.CurrentLanguage.InvalidPassword; }
             else { passwordForm.Text = Globalization.CurrentLanguage.Password; }
-            passwordForm.TopMost = true;
-            passwordForm.StartPosition = FormStartPosition.CenterScreen;
+            //passwordForm.TopMost = true;
+            //passwordForm.StartPosition = FormStartPosition.CenterScreen;
             passwordForm.Activate();
             if (passwordForm.ShowDialog() == DialogResult.OK)
             {
-                return passwordForm.Password;
+                pass = passwordForm.Password;
             }
             else
             {
-                RaiseLogMessage(messageType.Warning, "Password dialog box closed");
-                return "";
+                RaiseLogMessage(sender, messageType.Warning, "Password dialog box closed");
+                pass = "";
             }
         }
         #endregion
 
-        public static void SetMaxValue(int count) { RaiseMaxValueChanged(count); }
+        public static DialogResult ShowMessageBox(string Message, string Title, MessageBoxButtons Buttons, MessageBoxIcon Icon)
+        {
+            //DialogResult results = DialogResult.None;
+            //SendOrPostCallback spc = new SendOrPostCallback(delegate {results = MessageBox.Show(Message, Title, Buttons, Icon); });
+            //object state = new object();
+            //sync.Send(spc, state);
+            //return results;
+            return MessageBox.Show(Message, Title, Buttons, Icon);
+        }
+
+        public static void SetMaxValue(object sender, int count) { RaiseMaxValueChanged(sender, count); }
 
         public static bool NeedPassword(string filePath)
         {
@@ -131,7 +163,7 @@ namespace eSword9Converter
                 }
                 catch (Exception ex)
                 {
-                    RaiseLogMessage(messageType.Information, ex.ToString());
+                    RaiseLogMessage("Controller.ValidPassword", messageType.Information, ex.ToString());
                     return false;
                 }
             }
@@ -144,25 +176,34 @@ namespace eSword9Converter
         {
             if (ValidPassword(path, password))
             {
-                Error.Log(string.Format(Globalization.CurrentLanguage.PasswordFound, path, password));
+                RaiseLogMessage("Controller.GetPassword", messageType.Information, string.Format(Globalization.CurrentLanguage.PasswordFound, path, password));
                 return password;
             }
             try
             {
                 string pass = "Password";
                 if (passwords.Count == 0)
-                { pass = RaiseShowPasswordBox(path, tried); }
+                {
+                    RaiseShowPasswordBox("Controller.GetPassword", path, tried, out pass);
+                    if (pass == "") { DB.Stop(); return ""; }
+                }
                 else { pass = passwords[passCount]; }
                 return GetPassword(path, tried, passCount + 1, pass);
             }
-            catch (Exception ex) { Error.Record("Converter.GetPassword", ex); return password; }
+            catch (Exception ex) { RaiseLogMessage("Controller.GetPassword", messageType.Error, ex.Message); return password; }
         }
 
         public static void Begin()
         {
+            Thread T = new Thread(new ThreadStart(Controller.Process));
+            T.Start();
+        }
+
+
+        public static void Process()
+        {
             foreach (FileConversionInfo fci in Controller.FileNames)
             {
-                Database DB;
                 switch (fci.OldExtension)
                 {
                     case "bbl":
@@ -205,19 +246,26 @@ namespace eSword9Converter
                         DB = new Tables.VerseList();
                         break;
                     default:
-                        Error.Record("Error!", new Exception());
+                        RaiseLogMessage("Controller.Begin", messageType.Error, new InvalidDataException("Invalid filetype added to collection").Message);
                         return;
                 }
                 DB.SourceDB = fci.OldFullPath;
+                if (File.Exists(fci.NewFullPath) && !AutomaticallyOverwrite)
+                {
+                    if (ShowMessageBox(Globalization.CurrentLanguage.FileExists, "", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+                    {
+                        break;
+                    }
+                }
                 DB.DestDB = fci.NewFullPath;
                 Thread t = new Thread(new ThreadStart(DB.ConvertFormat));
                 t.Start();
                 while (DB.Running)
-                { Application.DoEvents(); }
+                { }//Application.DoEvents(); }
             }
+            Controller.FileNames.Clear();
         }
     }
-
     public class FileConversionInfo
     {
         public string OldDirectory { get; set; }

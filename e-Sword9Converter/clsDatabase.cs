@@ -27,7 +27,7 @@ namespace eSword9Converter
                 this.Load(SourceDB);
                 this.FileName = DestDB;
                 this.Save(DestDB);
-                Controller.RaiseStatusChanged(updateStatus.Finished);
+                Controller.RaiseStatusChanged(this, updateStatus.Finished);
                 running = false;
             }
             catch (Exception ex) { Error.Record(this, ex); }

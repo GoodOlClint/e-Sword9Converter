@@ -60,8 +60,8 @@ namespace eSword9Converter
                 {
                     dbCmd.CommandText = string.Format("SELECT COUNT(*) FROM {0};", Table.TableName);
                     int count = (int)dbCmd.ExecuteScalar();
-                    Controller.RaiseStatusChanged(updateStatus.Loading);
-                    Controller.SetMaxValue(count);
+                    Controller.RaiseStatusChanged(Table, updateStatus.Loading);
+                    Controller.SetMaxValue(Table, count);
                     dbCmd.CommandText = string.Format("SELECT * FROM {0};", Table.TableName);
                     int currentCount = 0;
                     using (DbDataReader reader = dbCmd.ExecuteReader())
@@ -116,7 +116,7 @@ namespace eSword9Converter
                                 {
                                     Table.Rows.Add(Row);
                                     currentCount++;
-                                    Controller.RaiseProgressChanged(currentCount);
+                                    Controller.RaiseProgressChanged(Table, currentCount);
                                 }
                                 catch (Exception ex) { Error.Record(Table, ex); }
                             }
@@ -187,8 +187,8 @@ namespace eSword9Converter
                 {
                     int count = (from ThreadSafeDictionary<string, object> kvp in this.Rows
                                  select kvp).Count();
-                    Controller.RaiseStatusChanged(updateStatus.Saving);
-                    Controller.SetMaxValue(count);
+                    Controller.RaiseStatusChanged(this, updateStatus.Saving);
+                    Controller.SetMaxValue(this, count);
                     string Command = string.Format("INSERT INTO {0} (", TableName);
                     IDictionary<string, IColumn> sqlColumns = (from KeyValuePair<string, IColumn> C in this.Columns
                                                                where C.Value.colType != columnType.Access
@@ -226,7 +226,7 @@ namespace eSword9Converter
                                 dbCmd.ExecuteNonQuery();
                             }
                             catch (Exception ex) { Error.Record(this, ex); }
-                            finally { currentCount++; Controller.RaiseProgressChanged(currentCount); }
+                            finally { currentCount++; Controller.RaiseProgressChanged(this, currentCount); }
                         }
                         dbTrans.Commit();
                     }

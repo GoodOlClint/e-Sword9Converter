@@ -6,7 +6,26 @@ using System.IO;
 namespace eSword9Converter
 {
     public class Error
+    
     {
+        public Error()
+        {
+            Controller.LogMessageEvent += new Controller.LogMessageEventHandler(Controller_LogMessageEvent);
+        }
+
+        void Controller_LogMessageEvent(object sender, messageType mesageType, string message)
+        {
+            switch (mesageType)
+            {
+                case messageType.Error:
+                    Error.Record(sender, new Exception(message));
+                    break;
+                case messageType.Warning:
+                case messageType.Information:
+                    Error.Log(message);
+                    break;
+            }
+        }
         private static object threadLock = new object();
         public static void Record(object sender, Exception ex)
         {

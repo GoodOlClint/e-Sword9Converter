@@ -21,14 +21,14 @@ namespace eSword9Converter.Tables
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
                                                                           where ((string)Row["Scripture"]) == ""
                                                                           select Row).ToArray();
-                Controller.RaiseStatusChanged(updateStatus.Converting);
-                Controller.SetMaxValue(rows.Count());
+                Controller.RaiseStatusChanged(this, updateStatus.Converting);
+                Controller.SetMaxValue(this, rows.Count());
                 int count = 0;
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     ((BibleTable)this.Tables["Bible"]).Rows.Remove(Row);
                         count++;
-                    Controller.RaiseProgressChanged(count);
+                    Controller.RaiseProgressChanged(this, count);
                 }
                 ((Details)this.Tables["Details"]).NT = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
                                                                           where ((int)Row["BookID"]) == 66

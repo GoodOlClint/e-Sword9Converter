@@ -21,41 +21,21 @@ namespace eSword9Converter
             Controller.ProgressChangedEvent += new Controller.ProgressChangedEventHandler(Controller_ProgressChangedEvent);
         }
 
-        void Controller_ProgressChangedEvent(int count)
-        {
-            if (this.prgMain.InvokeRequired)
-            {
-                this.prgMain.Invoke(new Controller.ProgressChangedEventHandler(this.Controller_ProgressChangedEvent), new object[] { count });
-            }
-            else
-            {
-                this.prgMain.Value = count;
-            }
+        void Controller_ProgressChangedEvent(object sender, int count)
+        { this.prgMain.Value = count;
+        FileInfo fi = new FileInfo(Controller.DB.SourceDB);
+        this.Text = string.Format("{0}: {3}% {1} {2}", Globalization.CurrentLanguage.AdvancedTitle, this.CurrentStatus.ToString(), Controller.DB.FileName.Replace(fi.DirectoryName + @"\", ""), (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d));
         }
 
-        void Controller_MaxValueChangedEvent(int value)
+        void Controller_MaxValueChangedEvent(object sender, int value)
+        { this.prgMain.Maximum = value; }
+
+
+        void Controller_StatusChangedEvent(object sender, updateStatus status)
         {
-            if (this.prgMain.InvokeRequired)
-            {
-                this.prgMain.Invoke(new Controller.MaxValueChangedEventHandler(this.Controller_MaxValueChangedEvent), new object[] { value });
-            }
-            else
-            {
-                this.prgMain.Maximum = value;
-            }
+            this.CurrentStatus = status;
         }
 
-        void Controller_StatusChangedEvent(updateStatus status)
-        {
-            if(this.InvokeRequired)
-            {
-                this.Invoke(new Controller.StatusChangedEventHandler(this.Controller_StatusChangedEvent), new object[] { status });
-            }
-            else
-            {
-                this.CurrentStatus = status;
-            }
-        }
 
         private void btnSource_Click(object sender, EventArgs e)
         {
@@ -104,71 +84,16 @@ namespace eSword9Converter
             FileInfo[] files = GetFiles(di, "*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst", ';');
             foreach (FileInfo fi in files)
             {
-                string DestPath = fi.FullName.Replace(ConvertFilePath(fi.FullName), this.txtDest.Text) + "x";
-                if (this.ValidateSource(fi.FullName))
+                if (!fi.Extension.EndsWith("x"))
                 {
-                    if (!this.ValidateDest(DestPath) && !this.chkOverwrite.Checked)
-                    {
-                        if (MessageBox.Show(string.Format("{0} {1} {2}", DestPath, Globalization.CurrentLanguage.FileExists, Globalization.CurrentLanguage.Overwrite), Globalization.CurrentLanguage.FileExists, MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
-                        { break; }
-                    }
-                    string ext = fi.FullName.Substring(fi.FullName.Length - 4, 4);
-                    switch (ext)
-                    {
-                        //case ".bbl":
-                        //    DB = new Tables.Bible(this);
-                        //    break;
-                        //case ".brp":
-                        //    DB = new Tables.BibleReadingPlan(this);
-                        //    break;
-                        //case ".cmt":
-                        //    DB = new Tables.Commentary(this);
-                        //    break;
-                        //case ".dct":
-                        //    DB = new Tables.Dictionary(this);
-                        //    break;
-                        //case ".dev":
-                        //    DB = new Tables.Devotion(this);
-                        //    break;
-                        //case ".map":
-                        //    DB = new Tables.Graphic(this);
-                        //    break;
-                        //case ".har":
-                        //    DB = new Tables.Harmony(this);
-                        //    break;
-                        //case ".not":
-                        //    DB = new Tables.Notes(this);
-                        //    break;
-                        //case ".mem":
-                        //    DB = new Tables.Memory(this);
-                        //    break;
-                        //case ".ovl":
-                        //    DB = new Tables.Overlay(this);
-                        //    break;
-                        //case ".prl":
-                        //    DB = new Tables.PrayerRequests(this);
-                        //    break;
-                        //case ".top":
-                        //    DB = new Tables.Topic(this);
-                        //    break;
-                        //case ".lst":
-                        //    DB = new Tables.VerseList(this);
-                        //    break;
-                        default:
-                            return;
-                    }
-                    //DB.SourceDB = fi.FullName;
-                    //DB.DestDB = DestPath;
-                    //Thread t = new Thread(new ThreadStart(DB.ConvertFormat));
-                    //t.Start();
-                    //Thread w = new Thread(new ThreadStart(WatchStatus));
-                    //w.Start();
-                    //while (DB.Running)
-                    //{ Application.DoEvents(); }
-                    //DB.Clear();
+                    string DestPath = fi.FullName.Replace(ConvertFilePath(fi.FullName), this.txtDest.Text) + "x";
+                    FileConversionInfo fci = new FileConversionInfo(fi.FullName, DestPath);
+                    Controller.FileNames.Add(fci);
                 }
             }
-            this.Text = Globalization.CurrentLanguage.AdvancedTitle + " " + Globalization.CurrentLanguage.Finished;
+            Controller.AutomaticallyOverwrite = this.chkOverwrite.Checked;
+            Controller.Begin();
+            //this.Text = Globalization.CurrentLanguage.AdvancedTitle + " " + Globalization.CurrentLanguage.Finished;
             this.grpDest.Enabled = false;
             this.txtDest.Enabled = true;
             this.btnDest.Enabled = true;
@@ -179,6 +104,7 @@ namespace eSword9Converter
             this.chkSkip.Enabled = true;
             this.chkSubDir.Enabled = true;
             this.lnkNormal.Enabled = true;
+
         }
         private bool ValidateSource(string path)
         {
@@ -208,7 +134,7 @@ namespace eSword9Converter
         void prgMain_MouseHover(object sender, EventArgs e)
         {
             int Percent = (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d);
-            this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% {2}", Percent, Globalization.CurrentLanguage.Completed));
+            this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% {1}", Percent, Globalization.CurrentLanguage.Completed));
         }
 
         private string ConvertFilePath(string OldPath)

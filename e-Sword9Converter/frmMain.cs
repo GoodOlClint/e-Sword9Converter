@@ -26,11 +26,11 @@ namespace eSword9Converter
             Controller.ProgressChangedEvent += new Controller.ProgressChangedEventHandler(Controller_ProgressChangedEvent);
         }
 
-        void Controller_ProgressChangedEvent(int count)
+        void Controller_ProgressChangedEvent(object sender, int count)
         {
             if (this.prgMain.InvokeRequired)
             {
-                this.prgMain.Invoke(new Controller.ProgressChangedEventHandler(this.Controller_ProgressChangedEvent), new object[] { count });
+                this.prgMain.Invoke(new Controller.ProgressChangedEventHandler(this.Controller_ProgressChangedEvent), new object[] { sender, count });
             }
             else
             {
@@ -38,11 +38,11 @@ namespace eSword9Converter
             }
         }
 
-        void Controller_MaxValueChangedEvent(int value)
+        void Controller_MaxValueChangedEvent(object sender, int value)
         {
             if (this.prgMain.InvokeRequired)
             {
-                this.prgMain.Invoke(new Controller.MaxValueChangedEventHandler(this.Controller_MaxValueChangedEvent), new object[] { value });
+                this.prgMain.Invoke(new Controller.MaxValueChangedEventHandler(this.Controller_MaxValueChangedEvent), new object[] { sender, value });
             }
             else
             {
@@ -50,11 +50,11 @@ namespace eSword9Converter
             }
         }
 
-        void Controller_StatusChangedEvent(updateStatus status)
+        void Controller_StatusChangedEvent(object sender, updateStatus status)
         {
             if (this.lblStatus.InvokeRequired)
             {
-                this.lblStatus.Invoke(new Controller.StatusChangedEventHandler(this.Controller_StatusChangedEvent), new object[] { status });
+                this.lblStatus.Invoke(new Controller.StatusChangedEventHandler(this.Controller_StatusChangedEvent), new object[] { sender, status });
             }
             else
             {
@@ -118,64 +118,9 @@ namespace eSword9Converter
         {
             FileConversionInfo FCI = new FileConversionInfo(this.txtSource.Text, this.txtDest.Text);
             Controller.FileNames.Add(FCI);
+            Controller.CurrentForm = this;
+            Controller.AutomaticallyOverwrite = true;
             Controller.Begin();
-            //try
-            //{
-            //    this.ValidateSource();
-            //    Database db;
-            //    string ext = this.txtDest.Text.Substring(this.txtDest.Text.Length - 5, 5);
-            //    switch (ext)
-            //    {
-            //        case ".bblx":
-            //            db = new Tables.Bible();
-            //            break;
-            //        case ".brpx":
-            //            db = new Tables.BibleReadingPlan();
-            //            break;
-            //        case ".cmtx":
-            //            db = new Tables.Commentary();
-            //            break;
-            //        case ".dctx":
-            //            db = new Tables.Dictionary();
-            //            break;
-            //        case ".devx":
-            //            db = new Tables.Devotion();
-            //            break;
-            //        case ".mapx":
-            //            db = new Tables.Graphic();
-            //            break;
-            //        case ".harx":
-            //            db = new Tables.Harmony();
-            //            break;
-            //        case ".notx":
-            //            db = new Tables.Notes();
-            //            break;
-            //        case ".memx":
-            //            db = new Tables.Memory();
-            //            break;
-            //        case ".ovlx":
-            //            db = new Tables.Overlay();
-            //            break;
-            //        case ".prlx":
-            //            db = new Tables.PrayerRequests();
-            //            break;
-            //        case ".topx":
-            //            db = new Tables.Topic();
-            //            break;
-            //        case ".lstx":
-            //            db = new Tables.VerseList();
-            //            break;
-            //        default:
-            //            return;
-            //    }
-            //    db.DestDB = this.txtDest.Text;
-            //    db.SourceDB = this.txtSource.Text;
-            //    Thread t = new Thread(new ThreadStart(db.ConvertFormat));
-            //    t.Start();
-            //    Thread w = new Thread(new ThreadStart(WatchStatus));
-            //    w.Start();
-            //}
-            //catch (Exception ex) { Error.Record(this, ex); }
         }
 
         private void lnkBatch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -185,93 +130,6 @@ namespace eSword9Converter
         }
         #endregion
 
-        public bool GetPassword(string path, out string password)
-        {
-            try
-            {
-                password = "";
-                if (this.InvokeRequired)
-                {
-                    object[] args = new object[] { path, password };
-                    bool ret = (bool)this.Invoke(new GetPasswordDelegate(this.GetPassword), args);
-                    password = (string)args[1];
-                    return ret;
-                }
-                else
-                {
-                    return this.GetPassword(path, false, out password);
-                }
-            }
-            catch (Exception ex) { Error.Record(this, ex); password = ""; return false; }
-        }
-
-        public static void OpenDatabase(string Path, string password)
-        {
-            OleDbConnection odbcCon = new OleDbConnection();
-            string str = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source={file};".Replace("{file}", Path);
-            str = str + "Jet OLEDB:Database Password=\"" + password + "\";";
-            odbcCon.ConnectionString = str;
-            odbcCon.Open();
-            odbcCon.Close();
-            odbcCon.Dispose();
-        }
-
-        private bool GetPassword(string path, bool tried, out string password) { return this.GetPassword(path, tried, 0, out password); }
-        private bool GetPassword(string path, bool tried, int passCount, out string password) { return this.GetPassword(path, tried, passCount, "", out password); }
-        private bool GetPassword(string path, bool tried, int passCount, string password, out string outPassword)
-        {
-
-            try
-            {
-                OpenDatabase(path, password);
-                Error.Log(string.Format(Globalization.CurrentLanguage.PasswordFound, path, password));
-                outPassword = password;
-                return true;
-            }
-            catch
-            {
-                try
-                {
-                    if (tried)
-                    { passwordForm.Text = Globalization.CurrentLanguage.InvalidPassword; }
-                    else { passwordForm.Text = Globalization.CurrentLanguage.Password; }
-                    string pass = "Password";
-                    if (!System.IO.File.Exists("Passwords.txt"))
-                    {
-                        if (passwordForm.ShowDialog() == DialogResult.OK)
-                        {
-                            pass = passwordForm.Password;
-                            tried = true;
-                        }
-                        else { outPassword = ""; return false; }
-                    }
-                    else
-                    {
-                        StreamReader SR = new StreamReader("Passwords.txt", Encoding.Default);
-                        ArrayList passList = new ArrayList();
-                        while (!SR.EndOfStream)
-                        {
-                            passList.Add(SR.ReadLine());
-                        }
-                        if (passCount >= passList.ToArray().Length)
-                        {
-                            if (passwordForm.ShowDialog() == DialogResult.OK)
-                            {
-                                pass = passwordForm.Password;
-                                tried = true;
-                            }
-                            else { outPassword = ""; return false; }
-                        }
-                        else
-                        {
-                            pass = (string)passList.ToArray()[passCount];
-                        }
-                    }
-                    return GetPassword(path, tried, passCount + 1, pass, out outPassword);
-                }
-                catch (Exception ex) { Error.Record(this, ex); outPassword = password; return false; }
-            }
-        }
 
         #region IParent Members
         private delegate void SetMaxValueDelegate(int value, updateStatus Status);

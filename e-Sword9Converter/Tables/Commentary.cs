@@ -22,14 +22,14 @@ namespace eSword9Converter.Tables
                 ((Details)this.Tables["Details"]).Version = 2;
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Verses)this.Tables["Verses"]).Rows
                                                                           select Row).ToArray();
-                Controller.RaiseStatusChanged(updateStatus.Converting);
-                Controller.SetMaxValue(rows.Count());
+                Controller.RaiseStatusChanged(this, updateStatus.Converting);
+                Controller.SetMaxValue(this, rows.Count());
                 int count = 0;
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     Row["ChapterEnd"] = Row["ChapterBegin"];
                     count++;
-                    Controller.RaiseProgressChanged(count);
+                    Controller.RaiseProgressChanged(this, count);
                 }
             }
         }

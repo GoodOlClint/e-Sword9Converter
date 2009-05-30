@@ -19,8 +19,8 @@ namespace eSword9Converter.Tables
                 //Convert Access State DateTime to SQLite Int
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Plan)this.Tables["Plan"]).Rows
                                                                           select Row).ToArray();
-                Controller.RaiseStatusChanged(updateStatus.Converting);
-                Controller.SetMaxValue(rows.Count());
+                Controller.RaiseStatusChanged(this, updateStatus.Converting);
+                Controller.SetMaxValue(this, rows.Count());
                 int count = 0;
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
@@ -29,7 +29,7 @@ namespace eSword9Converter.Tables
                     span = ((Plan)this.Tables["Plan"]).accessStart.Subtract(epoch);
                     ((Plan)this.Tables["Plan"]).Start = span.Days + 1;
                     count++;
-                    Controller.RaiseProgressChanged(count);
+                    Controller.RaiseProgressChanged(this, count);
                 }
             }
         }

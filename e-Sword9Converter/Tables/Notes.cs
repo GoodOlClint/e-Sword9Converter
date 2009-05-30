@@ -21,8 +21,8 @@ namespace eSword9Converter.Tables
             {
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((VerseNotes)this.Tables["VerseNotes"]).Rows
                                                                           select Row).ToArray();
-                Controller.RaiseStatusChanged(updateStatus.Converting);
-                Controller.SetMaxValue(rows.Count());
+                Controller.RaiseStatusChanged(this, updateStatus.Converting);
+                Controller.SetMaxValue(this, rows.Count());
                 int count = 0;
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
@@ -34,7 +34,7 @@ namespace eSword9Converter.Tables
                     Row["Chapter"] = reference.Chapter;
                     Row["Verse"] = (VerseID - reference.StartVerse) + 1;
                     count++;
-                    Controller.RaiseProgressChanged(count);
+                    Controller.RaiseProgressChanged(this, count);
                 }
             }
         }
