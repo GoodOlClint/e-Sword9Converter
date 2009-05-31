@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using ICSharpCode.SharpZipLib.Checksums;
-using ICSharpCode.SharpZipLib.Zip;
-using System.IO;
-using System.ComponentModel;
-using System.Reflection;
 using System.Diagnostics;
+using System.IO;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace BuildZip
 {
@@ -19,12 +15,12 @@ namespace BuildZip
                 string fileName = args[0];
                 List<string> filesToZip = new List<string>();
                 for (int i = 1; i <= args.Length - 1; i++)
-                {
-                    filesToZip.Add(args[i]);
-                }
-                //Crc32 crc32 = new Crc32();
+                { filesToZip.Add(args[i]); }
+
                 FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(filesToZip[0]);
-                fileName = fileName + "-" + fvi.FileVersion + ".zip";
+                string version = "{0}.{1}.{2}.{3}";
+                version = string.Format(version, fvi.FileMajorPart, fvi.FileMinorPart, fvi.FileBuildPart, fvi.FilePrivatePart);
+                fileName = fileName + "-" + version + ".zip";
 
                 // 'using' statements gaurantee the stream is closed properly which is a big source
                 // of problems otherwise.  Its exception safe as well which is great.
@@ -70,15 +66,10 @@ namespace BuildZip
                     // Close is important to wrap things up and unlock the file.
                     s.Close();
                 }
+                Console.WriteLine("Created zip {0}", fileName);
             }
             catch (Exception ex)
             { Console.WriteLine(ex.Message); }
-        }
-
-        private static void CompressZip(string sPath)
-        {
-
-            Console.WriteLine("Done!!");
         }
     }
 }
