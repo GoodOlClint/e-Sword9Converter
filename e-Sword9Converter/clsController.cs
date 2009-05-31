@@ -30,24 +30,27 @@ namespace eSword9Converter
         #region Constructor
         static Controller()
         {
-
-            FileNames = new ThreadSafeCollection<FileConversionInfo>();
-            passwords = new ThreadSafeCollection<string>();
-            passwordForm = new frmPassword();
-            MainForm = new frmMain();
-            threadLock = new object();
-            sync = SynchronizationContext.Current;
-            ShowPasswordBoxEvent += new ShowPasswordEventHandler(Controller_GetPasswordEvent);
-            if (System.IO.File.Exists("Passwords.txt"))
+            try
             {
-                StreamReader SR = new StreamReader("Passwords.txt", Encoding.Default);
-                List<string> passList = new List<string>();
-                while (!SR.EndOfStream)
+                FileNames = new ThreadSafeCollection<FileConversionInfo>();
+                passwords = new ThreadSafeCollection<string>();
+                passwordForm = new frmPassword();
+                MainForm = new frmMain();
+                threadLock = new object();
+                sync = SynchronizationContext.Current;
+                ShowPasswordBoxEvent += new ShowPasswordEventHandler(Controller_GetPasswordEvent);
+                if (System.IO.File.Exists("Passwords.txt"))
                 {
-                    passwords.Add(SR.ReadLine());
+                    StreamReader SR = new StreamReader("Passwords.txt", Encoding.Default);
+                    List<string> passList = new List<string>();
+                    while (!SR.EndOfStream)
+                    {
+                        passwords.Add(SR.ReadLine());
+                    }
                 }
+                MainForm.FormClosed += new FormClosedEventHandler(SubForm_FormClosed);
             }
-            MainForm.FormClosed += new FormClosedEventHandler(SubForm_FormClosed);
+            catch (Exception ex) { Error.Record("Controller.new", ex); }
         }
         #endregion
 
@@ -151,8 +154,13 @@ namespace eSword9Converter
 
         public static void Initalize()
         {
-            MainForm.Show();
-            CurrentForm = MainForm;
+            try
+            {
+                MainForm.Show();
+                CurrentForm = MainForm;
+            }
+            catch (Exception ex)
+            { Error.Record("Controller.Initalize", ex); }
         }
 
         private static bool switching;
@@ -250,77 +258,86 @@ namespace eSword9Converter
 
         public static void Begin()
         {
-            Thread T = new Thread(new ThreadStart(Controller.Process));
-            T.Start();
-            //Process();
+            try
+            {
+                Thread T = new Thread(new ThreadStart(Controller.Process));
+                T.Start();
+            }
+            catch (Exception ex) { RaiseLogMessage("Controller.Begin", messageType.Error, ex.Message); }
         }
 
 
         public static void Process()
         {
-            foreach (FileConversionInfo fci in Controller.FileNames)
+            try
             {
-                switch (fci.OldExtension)
+                foreach (FileConversionInfo fci in Controller.FileNames)
                 {
-                    case "bbl":
-                        DB = new Tables.Bible();
-                        break;
-                    case "brp":
-                        DB = new Tables.BibleReadingPlan();
-                        break;
-                    case "cmt":
-                        DB = new Tables.Commentary();
-                        break;
-                    case "dct":
-                        DB = new Tables.Dictionary();
-                        break;
-                    case "dev":
-                        DB = new Tables.Devotion();
-                        break;
-                    case "map":
-                        DB = new Tables.Graphic();
-                        break;
-                    case "har":
-                        DB = new Tables.Harmony();
-                        break;
-                    case "not":
-                        DB = new Tables.Notes();
-                        break;
-                    case "mem":
-                        DB = new Tables.Memory();
-                        break;
-                    case "ovl":
-                        DB = new Tables.Overlay();
-                        break;
-                    case "prl":
-                        DB = new Tables.PrayerRequests();
-                        break;
-                    case "top":
-                        DB = new Tables.Topic();
-                        break;
-                    case "lst":
-                        DB = new Tables.VerseList();
-                        break;
-                    default:
-                        RaiseLogMessage("Controller.Begin", messageType.Error, new InvalidDataException("Invalid filetype added to collection").Message);
-                        return;
-                }
-                DB.SourceDB = fci.OldFullPath;
-                bool needPassword = NeedPassword(fci.OldFullPath);
-                if ((needPassword && !SkipPassword) || !needPassword)
-                {
-                    if ((File.Exists(fci.NewFullPath) && AutomaticallyOverwrite) || (File.Exists(fci.NewFullPath) && (ShowMessageBox(string.Format(Globalization.CurrentLanguage.Overwrite, fci.NewFullPath), Globalization.CurrentLanguage.FileExists, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)))
+                    switch (fci.OldExtension)
                     {
-                        DB.DestDB = fci.NewFullPath;
-                        DB.ConvertFormat();
-                        DB.Clear();
+                        case "bbl":
+                            DB = new Tables.Bible();
+                            break;
+                        case "brp":
+                            DB = new Tables.BibleReadingPlan();
+                            break;
+                        case "cmt":
+                            DB = new Tables.Commentary();
+                            break;
+                        case "dct":
+                            DB = new Tables.Dictionary();
+                            break;
+                        case "dev":
+                            DB = new Tables.Devotion();
+                            break;
+                        case "map":
+                            DB = new Tables.Graphic();
+                            break;
+                        case "har":
+                            DB = new Tables.Harmony();
+                            break;
+                        case "not":
+                            DB = new Tables.Notes();
+                            break;
+                        case "mem":
+                            DB = new Tables.Memory();
+                            break;
+                        case "ovl":
+                            DB = new Tables.Overlay();
+                            break;
+                        case "prl":
+                            DB = new Tables.PrayerRequests();
+                            break;
+                        case "top":
+                            DB = new Tables.Topic();
+                            break;
+                        case "lst":
+                            DB = new Tables.VerseList();
+                            break;
+                        default:
+                            RaiseLogMessage("Controller.Begin", messageType.Error, new InvalidDataException("Invalid filetype added to collection").Message);
+                            return;
                     }
+                    DB.SourceDB = fci.OldFullPath;
+                    bool needPassword = NeedPassword(fci.OldFullPath);
+                    if ((needPassword && !SkipPassword) || !needPassword)
+                    {
+                        bool exist = File.Exists(fci.NewFullPath);
+                        if ((!exist) || (exist && AutomaticallyOverwrite) || (exist && (ShowMessageBox(string.Format(Globalization.CurrentLanguage.Overwrite, fci.NewFullPath), Globalization.CurrentLanguage.FileExists, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)))
+                        {
+                            DB.DestDB = fci.NewFullPath;
+                            DB.ConvertFormat();
+                            DB.Clear();
+                        }
+                    }
+                    if (Stop)
+                        break;
                 }
-                if (Stop)
-                    break;
+                Controller.FileNames.Clear();
+                RaiseConversionFinished();
             }
-            Controller.FileNames.Clear();
-            RaiseConversionFinished();
+            catch (Exception ex)
+            { RaiseLogMessage("Controller.Process", messageType.Error, ex.Message); }
         }
     }
     public class FileConversionInfo
@@ -335,21 +352,25 @@ namespace eSword9Converter
         public string NewExtension { get; set; }
         public FileConversionInfo(string oldPath, string newPath)
         {
-            this.OldFullPath = oldPath;
-            this.NewFullPath = newPath;
-            string[] oldpath = oldPath.Split('\\');
-            string[] newpath = newPath.Split('\\');
-            this.OldFileName = oldpath[oldpath.Length - 1];
-            this.NewFileName = newpath[newpath.Length - 1];
-            for (int i = 0; i <= oldpath.Length - 2; i++)
-            { this.OldDirectory += oldpath[i] + @"\"; }
-            for (int i = 0; i <= newpath.Length - 2; i++)
-            { this.NewDirectory += newpath[i] + @"\"; }
-            oldpath = oldPath.Split('.');
-            newpath = newPath.Split('.');
-            this.OldExtension = oldpath[oldpath.Length - 1];
-            this.NewExtension = newpath[newpath.Length - 1];
-
+            try
+            {
+                this.OldFullPath = oldPath;
+                this.NewFullPath = newPath;
+                string[] oldpath = oldPath.Split('\\');
+                string[] newpath = newPath.Split('\\');
+                this.OldFileName = oldpath[oldpath.Length - 1];
+                this.NewFileName = newpath[newpath.Length - 1];
+                for (int i = 0; i <= oldpath.Length - 2; i++)
+                { this.OldDirectory += oldpath[i] + @"\"; }
+                for (int i = 0; i <= newpath.Length - 2; i++)
+                { this.NewDirectory += newpath[i] + @"\"; }
+                oldpath = oldPath.Split('.');
+                newpath = newPath.Split('.');
+                this.OldExtension = oldpath[oldpath.Length - 1];
+                this.NewExtension = newpath[newpath.Length - 1];
+            }
+            catch (Exception ex)
+            { Controller.RaiseLogMessage("FileConversionInfo.New", messageType.Error, ex.Message); }
         }
     }
 }

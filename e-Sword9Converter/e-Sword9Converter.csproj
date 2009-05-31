@@ -30,6 +30,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -200,5 +201,6 @@
   -->
   <PropertyGroup>
     <PostBuildEvent>"$(SolutionDir)BuildZip\bin\$(ConfigurationName)\BuildZip.exe" $(ConfigurationName) "$(TargetPath)" "$(TargetPath).config" "$(TargetDir)System.Data.SQLite.dll"</PostBuildEvent>
+    <PreBuildEvent>"C:\Program Files\Versioning Controlled Build\AutoVer.exe" /V:* /A:M "$(SolutionPath)" *.*.*.+</PreBuildEvent>
   </PropertyGroup>
 </Project>

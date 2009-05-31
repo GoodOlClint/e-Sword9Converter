@@ -9,13 +9,18 @@ namespace eSword9Converter
         #region Constructor
         public frmMain()
         {
-            InitializeComponent();
-            this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
-            Controller.StatusChangedEvent += new Controller.StatusChangedEventHandler(Controller_StatusChangedEvent);
-            Controller.MaxValueChangedEvent += new Controller.MaxValueChangedEventHandler(Controller_MaxValueChangedEvent);
-            Controller.ProgressChangedEvent += new Controller.ProgressChangedEventHandler(Controller_ProgressChangedEvent);
-            Controller.LanguageChangedEvent += new Controller.LanguageChangedEventHandler(Controller_LanguageChangedEvent);
-            Controller.ConversionFinishedEvent += new Controller.ConversionFinishedEventHandler(Controller_ConversionFinishedEvent);
+            try
+            {
+                InitializeComponent();
+                this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
+                Controller.StatusChangedEvent += new Controller.StatusChangedEventHandler(Controller_StatusChangedEvent);
+                Controller.MaxValueChangedEvent += new Controller.MaxValueChangedEventHandler(Controller_MaxValueChangedEvent);
+                Controller.ProgressChangedEvent += new Controller.ProgressChangedEventHandler(Controller_ProgressChangedEvent);
+                Controller.LanguageChangedEvent += new Controller.LanguageChangedEventHandler(Controller_LanguageChangedEvent);
+                Controller.ConversionFinishedEvent += new Controller.ConversionFinishedEventHandler(Controller_ConversionFinishedEvent);
+            }
+            catch (Exception ex)
+            { Error.Record(this, ex); }
         }
 
         #endregion
@@ -24,66 +29,95 @@ namespace eSword9Converter
 
         void Controller_ConversionFinishedEvent()
         {
-            this.grpDest.Enabled = false;
-            this.txtDest.Text = "";
-            this.txtSource.Text = "";
-            this.lblStatus.Text = Globalization.CurrentLanguage.Finished;
-            this.btnConvert.Enabled = false;
-            this.prgMain.Value = 0;
-            this.prgMain.Maximum = 100;
-            MessageBox.Show(Globalization.CurrentLanguage.FinishedConverting);
+            try
+            {
+                this.grpDest.Enabled = false;
+                this.txtDest.Text = "";
+                this.txtSource.Text = "";
+                this.lblStatus.Text = Globalization.CurrentLanguage.Finished;
+                this.btnConvert.Enabled = false;
+                this.prgMain.Value = 0;
+                this.prgMain.Maximum = 100;
+                MessageBox.Show(Globalization.CurrentLanguage.FinishedConverting);
+            }
+            catch (Exception ex)
+            { Error.Record(this, ex); }
         }
 
 
         void Controller_LanguageChangedEvent()
         {
-            this.Text = Globalization.CurrentLanguage.MainTitle;
-            this.grpDest.Text = Globalization.CurrentLanguage.ConvertedFile;
-            this.grpSource.Text = Globalization.CurrentLanguage.FileToConvert;
-            this.btnConvert.Text = Globalization.CurrentLanguage.Convert;
-            this.btnDest.Text = Globalization.CurrentLanguage.Destination;
-            this.btnSource.Text = Globalization.CurrentLanguage.Source;
-            this.lnkBatch.Text = Globalization.CurrentLanguage.BatchMode;
+            try
+            {
+                this.Text = Globalization.CurrentLanguage.MainTitle;
+                this.grpDest.Text = Globalization.CurrentLanguage.ConvertedFile;
+                this.grpSource.Text = Globalization.CurrentLanguage.FileToConvert;
+                this.btnConvert.Text = Globalization.CurrentLanguage.Convert;
+                this.btnDest.Text = Globalization.CurrentLanguage.Destination;
+                this.btnSource.Text = Globalization.CurrentLanguage.Source;
+                this.lnkBatch.Text = Globalization.CurrentLanguage.BatchMode;
+            }
+            catch (Exception ex)
+            { Error.Record(this, ex); }
         }
 
         void Controller_ProgressChangedEvent(object sender, int count)
         {
-            if (this.prgMain.InvokeRequired)
+            try
             {
-                this.prgMain.Invoke(new Controller.ProgressChangedEventHandler(this.Controller_ProgressChangedEvent), new object[] { sender, count });
+                if (this.prgMain.InvokeRequired)
+                {
+                    this.prgMain.Invoke(new Controller.ProgressChangedEventHandler(this.Controller_ProgressChangedEvent), new object[] { sender, count });
+                }
+                else
+                {
+                    this.prgMain.Value = count;
+                }
             }
-            else
-            {
-                this.prgMain.Value = count;
-            }
+            catch (Exception ex)
+            { Error.Record(this, ex); }
         }
 
         void Controller_MaxValueChangedEvent(object sender, int value)
         {
-            if (this.prgMain.InvokeRequired)
+            try
             {
-                this.prgMain.Invoke(new Controller.MaxValueChangedEventHandler(this.Controller_MaxValueChangedEvent), new object[] { sender, value });
+                if (this.prgMain.InvokeRequired)
+                {
+                    this.prgMain.Invoke(new Controller.MaxValueChangedEventHandler(this.Controller_MaxValueChangedEvent), new object[] { sender, value });
+                }
+                else
+                {
+                    this.prgMain.Maximum = value;
+                }
             }
-            else
-            {
-                this.prgMain.Maximum = value;
-            }
+            catch (Exception ex)
+            { Error.Record(this, ex); }
         }
 
         void Controller_StatusChangedEvent(object sender, updateStatus status)
         {
-            if (this.lblStatus.InvokeRequired)
+            try
             {
-                this.lblStatus.Invoke(new Controller.StatusChangedEventHandler(this.Controller_StatusChangedEvent), new object[] { sender, status });
+                if (this.lblStatus.InvokeRequired)
+                {
+                    this.lblStatus.Invoke(new Controller.StatusChangedEventHandler(this.Controller_StatusChangedEvent), new object[] { sender, status });
+                }
+                else
+                {
+                    this.lblStatus.Text = status.ToString();
+                }
             }
-            else
-            {
-                this.lblStatus.Text = status.ToString();
-            }
+            catch (Exception ex)
+            { Error.Record(this, ex); }
         }
 
         void lnkNormal_Click(object sender, EventArgs e)
-        { Controller.SwitchForms(); }
+        {
+            try { Controller.SwitchForms(); }
+            catch (Exception ex)
+            { Error.Record(this, ex); }
+        }
 
         void prgMain_MouseHover(object sender, EventArgs e)
         {
@@ -97,19 +131,29 @@ namespace eSword9Converter
 
         private void btnSource_Click(object sender, EventArgs e)
         {
-            if (this.ofdSource.ShowDialog() == DialogResult.OK)
+            try
             {
-                this.txtSource.Text = this.ofdSource.FileName;
-                this.ValidateSource();
+                if (this.ofdSource.ShowDialog() == DialogResult.OK)
+                {
+                    this.txtSource.Text = this.ofdSource.FileName;
+                    this.ValidateSource();
+                }
             }
+            catch (Exception ex)
+            { Error.Record(this, ex); }
         }
         private void btnConvert_Click(object sender, EventArgs e)
         {
-            FileConversionInfo FCI = new FileConversionInfo(this.txtSource.Text, this.txtDest.Text);
-            Controller.FileNames.Add(FCI);
-            Controller.CurrentForm = this;
-            Controller.AutomaticallyOverwrite = true;
-            Controller.Begin();
+            try
+            {
+                FileConversionInfo FCI = new FileConversionInfo(this.txtSource.Text, this.txtDest.Text);
+                Controller.FileNames.Add(FCI);
+                Controller.CurrentForm = this;
+                Controller.AutomaticallyOverwrite = true;
+                Controller.Begin();
+            }
+            catch (Exception ex)
+            { Error.Record(this, ex); }
         }
 
         private void lnkBatch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)

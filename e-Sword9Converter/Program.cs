@@ -20,6 +20,7 @@ namespace eSword9Converter
             Application.SetCompatibleTextRenderingDefault(false);
             Globalization.CurrentLanguage.Initalize();
             Controller.Initalize();
+            Error.Initalize();
             Application.Run();
         }
     }
