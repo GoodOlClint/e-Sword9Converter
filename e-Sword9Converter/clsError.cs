@@ -5,15 +5,12 @@ using System.Text;
 using System.IO;
 namespace eSword9Converter
 {
-    public class Error
-    
+    public static class Error
     {
-        public Error()
-        {
-            Controller.LogMessageEvent += new Controller.LogMessageEventHandler(Controller_LogMessageEvent);
-        }
+        public static void Initalize()
+        { Controller.LogMessageEvent += new Controller.LogMessageEventHandler(Controller_LogMessageEvent); }
 
-        void Controller_LogMessageEvent(object sender, messageType mesageType, string message)
+        public static void Controller_LogMessageEvent(object sender, messageType mesageType, string message)
         {
             switch (mesageType)
             {
@@ -26,12 +23,14 @@ namespace eSword9Converter
                     break;
             }
         }
+
         private static object threadLock = new object();
+
         public static void Record(object sender, Exception ex)
         {
             lock (threadLock)
             {
-                using (StreamWriter sw = new StreamWriter("e-Sword9Converter.log"))
+                using (StreamWriter sw = new StreamWriter("e-Sword9Converter.log", true))
                 {
                     try
                     { sw.WriteLine(string.Format("Error: {0} {1}", ((Database)sender).DestDB, ex.Message)); }
@@ -40,11 +39,12 @@ namespace eSword9Converter
                 }
             }
         }
+
         public static void Log(string message)
         {
             lock (threadLock)
             {
-                using (StreamWriter sw = new StreamWriter("e-Sword9Converter.log"))
+                using (StreamWriter sw = new StreamWriter("e-Sword9Converter.log", true))
                 { sw.WriteLine("Warning: " + message); }
             }
         }
