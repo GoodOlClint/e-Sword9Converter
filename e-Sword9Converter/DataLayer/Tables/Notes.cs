@@ -5,21 +5,21 @@ using System.Text;
 
 namespace eSword9Converter.Tables
 {
-    public class VerseList : Database
+    public class Notes : Database
     {
         private VerseReferences VerseReferences;
-        public VerseList()
+        public Notes()
         {
-            this.Tables.Add("Verses", new Verses());
+            this.Tables.Add("VerseNotes", new VerseNotes());
             this.VerseReferences = new VerseReferences();
         }
 
         public override void Load(string Path)
         {
             base.Load(Path);
-            if (!skip)
+            if (!Skip)
             {
-                IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Verses)this.Tables["Verses"]).Rows
+                IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((VerseNotes)this.Tables["VerseNotes"]).Rows
                                                                           select Row).ToArray();
                 Controller.RaiseStatusChanged(this, updateStatus.Converting);
                 Controller.SetMaxValue(this, rows.Count());
@@ -39,30 +39,27 @@ namespace eSword9Converter.Tables
             }
         }
 
-        [Table("Verses")]
-        public class Verses : Table<Verses>
+        [AccessTable("[Verse Notes]")]
+        [SqlTable("Verse")]
+        public class VerseNotes : Table<VerseNotes>
         {
             [AccessColumn("ID", DbType.INT)]
             public int ID { get; set; }
-            
+
             [AccessColumn("Verse ID", DbType.INT)]
             public int VerseID { get; set; }
-            
+
             [SqlColumn("Book", DbType.INT)]
-            [Index("BookChapterVerseIndex")]
             public int Book { get; set; }
-            
+
             [SqlColumn("Chapter", DbType.INT)]
-            [Index("BookChapterVerseIndex")]
             public int Chapter { get; set; }
-            
+
             [SqlColumn("Verse", DbType.INT)]
-            [Index("BookChapterVerseIndex")]
             public int Verse { get; set; }
-            
-            [AccessColumn("Order", DbType.INT)]
-            [SqlColumn("Position", DbType.INT)]
-            public int Order { get; set; }
+
+            [Column("Comments", DbType.TEXT)]
+            public string Comments { get; set; }
         }
     }
 }

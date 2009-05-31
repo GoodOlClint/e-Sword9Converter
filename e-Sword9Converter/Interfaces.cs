@@ -33,5 +33,6 @@ namespace eSword9Converter
         string FileName { get; set; }
         void Stop();
         bool Running { get; set; }
+        bool Skip { get; set; }
     }
 }

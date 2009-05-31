@@ -16,19 +16,11 @@ namespace eSword9Converter
         [STAThread]
         static void Main(string[] Args)
         {
-            switch (CultureInfo.CurrentUICulture.Name.Remove(2, 3))
-            {
-                case "es":
-                    Globalization.CurrentLanguage = new Globalization.Spanish();
-                    break;
-                default:
-                    Globalization.CurrentLanguage = new Globalization.English();
-                    break;
-            }
-
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmMain());
+            Globalization.CurrentLanguage.Initalize();
+            Controller.Initalize();
+            Application.Run();
         }
     }
 }

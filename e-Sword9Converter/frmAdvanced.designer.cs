@@ -58,6 +58,7 @@
             this.lnkNormal.TabIndex = 12;
             this.lnkNormal.TabStop = true;
             this.lnkNormal.Text = "Normal";
+            this.lnkNormal.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkNormal_LinkClicked);
             // 
             // btnDest
             // 
@@ -199,7 +200,6 @@
             this.Name = "frmAdvanced";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "e-Sword 9 Converter: Batch Mode";
-            this.Load += new System.EventHandler(this.frmAdvanced_Load);
             this.grpDest.ResumeLayout(false);
             this.grpDest.PerformLayout();
             this.grpSource.ResumeLayout(false);

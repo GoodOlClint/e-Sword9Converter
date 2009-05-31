@@ -74,6 +74,8 @@ namespace eSword9Converter
                                 ThreadSafeDictionary<string, object> Row = new ThreadSafeDictionary<string, object>();
                                 foreach (KeyValuePair<string, IColumn> Pair in (from KeyValuePair<string, IColumn> c in Table.Columns where c.Value.colType != columnType.Sql select c))
                                 {
+                                    if (Db.Skip)
+                                    { break; }
                                     IColumn Column = Pair.Value;
                                     //PropertyInfo Prop = Table.GetType().GetProperty(Column.PropertyName);
                                     try
@@ -108,12 +110,14 @@ namespace eSword9Converter
                                     {
                                         //Build useful error message
                                         //string msg = string.Format("{0}\t{1}\tRow:{2}\tColumn:{3}\tType:{4}\tValue:{5}\tMessage:{6}", Db.FileName, Table.TableName, Table.Rows.Count, Column.Name, Column.Type, Convert.ToString(reader[Column.Name]), ex.Message);
-                                        string msg = string.Format(Globalization.CurrentLanguage.sqlErrorString, Db.FileName, Table.TableName, Table.Rows.Count, Column.Name, Column.Type, Convert.ToString(reader[Column.Name]), ex.Message);
+                                        string msg = string.Format(Globalization.CurrentLanguage.SqlErrorString, Db.FileName, Table.TableName, Table.Rows.Count, Column.Name, Column.Type, Convert.ToString(reader[Column.Name]), ex.Message);
                                         Error.Record(Table, new SQLiteException(msg));
                                     }
                                 }
                                 try
                                 {
+                                    if (Db.Skip)
+                                    { break; }
                                     Table.Rows.Add(Row);
                                     currentCount++;
                                     Controller.RaiseProgressChanged(Table, currentCount);

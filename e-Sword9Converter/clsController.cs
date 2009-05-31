@@ -13,24 +13,30 @@ namespace eSword9Converter
     {
         public static ThreadSafeCollection<FileConversionInfo> FileNames;
         public static bool AutomaticallyOverwrite { get; set; }
+        public static bool SkipPassword { get; set; }
+        public static Database DB { get; set; }
+        public static Form CurrentForm { get; set; }
 
         #region Private Members
         private static ThreadSafeCollection<string> passwords;
-        private static frmPassword passwordForm;
         private static object threadLock;
         private static SynchronizationContext sync;
-        public static Database DB;
-        public static Form CurrentForm;
+        private static frmMain MainForm;
+        private static frmAdvanced AdvancedForm;
+        private static frmPassword passwordForm;
+        private static bool Stop;
         #endregion
 
         #region Constructor
         static Controller()
         {
-            sync = SynchronizationContext.Current;
+
             FileNames = new ThreadSafeCollection<FileConversionInfo>();
             passwords = new ThreadSafeCollection<string>();
             passwordForm = new frmPassword();
+            MainForm = new frmMain();
             threadLock = new object();
+            sync = SynchronizationContext.Current;
             ShowPasswordBoxEvent += new ShowPasswordEventHandler(Controller_GetPasswordEvent);
             if (System.IO.File.Exists("Passwords.txt"))
             {
@@ -41,10 +47,19 @@ namespace eSword9Converter
                     passwords.Add(SR.ReadLine());
                 }
             }
+            MainForm.FormClosed += new FormClosedEventHandler(SubForm_FormClosed);
         }
         #endregion
 
         #region Events
+        public delegate void LanguageChangedEventHandler();
+        public static event LanguageChangedEventHandler LanguageChangedEvent;
+        public static void RaiseLanguageChanged()
+        {
+            if (LanguageChangedEvent != null)
+            { sync.Send(new SendOrPostCallback(delegate { LanguageChangedEvent(); }), null); }
+        }
+
         public delegate void StatusChangedEventHandler(object sender, updateStatus status);
         public static event StatusChangedEventHandler StatusChangedEvent;
         public static void RaiseStatusChanged(object sender, updateStatus status)
@@ -59,7 +74,7 @@ namespace eSword9Converter
         public static void RaiseProgressChanged(object sender, int count)
         {
             if (ProgressChangedEvent != null)
-            { sync.Post(new SendOrPostCallback(delegate { ProgressChangedEvent(sender, count); }), null); }
+            { sync.Send(new SendOrPostCallback(delegate { ProgressChangedEvent(sender, count); }), null); }
         }
 
         public delegate void MaxValueChangedEventHandler(object sender, int value);
@@ -91,22 +106,36 @@ namespace eSword9Converter
             else
             { RaiseLogMessage(sender, messageType.Error, "No Subscribers to GetPasswordEvent"); pass = ""; }
         }
+
+        public delegate void ConversionFinishedEventHandler();
+        public static event ConversionFinishedEventHandler ConversionFinishedEvent;
+        public static void RaiseConversionFinished()
+        {
+            if (ConversionFinishedEvent != null)
+            { sync.Send(new SendOrPostCallback(delegate { ConversionFinishedEvent(); }), null); }
+        }
         #endregion
 
         #region Event Handlers
+
+        static void SubForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            if (DB != null)
+                DB.Stop();
+            if (!switching)
+            { Stop = true; Application.Exit(); }
+        }
+
         private static void Controller_GetPasswordEvent(object sender, string path, bool tried, out string pass)
         { ShowPasswordBox(sender, path, tried, out pass); }
 
         private static void ShowPasswordBox(object sender, string Path, bool tried, out string pass)
         {
-            //passwordForm.Parent = Controller.CurrentForm;
             Controller.CurrentForm.AddOwnedForm(passwordForm);
             passwordForm.FileName = Path;
             if (tried)
             { passwordForm.Text = Globalization.CurrentLanguage.InvalidPassword; }
             else { passwordForm.Text = Globalization.CurrentLanguage.Password; }
-            //passwordForm.TopMost = true;
-            //passwordForm.StartPosition = FormStartPosition.CenterScreen;
             passwordForm.Activate();
             if (passwordForm.ShowDialog() == DialogResult.OK)
             {
@@ -120,15 +149,40 @@ namespace eSword9Converter
         }
         #endregion
 
-        public static DialogResult ShowMessageBox(string Message, string Title, MessageBoxButtons Buttons, MessageBoxIcon Icon)
+        public static void Initalize()
         {
-            //DialogResult results = DialogResult.None;
-            //SendOrPostCallback spc = new SendOrPostCallback(delegate {results = MessageBox.Show(Message, Title, Buttons, Icon); });
-            //object state = new object();
-            //sync.Send(spc, state);
-            //return results;
-            return MessageBox.Show(Message, Title, Buttons, Icon);
+            MainForm.Show();
+            CurrentForm = MainForm;
         }
+
+        private static bool switching;
+        public static void SwitchForms()
+        {
+            switching = true;
+            try
+            {
+                if (CurrentForm == MainForm)
+                {
+                    AdvancedForm = new frmAdvanced();
+                    AdvancedForm.FormClosed += new FormClosedEventHandler(SubForm_FormClosed);
+                    MainForm.Close();
+                    AdvancedForm.Show();
+                    CurrentForm = AdvancedForm;
+                }
+                else
+                {
+                    MainForm = new frmMain();
+                    MainForm.FormClosed += new FormClosedEventHandler(SubForm_FormClosed);
+                    AdvancedForm.Close();
+                    MainForm.Show();
+                    CurrentForm = MainForm;
+                }
+            }
+            finally { switching = false; }
+        }
+
+        public static DialogResult ShowMessageBox(string Message, string Title, MessageBoxButtons Buttons, MessageBoxIcon Icon)
+        { return MessageBox.Show(Message, Title, Buttons, Icon); }
 
         public static void SetMaxValue(object sender, int count) { RaiseMaxValueChanged(sender, count); }
 
@@ -174,6 +228,7 @@ namespace eSword9Converter
         private static string GetPassword(string path, bool tried, int passCount) { return GetPassword(path, tried, passCount, ""); }
         private static string GetPassword(string path, bool tried, int passCount, string password)
         {
+            if (SkipPassword) { return ""; }
             if (ValidPassword(path, password))
             {
                 RaiseLogMessage("Controller.GetPassword", messageType.Information, string.Format(Globalization.CurrentLanguage.PasswordFound, path, password));
@@ -188,7 +243,7 @@ namespace eSword9Converter
                     if (pass == "") { DB.Stop(); return ""; }
                 }
                 else { pass = passwords[passCount]; }
-                return GetPassword(path, tried, passCount + 1, pass);
+                return GetPassword(path, true, passCount + 1, pass);
             }
             catch (Exception ex) { RaiseLogMessage("Controller.GetPassword", messageType.Error, ex.Message); return password; }
         }
@@ -197,6 +252,7 @@ namespace eSword9Converter
         {
             Thread T = new Thread(new ThreadStart(Controller.Process));
             T.Start();
+            //Process();
         }
 
 
@@ -250,20 +306,21 @@ namespace eSword9Converter
                         return;
                 }
                 DB.SourceDB = fci.OldFullPath;
-                if (File.Exists(fci.NewFullPath) && !AutomaticallyOverwrite)
+                bool needPassword = NeedPassword(fci.OldFullPath);
+                if ((needPassword && !SkipPassword) || !needPassword)
                 {
-                    if (ShowMessageBox(Globalization.CurrentLanguage.FileExists, "", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
+                    if ((File.Exists(fci.NewFullPath) && AutomaticallyOverwrite) || (File.Exists(fci.NewFullPath) && (ShowMessageBox(string.Format(Globalization.CurrentLanguage.Overwrite, fci.NewFullPath), Globalization.CurrentLanguage.FileExists, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)))
                     {
-                        break;
+                        DB.DestDB = fci.NewFullPath;
+                        DB.ConvertFormat();
+                        DB.Clear();
                     }
                 }
-                DB.DestDB = fci.NewFullPath;
-                Thread t = new Thread(new ThreadStart(DB.ConvertFormat));
-                t.Start();
-                while (DB.Running)
-                { }//Application.DoEvents(); }
+                if (Stop)
+                    break;
             }
             Controller.FileNames.Clear();
+            RaiseConversionFinished();
         }
     }
     public class FileConversionInfo
@@ -283,7 +340,7 @@ namespace eSword9Converter
             string[] oldpath = oldPath.Split('\\');
             string[] newpath = newPath.Split('\\');
             this.OldFileName = oldpath[oldpath.Length - 1];
-            this.NewFileName = newpath[oldpath.Length - 1];
+            this.NewFileName = newpath[newpath.Length - 1];
             for (int i = 0; i <= oldpath.Length - 2; i++)
             { this.OldDirectory += oldpath[i] + @"\"; }
             for (int i = 0; i <= newpath.Length - 2; i++)

@@ -5,26 +5,23 @@ using System.Text;
 
 namespace eSword9Converter.Tables
 {
-    public class Harmony : Database
+    public class Graphic : Database
     {
-        public Harmony()
+        public Graphic()
         {
             this.Tables.Add("Details", new Details());
-            this.Tables.Add("Sections", new Sections());
-            this.Tables.Add("Parts", new Parts());
+            this.Tables.Add("Graphics", new Graphics());
         }
-
         public override void Load(string File)
         {
             base.Load(File);
-            if (!skip)
+            if (!Skip)
             { ((Details)this.Tables["Details"]).Version = 2; }
         }
-
         [Table("Details")]
         public class Details : Table<Details>
         {
-            [Column("Description", DbType.NVARCHAR, 255)]
+            [Column("Description", DbType.NVARCHAR, 250)]
             public string Description { get { return Convert.ToString(this.Rows[0]["Description"]); } set { this.Rows[0]["Description"] = value; } }
 
             [Column("Abbreviation", DbType.NVARCHAR, 50)]
@@ -37,34 +34,20 @@ namespace eSword9Converter.Tables
             public int Version { get { return Convert.ToInt32(this.Rows[0]["Version"]); } set { this.Rows[0]["Version"] = value; } }
         }
 
-        [Table("Sections")]
-        public class Sections : Table<Sections>
-        {
-            [Column("ID", DbType.INT)]
-            public int ID { get; set; }
-
-            [Column("Title", DbType.NVARCHAR, 255)]
-            public string Comments { get; set; }
-        }
-
-        [SqlTable("Parts")]
-        [AccessTable("Harmony")]
-        public class Parts : Table<Parts>
+        [Table("Graphics")]
+        public class Graphics : Table<Graphics>
         {
             [AccessColumn("ID", DbType.INT)]
             public int ID { get; set; }
 
-            [AccessColumn("Section ID", DbType.INT)]
-            [SqlColumn("Section", DbType.INT)]
-            [Index("SectionPartIndex")]
-            public int SectionID { get; set; }
+            [Column("Title", DbType.NVARCHAR, 100)]
+            public string Title { get; set; }
 
-            [Column("Part", DbType.INT)]
-            [Index("SectionPartIndex")]
-            public int Part { get; set; }
+            [Column("Details", DbType.TEXT)]
+            public string Details { get; set; }
 
-            [Column("Reference", DbType.TEXT)]
-            public string Reference { get; set; }
+            [Column("Picture", DbType.BLOB)]
+            public object Picture { get; set; }
         }
     }
 }

@@ -17,7 +17,7 @@ namespace eSword9Converter.Tables
         public override void Load(string File)
         {
             base.Load(File);
-            if (!skip)
+            if (!Skip)
             {
                 ((Details)this.Tables["Details"]).Version = 2;
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Verses)this.Tables["Verses"]).Rows

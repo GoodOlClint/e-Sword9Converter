@@ -14,7 +14,7 @@ namespace eSword9Converter.Tables
         public override void Load(string File)
         {
             base.Load(File);
-            if (!this.skip)
+            if (!this.Skip)
             {
                 //Convert Access State DateTime to SQLite Int
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((Plan)this.Tables["Plan"]).Rows

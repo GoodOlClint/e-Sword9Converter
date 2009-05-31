@@ -9,8 +9,26 @@ namespace eSword9Converter
         {
             InitializeComponent();
             this.txtPassword.KeyDown += new KeyEventHandler(txtPassword_KeyDown);
+            Controller.LanguageChangedEvent += new Controller.LanguageChangedEventHandler(Controller_LanguageChangedEvent);
         }
-        public string FileName { get { return this.lblFile.Text; } set { this.lblFile.Text = value; } }
+
+        void Controller_LanguageChangedEvent()
+        {
+            this.Text = Globalization.CurrentLanguage.Password;
+            this.btnCancel.Text = Globalization.CurrentLanguage.Cancel;
+            this.btnOk.Text = Globalization.CurrentLanguage.Ok;
+        }
+
+        public string FileName
+        {
+            get { return this.lblFile.Text; }
+            set
+            {
+                string oldPath = value;
+                string[] oldpath = oldPath.Split('\\');
+                this.lblFile.Text = oldpath[oldpath.Length - 1];
+            }
+        }
 
         void txtPassword_KeyDown(object sender, KeyEventArgs e)
         {
@@ -29,12 +47,5 @@ namespace eSword9Converter
         }
 
         public string Password { get { return this.txtPassword.Text; } }
-
-        private void frmPassword_Load(object sender, EventArgs e)
-        {
-            this.Text = Globalization.CurrentLanguage.Password;
-            this.btnCancel.Text = Globalization.CurrentLanguage.Cancel;
-            this.btnOk.Text = Globalization.CurrentLanguage.Ok;
-        }
     }
 }

@@ -15,6 +15,7 @@
     <TargetFrameworkSubset>
     </TargetFrameworkSubset>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -27,7 +28,6 @@
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -72,19 +72,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes.cs" />
-    <Compile Include="clsDatabase.cs" />
+    <Compile Include="DataLayer\Attributes.cs" />
+    <Compile Include="DataLayer\clsDatabase.cs" />
     <Compile Include="clsError.cs" />
     <Compile Include="clsGlobalization.cs" />
     <Compile Include="clsController.cs" />
-    <Compile Include="clsTable.cs" />
+    <Compile Include="DataLayer\clsTable.cs" />
     <Compile Include="clsThreadSafeCollection.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="clsThreadSafeDictionary.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="DbFactories.cs" />
+    <Compile Include="DataLayer\DbFactories.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="frmMain.cs">
       <SubType>Form</SubType>
@@ -115,10 +115,10 @@
       <DependentUpon>frmAdvanced.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="frmPassword.resx">
+    <Resource Include="frmPassword.resx">
       <DependentUpon>frmPassword.cs</DependentUpon>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
+    </Resource>
     <None Include="App.config" />
     <None Include="app.manifest" />
     <None Include="Properties\Settings.settings">
@@ -130,26 +130,31 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="Tables\Bible.cs" />
-    <Compile Include="Tables\Commentary.cs" />
-    <Compile Include="Tables\BibleReadingPlan.cs" />
-    <Compile Include="Tables\Devotions.cs" />
-    <Compile Include="Tables\Illustrations.cs" />
-    <Compile Include="Tables\Memory.cs" />
-    <Compile Include="Tables\Notes.cs" />
-    <Compile Include="Tables\Overlay.cs" />
-    <Compile Include="Tables\PrayerRequests.cs" />
-    <Compile Include="Tables\Topics.cs" />
-    <Compile Include="Tables\Graphics.cs" />
-    <Compile Include="Tables\Harmony.cs" />
-    <Compile Include="Tables\Dictionary.cs" />
-    <Compile Include="Tables\VerseList.cs" />
-    <Compile Include="VerseReferences.cs" />
+    <Compile Include="DataLayer\Tables\Bible.cs" />
+    <Compile Include="DataLayer\Tables\Commentary.cs" />
+    <Compile Include="DataLayer\Tables\BibleReadingPlan.cs" />
+    <Compile Include="DataLayer\Tables\Devotions.cs" />
+    <Compile Include="DataLayer\Tables\Illustrations.cs" />
+    <Compile Include="DataLayer\Tables\Memory.cs" />
+    <Compile Include="DataLayer\Tables\Notes.cs" />
+    <Compile Include="DataLayer\Tables\Overlay.cs" />
+    <Compile Include="DataLayer\Tables\PrayerRequests.cs" />
+    <Compile Include="DataLayer\Tables\Topics.cs" />
+    <Compile Include="DataLayer\Tables\Graphics.cs" />
+    <Compile Include="DataLayer\Tables\Harmony.cs" />
+    <Compile Include="DataLayer\Tables\Dictionary.cs" />
+    <Compile Include="DataLayer\Tables\VerseList.cs" />
+    <Compile Include="DataLayer\VerseReferences.cs" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{3259AA49-8AA1-44D3-9025-A0B520596A8C}" />
   </ItemGroup>
   <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
       <Visible>False</Visible>
       <ProductName>.NET Framework 2.0 %28x86%29</ProductName>
@@ -165,11 +170,22 @@
       <ProductName>.NET Framework 3.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
       <Visible>False</Visible>
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Strings\en.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Strings\es.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

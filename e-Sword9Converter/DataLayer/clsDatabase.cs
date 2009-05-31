@@ -12,22 +12,27 @@ namespace eSword9Converter
         public string SourceDB { get; set; }
         public string DestDB { get; set; }
         public string FileName { get; set; }
-        public void Stop() { skip = true; }
+        public void Stop() { Skip = true; }
         public bool Running { get { lock (threadLock) { return this.running; } } set { lock (threadLock) { this.running = value; } } }
         private object threadLock = new object();
-        protected bool skip;
+        public bool Skip { get; set; }
         private bool running;
         public void ConvertFormat()
         {
             try
             {
-                skip = false;
+                Skip = false;
                 running = true;
+                string[] path = DestDB.Split('\\');
+                this.FileName = path[path.Length - 1];
                 this.FileName = SourceDB;
                 this.Load(SourceDB);
-                this.FileName = DestDB;
+                //this.FileName = DestDB;
+                path = DestDB.Split('\\');
+                this.FileName = path[path.Length - 1];
                 this.Save(DestDB);
-                Controller.RaiseStatusChanged(this, updateStatus.Finished);
+                if (!Skip)
+                    Controller.RaiseStatusChanged(this, updateStatus.Finished);
                 running = false;
             }
             catch (Exception ex) { Error.Record(this, ex); }
@@ -42,7 +47,7 @@ namespace eSword9Converter
 
         public virtual void Save(string Path)
         {
-            if (!skip)
+            if (!Skip)
             {
                 if (File.Exists(Path))
                     File.Delete(Path);
@@ -76,9 +81,9 @@ namespace eSword9Converter
             {
                 string pass = Controller.GetPassword(Path);
                 SourceConnectionString += "Jet OLEDB:Database Password=\"" + pass + "\";";
-                skip = (pass == "");
+                Skip = (pass == "");
             }
-            if (!skip)
+            if (!Skip)
             {
                 foreach (KeyValuePair<string, ITable> Table in this.Tables)
                 {
