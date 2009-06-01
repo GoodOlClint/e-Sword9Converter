@@ -1,23 +1,29 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
+using System.Diagnostics;
+using eSword9Converter.Globalization;
 
 namespace eSword9Converter
 {
     public partial class frmMain : Form
     {
+
         #region Constructor
         public frmMain()
         {
             try
             {
+                Debug.WriteLine("Initializing frmMain");
                 InitializeComponent();
+                Debug.WriteLine("Registering event handlers");
                 this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
                 Controller.StatusChangedEvent += new Controller.StatusChangedEventHandler(Controller_StatusChangedEvent);
                 Controller.MaxValueChangedEvent += new Controller.MaxValueChangedEventHandler(Controller_MaxValueChangedEvent);
                 Controller.ProgressChangedEvent += new Controller.ProgressChangedEventHandler(Controller_ProgressChangedEvent);
                 Controller.LanguageChangedEvent += new Controller.LanguageChangedEventHandler(Controller_LanguageChangedEvent);
                 Controller.ConversionFinishedEvent += new Controller.ConversionFinishedEventHandler(Controller_ConversionFinishedEvent);
+                Debug.WriteLine("==Finished==");
             }
             catch (Exception ex)
             { Error.Record(this, ex); }
@@ -71,6 +77,7 @@ namespace eSword9Converter
                 }
                 else
                 {
+                    Debug.WriteLine("frmMain.prgMain.Value set to: " + count);
                     this.prgMain.Value = count;
                 }
             }
@@ -88,6 +95,7 @@ namespace eSword9Converter
                 }
                 else
                 {
+                    Debug.WriteLine("frmMain.prgMain.Maximum set to: " + value);
                     this.prgMain.Maximum = value;
                 }
             }
@@ -105,6 +113,7 @@ namespace eSword9Converter
                 }
                 else
                 {
+                    Debug.WriteLine("frmMain.lblStatus.Text set to: " + status.ToString());
                     this.lblStatus.Text = status.ToString();
                 }
             }
@@ -112,15 +121,9 @@ namespace eSword9Converter
             { Error.Record(this, ex); }
         }
 
-        void lnkNormal_Click(object sender, EventArgs e)
-        {
-            try { Controller.SwitchForms(); }
-            catch (Exception ex)
-            { Error.Record(this, ex); }
-        }
-
         void prgMain_MouseHover(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmMain.prgMain hovered");
             try
             {
                 int Percent = (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d);
@@ -131,6 +134,7 @@ namespace eSword9Converter
 
         private void btnSource_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmMain.btnSource clicked");
             try
             {
                 if (this.ofdSource.ShowDialog() == DialogResult.OK)
@@ -144,6 +148,7 @@ namespace eSword9Converter
         }
         private void btnConvert_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmMain.btnConvert clicked");
             try
             {
                 FileConversionInfo FCI = new FileConversionInfo(this.txtSource.Text, this.txtDest.Text);
@@ -157,16 +162,21 @@ namespace eSword9Converter
         }
 
         private void lnkBatch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        { Controller.SwitchForms(); }
+        {
+            Debug.WriteLine("frmMain.lnkBatch clicked");
+            Controller.SwitchForms();
+        }
 
         private void btnDest_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmMain.btnDest clicked");
             try
             {
                 if (this.ofdDest.ShowDialog() == DialogResult.OK)
                 {
                     this.txtDest.Text = this.ofdDest.FileName;
-                    ValidateDestination(true);
+                    this.prgMain.Enabled = true;
+                    this.btnConvert.Enabled = true;
                 }
             }
             catch (Exception ex) { Error.Record(this, ex); }
@@ -199,46 +209,46 @@ namespace eSword9Converter
             try
             {
                 FileInfo fi = new FileInfo(path);
-                switch (fi.Extension)
+                switch (fi.Extension.ToLower())
                 {
                     case ".bbl":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.bblx", Globalization.CurrentLanguage.eSword, Globalization.CurrentLanguage.Bible);
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.bblx", CurrentLanguage.eSword, CurrentLanguage.Bible);
                         break;
                     case ".brp":
-                        this.ofdDest.Filter = "e-Sword Bible Reading Plan|*.brpx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.brpx", CurrentLanguage.eSword, CurrentLanguage.BibleReadingPlan);
                         break;
                     case ".cmt":
-                        this.ofdDest.Filter = "e-Sword Commentary|*.cmtx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.cmtx", CurrentLanguage.eSword, CurrentLanguage.Commentary);
                         break;
                     case ".dct":
-                        this.ofdDest.Filter = "e-Sword Dictionary|*.dctx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.dctx", CurrentLanguage.eSword, CurrentLanguage.Dictionary);
                         break;
                     case ".dev":
-                        this.ofdDest.Filter = "e-Sword Devotional|*.devx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.devx", CurrentLanguage.eSword, CurrentLanguage.Devotional);
                         break;
                     case ".map":
-                        this.ofdDest.Filter = "e-Sword Graphics|*.mapx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.mapx", CurrentLanguage.eSword, CurrentLanguage.Graphics);
                         break;
                     case ".har":
-                        this.ofdDest.Filter = "e-Sword Gospel Harmony|*.harx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.harx", CurrentLanguage.eSword, CurrentLanguage.Harmony);
                         break;
                     case ".not":
-                        this.ofdDest.Filter = "e-Sword Notes|*.notx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.notx", CurrentLanguage.eSword, CurrentLanguage.Notes);
                         break;
                     case ".mem":
-                        this.ofdDest.Filter = "e-Sword Memory Verses|*.memx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.memx", CurrentLanguage.eSword, CurrentLanguage.MemoryVerses);
                         break;
                     case ".ovl":
-                        this.ofdDest.Filter = "e-Sword Overlay|*.ovlx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.ovlx", CurrentLanguage.eSword, CurrentLanguage.Overlay);
                         break;
                     case ".prl":
-                        this.ofdDest.Filter = "e-Sword Prayer Requests|*.prlx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.prlx", CurrentLanguage.eSword, CurrentLanguage.PrayerRequests);
                         break;
                     case ".top":
-                        this.ofdDest.Filter = "e-Sword Topic|*.topx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.topx", CurrentLanguage.eSword, CurrentLanguage.TopicNotes);
                         break;
                     case ".lst":
-                        this.ofdDest.Filter = "e-Sword Verse List|*.lstx";
+                        this.ofdDest.Filter = string.Format("{0} {1}|*.lstx", CurrentLanguage.eSword, CurrentLanguage.VerseLists);
                         break;
                     default:
                         return false;
@@ -266,7 +276,7 @@ namespace eSword9Converter
             try
             {
                 FileInfo fi = new FileInfo(path);
-                switch (fi.Extension)
+                switch (fi.Extension.ToLower())
                 {
                     case ".bblx":
                     case ".brpx":
@@ -289,25 +299,25 @@ namespace eSword9Converter
             catch (Exception ex) { Error.Record(this, ex); return false; }
         }
 
-        private void ValidateDestination()
-        { this.ValidateDestination(false); }
+        //private void ValidateDestination()
+        //{ this.ValidateDestination(false); }
 
-        private void ValidateDestination(bool ofd)
-        {
-            try
-            {
-                if (!ofd && File.Exists(this.txtDest.Text))
-                {
-                    this.txtDest.Text = "";
-                    this.prgMain.Enabled = false;
-                    this.btnConvert.Enabled = false;
-                    return;
-                }
-                this.prgMain.Enabled = true;
-                this.btnConvert.Enabled = true;
-            }
-            catch (Exception ex) { Error.Record(this, ex); }
-        }
+        //private void ValidateDestination(bool ofd)
+        //{
+        //    try
+        //    {
+        //        if (!ofd && File.Exists(this.txtDest.Text))
+        //        {
+        //            this.txtDest.Text = "";
+        //            this.prgMain.Enabled = false;
+        //            this.btnConvert.Enabled = false;
+        //            return;
+        //        }
+        //        this.prgMain.Enabled = true;
+        //        this.btnConvert.Enabled = true;
+        //    }
+        //    catch (Exception ex) { Error.Record(this, ex); }
+        //}
 
 
 

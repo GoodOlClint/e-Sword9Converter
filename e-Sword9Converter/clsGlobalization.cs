@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Globalization;
 using System.Linq;
+using System.Diagnostics;
 
 namespace eSword9Converter.Globalization
 {
@@ -75,50 +76,61 @@ namespace eSword9Converter.Globalization
         public static string SqlErrorString { get { return "{0}\t{1}\t" + Row + ":{2}\t" + Column + ":{3}\t" + Type + ":{4}\t" + Value + ":{5}\t" + Message + ":{6}"; } }
         public static void Initalize()
         {
+            Debug.WriteLine("Globalization initalization started");
             Strings = new ThreadSafeDictionary<string, string>();
-            string currentLanguage = CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
-            Stream stream = typeof(CurrentLanguage).Assembly.GetManifestResourceStream("eSword9Converter.Strings." + currentLanguage + ".txt");
-            if (stream != null)
-            { LoadLanguage(stream); }
-            else
+            string fileStream = "eSword9Converter.Strings." + CultureInfo.CurrentCulture.TwoLetterISOLanguageName + ".txt";
+            Debug.WriteLine("Attempting to load localized strings from " + fileStream);
+            Stream stream = typeof(CurrentLanguage).Assembly.GetManifestResourceStream(fileStream);
+
+            if (stream == null)
             {
                 stream = typeof(CurrentLanguage).Assembly.GetManifestResourceStream("eSword9Converter.Strings.en.txt");
-                LoadLanguage(stream);
+                Debug.WriteLine("Loading of " + fileStream + "failed. Falling back on eSword9Converter.Strings.en.txt");
             }
+
+            LoadLanguage(stream);
             stream.Close();
             stream.Dispose();
         }
-        static CurrentLanguage() { Initalize(); }
+
         static void LoadLanguage(Stream FileStream)
         {
             using (StreamReader SR = new StreamReader(FileStream, System.Text.Encoding.Default))
             {
+                Debug.WriteLine("Reading FileStream one line at a time");
                 while (!SR.EndOfStream)
                 {
                     string[] dct = Regex.Split(SR.ReadLine(), ":=");
                     Strings[dct[0]] = dct[1];
+
                 }
+                Debug.WriteLine("Finished");
                 SR.Close();
             }
             Regex searchTerm = new Regex(@"\\r\\n");
             var query = from KeyValuePair<string, string> kvp in Strings.ToArray()
                         where searchTerm.Matches(kvp.Value).Count > 0
                         select kvp;
+            Debug.WriteLineIf(query.Count() > 0, "Creating " + query.Count() + " new lines");
             foreach (KeyValuePair<string, string> kvp in query)
             {
                 Strings[kvp.Key] = searchTerm.Replace(kvp.Value, "\r\n");
             }
+            Debug.WriteLineIf(query.Count() > 0, "Finished");
             searchTerm = new Regex(@"\$\{(.+)\}");
             query = from KeyValuePair<string, string> kvp in Strings.ToArray()
                     where searchTerm.Matches(kvp.Value).Count > 0
                     select kvp;
+            Debug.WriteLineIf(query.Count() > 0, "Transforming " + query.Count() + " strings");
             foreach (KeyValuePair<string, string> kvp in query)
             {
                 Match match = searchTerm.Match(kvp.Value);
-                Strings[kvp.Key] = ParseString(kvp.Value);//kvp.Value.Replace(match.Groups[0].Value, Strings[match.Groups[1].Value]);
+                Strings[kvp.Key] = ParseString(kvp.Value);
             }
+            Debug.WriteLineIf(query.Count() > 0, "Finished");
             Controller.RaiseLanguageChanged();
         }
+
         static string ParseString(string inString)
         {
             Regex searchTerm = new Regex(@"\$\{(.+)\}");

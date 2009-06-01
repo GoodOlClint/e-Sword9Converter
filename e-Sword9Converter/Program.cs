@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Windows.Forms;
-using System.Reflection;
-using System.Reflection.Emit;
-using Microsoft.VisualBasic.ApplicationServices;
-using System.Threading;
-using System.Globalization;
+using eSword9Converter.Globalization;
+
 namespace eSword9Converter
 {
     static class Program
@@ -16,11 +13,13 @@ namespace eSword9Converter
         [STAThread]
         static void Main(string[] Args)
         {
+#if DEBUG
+            Process proc = Process.GetCurrentProcess();
+            Debug.WriteLine(string.Format("Application {0} started on computer {1} with process ID of ", proc.ProcessName, proc.MachineName, proc.Id));
+#endif
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Globalization.CurrentLanguage.Initalize();
             Controller.Initalize();
-            Error.Initalize();
             Application.Run();
         }
     }

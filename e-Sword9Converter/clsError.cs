@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Diagnostics;
+
 namespace eSword9Converter
 {
-    public class Error
-    
+    public static class Error
     {
-        public Error()
+        public static void Initalize()
         {
             Controller.LogMessageEvent += new Controller.LogMessageEventHandler(Controller_LogMessageEvent);
         }
 
-        void Controller_LogMessageEvent(object sender, messageType mesageType, string message)
+        static void Controller_LogMessageEvent(object sender, messageType mesageType, string message)
         {
             switch (mesageType)
             {
@@ -29,6 +30,7 @@ namespace eSword9Converter
         private static object threadLock = new object();
         public static void Record(object sender, Exception ex)
         {
+            Debug.WriteLine("Recording error: " + ex.Message);
             lock (threadLock)
             {
                 using (StreamWriter sw = new StreamWriter("e-Sword9Converter.log"))
@@ -42,6 +44,7 @@ namespace eSword9Converter
         }
         public static void Log(string message)
         {
+            Debug.WriteLine("Loging message: " + message);
             lock (threadLock)
             {
                 using (StreamWriter sw = new StreamWriter("e-Sword9Converter.log"))
