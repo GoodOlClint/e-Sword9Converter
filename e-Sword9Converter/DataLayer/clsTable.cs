@@ -4,16 +4,20 @@ using System.Data.Common;
 using System.Data.SQLite;
 using System.Linq;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace eSword9Converter
 {
-    public abstract class Table<T> : ITable where T : Table<T>, new()
+    public abstract class Table<T> : ITable, IDisposable where T : Table<T>, new()
     {
         public ThreadSafeDictionary<string, IColumn> Columns = new ThreadSafeDictionary<string, IColumn>();
         public ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>> Indexes = new ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>();
         public ThreadSafeCollection<ThreadSafeDictionary<string, object>> Rows = new ThreadSafeCollection<ThreadSafeDictionary<string, object>>();
         public string TableName { get; set; }
         public IDatabase DB { get; set; }
+
+        private bool stop;
+        
         #region Constructor
         public Table()
         {
@@ -47,8 +51,10 @@ namespace eSword9Converter
                     }
                 }
             }
+            this.disposed = false;
         }
         #endregion
+        
         public static T LoadFromDatabase(DbProviderFactory Factory, string connectionString, IDatabase Db)
         {
             T Table = new T();
@@ -67,6 +73,7 @@ namespace eSword9Converter
                     using (DbDataReader reader = dbCmd.ExecuteReader())
                     {
                         bool nextResult = true;
+                        Trace.WriteLine("Begining to read " + count + " entries from " + Table.TableName + " in " + Db.FileName);
                         while (nextResult)
                         {
                             while (reader.Read())
@@ -126,6 +133,7 @@ namespace eSword9Converter
                             }
                             nextResult = reader.NextResult();
                         }
+                        Trace.WriteLine("Successfully read " + currentCount + " entries out of " + count + "from " + Table.TableName + " in " + Db.FileName);
                     }
                 }
             }
@@ -140,6 +148,9 @@ namespace eSword9Converter
         /// <returns>a string containing the SQL Create statement for the current table, including all indexes</returns>
         public string SQLCreateStatement()
         {
+            if (disposed)
+            { throw new ObjectDisposedException(this.ToString()); }
+            Trace.WriteLine("Building SqlCreateStatement");
             TableName = (from TableAttribute ta in (TableAttribute[])this.GetType().GetCustomAttributes(typeof(TableAttribute), false)
                          where ta.Type != tableType.Access
                          select ta.Name).First();
@@ -163,7 +174,6 @@ namespace eSword9Converter
             sql = sql.Remove(sql.Length - 2, 2);
             /* close the statement and add a new line*/
             sql += ");\r\n";
-
             /* Check to see if we have any indexes for this table */
             if (this.Indexes.Count > 0)
             {
@@ -178,11 +188,14 @@ namespace eSword9Converter
                 }
             }
             /* Finally, return our SQL statment */
+            Trace.WriteLine("Successfully built sql statement: " + sql);
             return sql;
         }
 
         public void SaveToDatabase(DbProviderFactory Factory, string connectionString)
         {
+            if (disposed)
+            { throw new ObjectDisposedException(this.ToString()); }
             using (DbConnection dbCon = Factory.CreateConnection())
             {
                 dbCon.ConnectionString = connectionString;
@@ -228,6 +241,8 @@ namespace eSword9Converter
                                 { dbParams[Column.Key].Value = Column.Value; }
                                 dbCmd.Parameters.AddRange(dbParams.Values.ToArray());
                                 dbCmd.ExecuteNonQuery();
+                                if (stop)
+                                { break; }
                             }
                             catch (Exception ex) { Error.Record(this, ex); }
                             finally { currentCount++; Controller.RaiseProgressChanged(this, currentCount); }
@@ -239,11 +254,29 @@ namespace eSword9Converter
         }
         public void Load(DbProviderFactory Factory, string connectionString)
         {
-            T Table = global::eSword9Converter.Table<T>.LoadFromDatabase(Factory, connectionString, this.DB);
-            this.Rows = (ThreadSafeCollection<ThreadSafeDictionary<string, object>>)Table.Rows.Clone();
-            this.Columns = (ThreadSafeDictionary<string, IColumn>)Table.Columns.Clone();
-            this.Indexes = (ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>)Table.Indexes.Clone();
-            this.TableName = Table.TableName;
+            if (disposed)
+            { throw new ObjectDisposedException(this.ToString()); }
+            using (T Table = global::eSword9Converter.Table<T>.LoadFromDatabase(Factory, connectionString, this.DB))
+            {
+                this.Rows = (ThreadSafeCollection<ThreadSafeDictionary<string, object>>)Table.Rows.Clone();
+                this.Columns = (ThreadSafeDictionary<string, IColumn>)Table.Columns.Clone();
+                this.Indexes = (ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>)Table.Indexes.Clone();
+                this.TableName = Table.TableName;
+            }
+        }
+
+        #endregion
+
+        #region IDisposable Members
+        private bool disposed;
+        public void Dispose()
+        {
+            if (disposed)
+            { throw new ObjectDisposedException(this.ToString()); }
+            this.stop = true;
+            this.Columns.Dispose();
+            this.Indexes.Dispose();
+            this.Rows.Dispose();
         }
 
         #endregion

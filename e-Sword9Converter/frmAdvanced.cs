@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data.OleDb;
+using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Windows.Forms;
-using System.Threading;
 
 namespace eSword9Converter
 {
@@ -14,17 +11,22 @@ namespace eSword9Converter
         private updateStatus CurrentStatus;
         public frmAdvanced()
         {
+            Debug.WriteLine("Initializing frmAdvanced");
             InitializeComponent();
+            Debug.WriteLine("Registering frmMain event handlers");
+            this.Controller_LanguageChangedEvent();
             this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
             Controller.StatusChangedEvent += new Controller.StatusChangedEventHandler(Controller_StatusChangedEvent);
             Controller.MaxValueChangedEvent += new Controller.MaxValueChangedEventHandler(Controller_MaxValueChangedEvent);
             Controller.ProgressChangedEvent += new Controller.ProgressChangedEventHandler(Controller_ProgressChangedEvent);
             Controller.ConversionFinishedEvent += new Controller.ConversionFinishedEventHandler(Controller_ConversionFinishedEvent);
             Controller.LanguageChangedEvent += new Controller.LanguageChangedEventHandler(Controller_LanguageChangedEvent);
+            Debug.WriteLine("Initializing frmAdvanced Finished");
         }
 
         void Controller_LanguageChangedEvent()
         {
+            Debug.WriteLine("frmPassword.LanguageChangedEvent");
             this.Text = Globalization.CurrentLanguage.AdvancedTitle;
             this.grpDest.Text = Globalization.CurrentLanguage.DestinationDirectory;
             this.grpSource.Text = Globalization.CurrentLanguage.SourceDirectory;
@@ -35,6 +37,7 @@ namespace eSword9Converter
             this.chkOverwrite.Text = Globalization.CurrentLanguage.AutomaticallyOverwrite;
             this.chkSkip.Text = Globalization.CurrentLanguage.SkipPasswordProtectedFiles;
             this.chkSubDir.Text = Globalization.CurrentLanguage.IncludeSubdirectories;
+            Debug.WriteLine("frmPassword.LanguageChangedEvent Finished");
         }
 
         void Controller_ConversionFinishedEvent()
@@ -54,23 +57,30 @@ namespace eSword9Converter
         }
 
         void Controller_ProgressChangedEvent(object sender, int count)
-        { this.prgMain.Value = count;
-        FileInfo fi = new FileInfo(Controller.DB.SourceDB);
-        this.Text = string.Format("{0}: {3}% {1} {2}", Globalization.CurrentLanguage.AdvancedTitle, this.CurrentStatus.ToString(), Controller.DB.FileName.Replace(fi.DirectoryName + @"\", ""), (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d));
+        {
+            this.prgMain.Value = count;
+            //Debug.WriteLine("frmAdvanced.prgMain.Value set to: " + count);
+            this.Text = string.Format("{0}: {3}% {1} {2}", Globalization.CurrentLanguage.AdvancedTitle, this.CurrentStatus.ToString(), Controller.DB.FileName, (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d));
+            //Debug.WriteLine("frmAdvanced.Text set to: " + this.Text);
         }
 
         void Controller_MaxValueChangedEvent(object sender, int value)
-        { this.prgMain.Maximum = value; }
+        {
+            this.prgMain.Maximum = value;
+            Debug.WriteLine("frmAdvanced.prgMain.Maximum set to: " + value);
+        }
 
 
         void Controller_StatusChangedEvent(object sender, updateStatus status)
         {
             this.CurrentStatus = status;
+            Debug.WriteLine("frmAdvanced.CurrentStatus set to: " + status.ToString());
         }
 
 
         private void btnSource_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmAdvanced.btnSource Clicked");
             if (this.txtSource.Text == "")
             { this.ofdSource.SelectedPath = @"C:\Program Files\e-Sword"; }
             this.ofdSource.ShowNewFolderButton = false;
@@ -85,6 +95,7 @@ namespace eSword9Converter
 
         private void btnDest_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmAdvanced.btnDest Clicked");
             this.sfdDest.SelectedPath = this.txtDest.Text;
             if (this.sfdDest.ShowDialog() == DialogResult.OK)
             {
@@ -96,17 +107,20 @@ namespace eSword9Converter
 
         private void btnConvert_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmAdvanced.btnConvert Clicked");
             this.RunBatch();
         }
 
         void prgMain_MouseHover(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmAdvanced.prgMain Hovered");
             int Percent = (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d);
             this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% {1}", Percent, Globalization.CurrentLanguage.Completed));
         }
 
         private void lnkNormal_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            Debug.WriteLine("frmAdvanced.lnkNormal Clicked");
             Controller.SwitchForms();
         }
 
@@ -137,21 +151,10 @@ namespace eSword9Converter
             Controller.SkipPassword = this.chkSkip.Checked;
             Controller.AutomaticallyOverwrite = this.chkOverwrite.Checked;
             Controller.Begin();
-            //this.Text = Globalization.CurrentLanguage.AdvancedTitle + " " + Globalization.CurrentLanguage.Finished;
-            //this.grpDest.Enabled = false;
-            //this.txtDest.Enabled = true;
-            //this.btnDest.Enabled = true;
-            //this.txtDest.Text = "";
-            //this.btnSource.Enabled = true;
-            //this.txtSource.Enabled = true;
-            //this.chkOverwrite.Enabled = true;
-            //this.chkSkip.Enabled = true;
-            //this.chkSubDir.Enabled = true;
-            //this.lnkNormal.Enabled = true;
-
         }
         private bool ValidateSource(string path)
         {
+            Debug.WriteLine("Checking that " + path + " is a valid access database");
             try
             {
                 FileStream fs = new FileStream(path, FileMode.Open);
@@ -167,7 +170,10 @@ namespace eSword9Converter
                     reading = !(pos >= 19);
                 }
                 br.Close();
-                return (header == "Standard Jet DB");
+                bool ret = (header == "Standard Jet DB");
+                Debug.WriteLineIf(!ret, path + " is not a valid Jet Database");
+                Debug.WriteLineIf(!ret, "File header is " + header);
+                return ret;
             }
             catch (Exception ex) { Error.Record(this, ex); return false; }
         }
@@ -175,7 +181,7 @@ namespace eSword9Converter
         private bool ValidateDest(string path)
         { return !File.Exists(path); }
 
-       
+
 
         private string ConvertFilePath(string OldPath)
         { return new FileInfo(OldPath).DirectoryName; }

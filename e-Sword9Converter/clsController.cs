@@ -42,7 +42,7 @@ namespace eSword9Converter
         public static event StatusChangedEventHandler StatusChangedEvent;
         public static void RaiseStatusChanged(object sender, updateStatus status)
         {
-            Debug.WriteLine("RaiseStatusChanged called");
+            Debug.WriteLine(string.Format("RaiseStatusChanged({0}, {1}) called", sender.ToString(), status.ToString()));
             if (StatusChangedEvent != null)
             { sync.Send(new SendOrPostCallback(delegate { StatusChangedEvent(sender, status); }), null); }
             SetMaxValue("Controller.RaiseStatusChangedEvent", 100);
@@ -52,7 +52,7 @@ namespace eSword9Converter
         public static event ProgressChangedEventHandler ProgressChangedEvent;
         public static void RaiseProgressChanged(object sender, int count)
         {
-            Debug.WriteLine("RaiseProgressChanged called");
+            //Debug.WriteLine("RaiseProgressChanged called");
             if (ProgressChangedEvent != null)
             { sync.Send(new SendOrPostCallback(delegate { ProgressChangedEvent(sender, count); }), null); }
         }
@@ -61,7 +61,7 @@ namespace eSword9Converter
         public static event MaxValueChangedEventHandler MaxValueChangedEvent;
         public static void RaiseMaxValueChanged(object sender, int value)
         {
-            Debug.WriteLine("RaiseMaxValueChanged called");
+            Debug.WriteLine(string.Format("RaiseMaxValueChanged({0}, {1}) called", sender.ToString(), value));
             if (MaxValueChangedEvent != null)
             { sync.Send(new SendOrPostCallback(delegate { MaxValueChangedEvent(sender, value); }), null); }
         }
@@ -70,7 +70,7 @@ namespace eSword9Converter
         public static event LogMessageEventHandler LogMessageEvent;
         public static void RaiseLogMessage(object sender, messageType type, string message)
         {
-            Debug.WriteLine("RaiseLogMessage called");
+            Debug.WriteLine(string.Format("RaiseLogMessage({0}, {1}, {2}) called", sender.ToString(), type.ToString(), message));
             if (LogMessageEvent != null)
             { sync.Send(new SendOrPostCallback(delegate { LogMessageEvent(sender, type, message); }), null); }
         }
@@ -79,7 +79,7 @@ namespace eSword9Converter
         public static event ShowPasswordEventHandler ShowPasswordBoxEvent;
         public static void RaiseShowPasswordBox(object sender, string path, bool tried, out string pass)
         {
-            Debug.WriteLine("RaiseShowPasswordBox called");
+            Debug.WriteLine(string.Format("RaiseShowPasswordBox({0}, {1}, {2}) called", sender.ToString(), path, tried));
             if (ShowPasswordBoxEvent != null)
             {
                 string p = "";
@@ -107,7 +107,7 @@ namespace eSword9Converter
             if (DB != null)
                 DB.Stop();
             if (!switching)
-            { Stop = true; Application.Exit(); }
+            { Stop = true; Application.Exit(); Debug.Flush(); }
         }
 
         private static void Controller_GetPasswordEvent(object sender, string path, bool tried, out string pass)
@@ -160,7 +160,7 @@ namespace eSword9Converter
                 MainForm.FormClosed += new FormClosedEventHandler(SubForm_FormClosed);
                 MainForm.Show();
                 CurrentForm = MainForm;
-                Debug.WriteLine("==Finished==");
+                Debug.WriteLine("Initalizing Controller Finished");
             }
             catch (Exception ex)
             { Error.Record("Controller.Initalize", ex); }
@@ -213,7 +213,7 @@ namespace eSword9Converter
                     odbcCon.Close();
                     return false;
                 }
-                catch { return true; }
+                catch { Debug.Write("yes"); return true; }
                 finally { odbcCon.Close(); }
             }
         }
@@ -346,18 +346,14 @@ namespace eSword9Converter
                             DB.Clear();
                         }
                     }
-                    RaiseLogMessage("Controller.Process", messageType.Information, "11: Controller.Process");
                     if (Stop)
                     {
                         Debug.WriteLine("Exiting batch conversion");
                         break;
                     }
                 }
-                RaiseLogMessage("Controller.Process", messageType.Information, "12: Controller.Process");
                 Controller.FileNames.Clear();
-                RaiseLogMessage("Controller.Process", messageType.Information, "13: Controller.Process");
                 RaiseConversionFinished();
-                RaiseLogMessage("Controller.Process", messageType.Information, "14: Controller.Process");
             }
             catch (Exception ex)
             { RaiseLogMessage("Controller.Process", messageType.Error, ex.Message); }
@@ -400,7 +396,7 @@ namespace eSword9Converter
                 Debug.WriteLine("OldExtension: " + this.OldExtension);
                 this.NewExtension = newpath[newpath.Length - 1];
                 Debug.WriteLine("NewExtension: " + this.NewExtension);
-                Debug.WriteLine("==Finished==");
+                Debug.WriteLine("Creating new FileConversionInfo object Finished");
             }
             catch (Exception ex)
             { Controller.RaiseLogMessage("FileConversionInfo.New", messageType.Error, ex.Message); }

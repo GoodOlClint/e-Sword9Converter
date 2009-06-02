@@ -7,46 +7,159 @@ using System.Data.Common;
 
 namespace eSword9Converter
 {
-    public class Database : IDatabase
+    public class Database : IDatabase, IDisposable
     {
-        public string SourceDB { get; set; }
-        public string DestDB { get; set; }
-        public string FileName { get; set; }
-        public void Stop() { Skip = true; }
-        public bool Running { get { lock (threadLock) { return this.running; } } set { lock (threadLock) { this.running = value; } } }
+        private ThreadSafeDictionary<string, bool> BooleanProperties;
+        private ThreadSafeDictionary<string, string> StringProperties;
+        private ThreadSafeDictionary<string, ITable> tables;
         private object threadLock = new object();
-        public bool Skip { get; set; }
-        private bool running;
+        private oleDbFactory oleDbFactory;
+        private SQLiteDbFactory SQLiteFactory;
+        private string SourceConnectionString;
+        private string DestConnectionString;
+
+        #region Public Properties
+        public string SourceDB
+        {
+            get
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { return this.StringProperties["SourceDB"]; }
+            }
+            set
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { this.StringProperties["SourceDB"] = value; }
+            }
+        }
+        public string DestDB
+        {
+            get
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { return this.StringProperties["DestDB"]; }
+            }
+            set
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { this.StringProperties["DestDB"] = value; }
+            }
+        }
+        public string FileName
+        {
+            get
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { return this.StringProperties["FileName"]; }
+            }
+            set
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { this.StringProperties["FileName"] = value; }
+            }
+        }
+        public bool Running
+        {
+            get
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { return this.BooleanProperties["Running"]; }
+            }
+            set
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { this.BooleanProperties["Running"] = value; }
+            }
+        }
+        public bool Skip
+        {
+            get
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { return this.BooleanProperties["Skip"]; }
+            }
+            set
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { this.BooleanProperties["Skip"] = value; }
+            }
+        }
+        public ThreadSafeDictionary<string, ITable> Tables
+        {
+            get
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { return this.tables; }
+            }
+            set
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { this.tables = value; }
+            }
+        }
+        #endregion
+        
+       
+        public Database()
+        {
+            this.Tables = new ThreadSafeDictionary<string, ITable>();
+            this.BooleanProperties = new ThreadSafeDictionary<string, bool>();
+            this.StringProperties = new ThreadSafeDictionary<string, string>();
+            this.oleDbFactory = new oleDbFactory();
+            this.SQLiteFactory = new SQLiteDbFactory();
+            this.SourceConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source={file};";
+            this.DestConnectionString = "data source=\"{file}\"";
+        }
+
+        public void Stop() { Skip = true; }
+        
         public void ConvertFormat()
         {
+            if (disposed)
+            { throw new ObjectDisposedException(this.ToString()); }
             try
             {
-                Skip = false;
-                running = true;
+                this.Skip = false;
+                this.Running = true;
                 string[] path = DestDB.Split('\\');
                 this.FileName = path[path.Length - 1];
                 this.FileName = SourceDB;
                 this.Load(SourceDB);
-                //this.FileName = DestDB;
                 path = DestDB.Split('\\');
                 this.FileName = path[path.Length - 1];
                 this.Save(DestDB);
                 if (!Skip)
                     Controller.RaiseStatusChanged(this, updateStatus.Finished);
-                running = false;
+                this.Running = false;
             }
             catch (Exception ex) { Error.Record(this, ex); }
         }
+
         public void Clear()
-        { this.Tables.Clear(); }
-        public ThreadSafeDictionary<string, ITable> Tables = new ThreadSafeDictionary<string, ITable>();
-        private oleDbFactory oleDbFactory = new oleDbFactory();
-        private SQLiteDbFactory SQLiteFactory = new SQLiteDbFactory();
-        private string SourceConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source={file};";
-        private string DestConnectionString = "data source=\"{file}\"";
+        {
+            if (disposed)
+            { throw new ObjectDisposedException(this.ToString()); }
+            this.Tables.Clear();
+        }
+        
+        
 
         public virtual void Save(string Path)
         {
+            if (disposed)
+            { throw new ObjectDisposedException(this.ToString()); }
             if (!Skip)
             {
                 if (File.Exists(Path))
@@ -77,6 +190,8 @@ namespace eSword9Converter
         }
         public virtual void Load(string Path)
         {
+            if (disposed)
+            { throw new ObjectDisposedException(this.ToString()); }
             if (Controller.NeedPassword(Path))
             {
                 string pass = Controller.GetPassword(Path);
@@ -95,5 +210,28 @@ namespace eSword9Converter
             }
             else { this.Running = false; }
         }
+
+        #region IDisposable Members
+        protected bool disposed;
+
+        public void Dispose()
+        {
+            if (disposed)
+            { throw new ObjectDisposedException(this.ToString()); }
+            this.Tables.Clear();
+            this.Tables.Dispose();
+            this.oleDbFactory = null;
+            this.SQLiteFactory = null;
+            this.DestConnectionString = null;
+            this.DestDB = null;
+            this.FileName = null;
+            this.Running = false;
+            this.Skip = false;
+            this.SourceDB = null;
+            this.threadLock = null;
+            this.disposed = true;
+        }
+
+        #endregion
     }
 }

@@ -76,6 +76,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="clsTraceListener.cs" />
     <Compile Include="DataLayer\Attributes.cs" />
     <Compile Include="DataLayer\clsDatabase.cs" />
     <Compile Include="clsError.cs" />
@@ -190,6 +191,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Strings\es.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Strings\he.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

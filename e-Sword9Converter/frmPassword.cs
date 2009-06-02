@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace eSword9Converter
 {
@@ -7,26 +8,33 @@ namespace eSword9Converter
     {
         public frmPassword()
         {
+            Debug.WriteLine("Initalizing frmPassword");
             InitializeComponent();
+            this.Controller_LanguageChangedEvent();
+            Debug.WriteLine("Registering frmMain event handlers");
             this.txtPassword.KeyDown += new KeyEventHandler(txtPassword_KeyDown);
             Controller.LanguageChangedEvent += new Controller.LanguageChangedEventHandler(Controller_LanguageChangedEvent);
+            Debug.WriteLine("frmPassword.Initalize Finished");
         }
 
         void Controller_LanguageChangedEvent()
         {
+            Debug.WriteLine("frmPassword.LanguageChangedEvent");
             this.Text = Globalization.CurrentLanguage.Password;
             this.btnCancel.Text = Globalization.CurrentLanguage.Cancel;
             this.btnOk.Text = Globalization.CurrentLanguage.Ok;
+            Debug.WriteLine("frmPassword.LanguageChangedEvent Finished");
         }
 
         public string FileName
         {
-            get { return this.lblFile.Text; }
+            get { Debug.WriteLine("frmPassword.FileName is: " + this.lblFile.Text); return this.lblFile.Text; }
             set
             {
                 string oldPath = value;
                 string[] oldpath = oldPath.Split('\\');
                 this.lblFile.Text = oldpath[oldpath.Length - 1];
+                Debug.WriteLine("Setting frmPassword.FileName to: " + this.lblFile.Text);
             }
         }
 
@@ -46,6 +54,6 @@ namespace eSword9Converter
             { MessageBox.Show(Globalization.CurrentLanguage.PasswordBlank); }
         }
 
-        public string Password { get { return this.txtPassword.Text; } }
+        public string Password { get { Debug.WriteLine("frmPassword.Password is: " + this.txtPassword.Text); return this.txtPassword.Text; } }
     }
 }

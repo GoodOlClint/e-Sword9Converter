@@ -16,14 +16,15 @@ namespace eSword9Converter
             {
                 Debug.WriteLine("Initializing frmMain");
                 InitializeComponent();
-                Debug.WriteLine("Registering event handlers");
+                this.Controller_LanguageChangedEvent();
+                Debug.WriteLine("Registering frmMain event handlers");
                 this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
                 Controller.StatusChangedEvent += new Controller.StatusChangedEventHandler(Controller_StatusChangedEvent);
                 Controller.MaxValueChangedEvent += new Controller.MaxValueChangedEventHandler(Controller_MaxValueChangedEvent);
                 Controller.ProgressChangedEvent += new Controller.ProgressChangedEventHandler(Controller_ProgressChangedEvent);
                 Controller.LanguageChangedEvent += new Controller.LanguageChangedEventHandler(Controller_LanguageChangedEvent);
                 Controller.ConversionFinishedEvent += new Controller.ConversionFinishedEventHandler(Controller_ConversionFinishedEvent);
-                Debug.WriteLine("==Finished==");
+                Debug.WriteLine("Initializing frmMain Finished");
             }
             catch (Exception ex)
             { Error.Record(this, ex); }
@@ -77,7 +78,7 @@ namespace eSword9Converter
                 }
                 else
                 {
-                    Debug.WriteLine("frmMain.prgMain.Value set to: " + count);
+                    //Debug.WriteLine("frmMain.prgMain.Value set to: " + count);
                     this.prgMain.Value = count;
                 }
             }

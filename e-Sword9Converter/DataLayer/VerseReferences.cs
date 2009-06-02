@@ -2,22 +2,108 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 
 namespace eSword9Converter
 {
     #region Verse List
-    public class VerseReference
+    public class VerseReference : IDisposable
     {
-        public int Book, Chapter, StartVerse, EndVerse;
-        public VerseReference(int book, int chapter, int startVerse, int endVerse)
+        private ThreadSafeDictionary<string, int> Properties;
+        private object threadLock;
+
+        #region Public Properties
+        public int Book
+        {
+            get
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { return this.Properties["Book"]; }
+            }
+            set
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { this.Properties["Book"] = value; }
+            }
+        }
+        public int Chapter
+        {
+            get
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { return this.Properties["Chapter"]; }
+            }
+            set
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { this.Properties["Chapter"] = value; }
+            }
+        }
+        public int StartVerse
+        {
+            get
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { return this.Properties["StartVerse"]; }
+            }
+            set
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { this.Properties["StartVerse"] = value; }
+            }
+        }
+        public int EndVerse
+        {
+            get
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { return this.Properties["EndVerse"]; }
+            }
+            set
+            {
+                if (disposed)
+                { throw new ObjectDisposedException(this.ToString()); }
+                lock (threadLock) { this.Properties["EndVerse"] = value; }
+            }
+        }
+
+        #endregion
+
+        public VerseReference()
+        {
+            this.threadLock = new object();
+            this.Properties = new ThreadSafeDictionary<string, int>();
+        }
+
+        public VerseReference(int book, int chapter, int startVerse, int endVerse) : this()
         { this.Book = book; this.Chapter = chapter; this.StartVerse = startVerse; this.EndVerse = endVerse; }
+
+        #region IDisposable Members
+        private bool disposed;
+        public void Dispose()
+        {
+            if (disposed)
+            { throw new ObjectDisposedException(this.ToString()); }
+            this.threadLock = null;
+            this.Properties.Dispose();
+            this.Properties = null;
+            this.disposed = true;
+        }
+        #endregion
     }
 
     public class VerseReferences : ThreadSafeCollection<VerseReference>
     {
         public VerseReferences()
         {
-            this.Add(new VerseReference(1, 1, 1, 31));
+            Trace.WriteLine("Building VerseReferenes Database");
             this.Add(new VerseReference(1, 2, 32, 56));
             this.Add(new VerseReference(1, 3, 57, 80));
             this.Add(new VerseReference(1, 4, 81, 106));
@@ -1345,6 +1431,7 @@ namespace eSword9Converter
             this.Add(new VerseReference(73, 13, 35089, 35114));
             this.Add(new VerseReference(73, 14, 35115, 35160));
             this.Add(new VerseReference(73, 15, 35161, 35199));
+            Trace.WriteLine("Finished adding " + this.Count + " to VerseReferences Database");
         }
     }
     #endregion

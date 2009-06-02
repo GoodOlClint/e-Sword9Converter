@@ -78,7 +78,8 @@ namespace eSword9Converter.Globalization
         {
             Debug.WriteLine("Globalization initalization started");
             Strings = new ThreadSafeDictionary<string, string>();
-            string fileStream = "eSword9Converter.Strings." + CultureInfo.CurrentCulture.TwoLetterISOLanguageName + ".txt";
+            //string fileStream = "eSword9Converter.Strings." + CultureInfo.CurrentCulture.TwoLetterISOLanguageName + ".txt";
+            string fileStream = "eSword9Converter.Strings." + "he" + ".txt";
             Debug.WriteLine("Attempting to load localized strings from " + fileStream);
             Stream stream = typeof(CurrentLanguage).Assembly.GetManifestResourceStream(fileStream);
 
