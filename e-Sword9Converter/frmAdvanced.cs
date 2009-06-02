@@ -175,7 +175,7 @@ namespace eSword9Converter
                 Debug.WriteLineIf(!ret, "File header is " + header);
                 return ret;
             }
-            catch (Exception ex) { Error.Record(this, ex); return false; }
+            catch (Exception ex) { Trace.WriteLine(ex); return false; }
         }
 
         private bool ValidateDest(string path)
@@ -203,7 +203,7 @@ namespace eSword9Converter
                 }
             }
             catch (Exception ex)
-            { Error.Record(this, ex); }
+            { Trace.WriteLine(ex); }
             return files.ToArray();
         }
     }

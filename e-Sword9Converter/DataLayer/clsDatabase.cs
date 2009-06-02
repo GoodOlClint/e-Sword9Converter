@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Data.Common;
+using System.Diagnostics;
 
 namespace eSword9Converter
 {
@@ -110,8 +111,8 @@ namespace eSword9Converter
             }
         }
         #endregion
-        
-       
+
+
         public Database()
         {
             this.Tables = new ThreadSafeDictionary<string, ITable>();
@@ -124,7 +125,7 @@ namespace eSword9Converter
         }
 
         public void Stop() { Skip = true; }
-        
+
         public void ConvertFormat()
         {
             if (disposed)
@@ -144,7 +145,7 @@ namespace eSword9Converter
                     Controller.RaiseStatusChanged(this, updateStatus.Finished);
                 this.Running = false;
             }
-            catch (Exception ex) { Error.Record(this, ex); }
+            catch (Exception ex) { Trace.WriteLine(ex); } //Error.Record(this, ex); }
         }
 
         public void Clear()
@@ -153,8 +154,8 @@ namespace eSword9Converter
             { throw new ObjectDisposedException(this.ToString()); }
             this.Tables.Clear();
         }
-        
-        
+
+
 
         public virtual void Save(string Path)
         {
@@ -183,7 +184,7 @@ namespace eSword9Converter
                 {
                     try
                     { Table.Value.SaveToDatabase(SQLiteFactory, this.DestConnectionString.Replace("{file}", Path)); }
-                    catch (Exception ex) { Error.Record(this, ex); }
+                    catch (Exception ex) { Trace.WriteLine(ex); }
                 }
 
             }
@@ -205,7 +206,7 @@ namespace eSword9Converter
                     Table.Value.DB = this;
                     try
                     { Table.Value.Load(oleDbFactory, this.SourceConnectionString.Replace("{file}", Path)); }
-                    catch (Exception ex) { Error.Record(this, ex); }
+                    catch (Exception ex) { Trace.WriteLine(ex); }
                 }
             }
             else { this.Running = false; }

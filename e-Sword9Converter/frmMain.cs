@@ -27,7 +27,7 @@ namespace eSword9Converter
                 Debug.WriteLine("Initializing frmMain Finished");
             }
             catch (Exception ex)
-            { Error.Record(this, ex); }
+            { Trace.WriteLine(ex); }
         }
 
         #endregion
@@ -48,7 +48,7 @@ namespace eSword9Converter
                 MessageBox.Show(Globalization.CurrentLanguage.FinishedConverting);
             }
             catch (Exception ex)
-            { Error.Record(this, ex); }
+            { Trace.WriteLine(ex); }
         }
 
 
@@ -65,7 +65,7 @@ namespace eSword9Converter
                 this.lnkBatch.Text = Globalization.CurrentLanguage.BatchMode;
             }
             catch (Exception ex)
-            { Error.Record(this, ex); }
+            { Trace.WriteLine(ex); }
         }
 
         void Controller_ProgressChangedEvent(object sender, int count)
@@ -78,12 +78,11 @@ namespace eSword9Converter
                 }
                 else
                 {
-                    //Debug.WriteLine("frmMain.prgMain.Value set to: " + count);
                     this.prgMain.Value = count;
                 }
             }
             catch (Exception ex)
-            { Error.Record(this, ex); }
+            { Trace.WriteLine(ex); }
         }
 
         void Controller_MaxValueChangedEvent(object sender, int value)
@@ -101,7 +100,7 @@ namespace eSword9Converter
                 }
             }
             catch (Exception ex)
-            { Error.Record(this, ex); }
+            { Trace.WriteLine(ex); }
         }
 
         void Controller_StatusChangedEvent(object sender, updateStatus status)
@@ -119,7 +118,7 @@ namespace eSword9Converter
                 }
             }
             catch (Exception ex)
-            { Error.Record(this, ex); }
+            { Trace.WriteLine(ex); }
         }
 
         void prgMain_MouseHover(object sender, EventArgs e)
@@ -130,7 +129,7 @@ namespace eSword9Converter
                 int Percent = (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d);
                 this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% {1}", Percent, Globalization.CurrentLanguage.Completed));
             }
-            catch (Exception ex) { Error.Record(this, ex); }
+            catch (Exception ex) { Trace.WriteLine(ex); }
         }
 
         private void btnSource_Click(object sender, EventArgs e)
@@ -145,7 +144,7 @@ namespace eSword9Converter
                 }
             }
             catch (Exception ex)
-            { Error.Record(this, ex); }
+            { Trace.WriteLine(ex); }
         }
         private void btnConvert_Click(object sender, EventArgs e)
         {
@@ -159,7 +158,7 @@ namespace eSword9Converter
                 Controller.Begin();
             }
             catch (Exception ex)
-            { Error.Record(this, ex); }
+            { Trace.WriteLine(ex); }
         }
 
         private void lnkBatch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -180,7 +179,7 @@ namespace eSword9Converter
                     this.btnConvert.Enabled = true;
                 }
             }
-            catch (Exception ex) { Error.Record(this, ex); }
+            catch (Exception ex) { Trace.WriteLine(ex); }
         }
         #endregion
 
@@ -202,7 +201,7 @@ namespace eSword9Converter
                 this.ofdDest.InitialDirectory = path;
                 this.grpDest.Enabled = true;
             }
-            catch (Exception ex) { Error.Record(this, ex); }
+            catch (Exception ex) { Trace.WriteLine(ex); }
         }
 
         private bool ValidSource(string path)
@@ -255,7 +254,7 @@ namespace eSword9Converter
                         return false;
                 }
                 FileStream fs = new FileStream(path, FileMode.Open);
-                System.IO.BinaryReader br = new BinaryReader(fs);
+                BinaryReader br = new BinaryReader(fs);
                 long pos = 0;
                 bool reading = true;
                 string header = "";
@@ -269,7 +268,7 @@ namespace eSword9Converter
                 br.Close();
                 return (header == "Standard Jet DB");
             }
-            catch (Exception ex) { Error.Record(this, ex); return false; }
+            catch (Exception ex) { Trace.WriteLine(ex); return false; }
         }
 
         private bool ValidDestination(string path)
@@ -297,36 +296,14 @@ namespace eSword9Converter
                         return false;
                 }
             }
-            catch (Exception ex) { Error.Record(this, ex); return false; }
+            catch (Exception ex) { Trace.WriteLine(ex); return false; }
         }
-
-        //private void ValidateDestination()
-        //{ this.ValidateDestination(false); }
-
-        //private void ValidateDestination(bool ofd)
-        //{
-        //    try
-        //    {
-        //        if (!ofd && File.Exists(this.txtDest.Text))
-        //        {
-        //            this.txtDest.Text = "";
-        //            this.prgMain.Enabled = false;
-        //            this.btnConvert.Enabled = false;
-        //            return;
-        //        }
-        //        this.prgMain.Enabled = true;
-        //        this.btnConvert.Enabled = true;
-        //    }
-        //    catch (Exception ex) { Error.Record(this, ex); }
-        //}
-
-
 
         private string ConvertFilePath(string OldPath)
         {
             try
             { return new FileInfo(OldPath).DirectoryName; }
-            catch (Exception ex) { Error.Record(this, ex); return OldPath; }
+            catch (Exception ex) { Trace.WriteLine(ex); return OldPath; }
         }
     }
 

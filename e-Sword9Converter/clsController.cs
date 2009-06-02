@@ -45,7 +45,6 @@ namespace eSword9Converter
             Debug.WriteLine(string.Format("RaiseStatusChanged({0}, {1}) called", sender.ToString(), status.ToString()));
             if (StatusChangedEvent != null)
             { sync.Send(new SendOrPostCallback(delegate { StatusChangedEvent(sender, status); }), null); }
-            SetMaxValue("Controller.RaiseStatusChangedEvent", 100);
         }
 
         public delegate void ProgressChangedEventHandler(object sender, int count);
@@ -66,14 +65,14 @@ namespace eSword9Converter
             { sync.Send(new SendOrPostCallback(delegate { MaxValueChangedEvent(sender, value); }), null); }
         }
 
-        public delegate void LogMessageEventHandler(object sender, messageType mesageType, string message);
-        public static event LogMessageEventHandler LogMessageEvent;
-        public static void RaiseLogMessage(object sender, messageType type, string message)
-        {
-            Debug.WriteLine(string.Format("RaiseLogMessage({0}, {1}, {2}) called", sender.ToString(), type.ToString(), message));
-            if (LogMessageEvent != null)
-            { sync.Send(new SendOrPostCallback(delegate { LogMessageEvent(sender, type, message); }), null); }
-        }
+        //public delegate void LogMessageEventHandler(object sender, messageType mesageType, string message);
+        //public static event LogMessageEventHandler LogMessageEvent;
+        //public static void RaiseLogMessage(object sender, messageType type, string message)
+        //{
+        //    Debug.WriteLine(string.Format("RaiseLogMessage({0}, {1}, {2}) called", sender.ToString(), type.ToString(), message));
+        //    if (LogMessageEvent != null)
+        //    { sync.Send(new SendOrPostCallback(delegate { LogMessageEvent(sender, type, message); }), null); }
+        //}
 
         public delegate void ShowPasswordEventHandler(object sender, string path, bool tried, out string pass);
         public static event ShowPasswordEventHandler ShowPasswordBoxEvent;
@@ -87,7 +86,7 @@ namespace eSword9Converter
                 pass = p;
             }
             else
-            { RaiseLogMessage(sender, messageType.Error, "No Subscribers to GetPasswordEvent"); pass = ""; }
+            { Trace.WriteLine("No Subscribers to GetPasswordEvent"); pass = ""; }
         }
 
         public delegate void ConversionFinishedEventHandler();
@@ -104,10 +103,11 @@ namespace eSword9Converter
 
         static void SubForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            Debug.WriteLine(CurrentForm.GetType().ToString() + " Closed");
             if (DB != null)
                 DB.Stop();
             if (!switching)
-            { Stop = true; Application.Exit(); Debug.Flush(); }
+            { Stop = true; Application.Exit(); }
         }
 
         private static void Controller_GetPasswordEvent(object sender, string path, bool tried, out string pass)
@@ -127,7 +127,7 @@ namespace eSword9Converter
             }
             else
             {
-                RaiseLogMessage(sender, messageType.Warning, "Password dialog box closed");
+                Trace.WriteLine("Password dialog box closed");
                 pass = "";
             }
         }
@@ -137,7 +137,6 @@ namespace eSword9Converter
         {
             try
             {
-                Error.Initalize();
                 CurrentLanguage.Initalize();
                 Debug.WriteLine("Initalizing Controller");
                 FileNames = new ThreadSafeCollection<FileConversionInfo>();
@@ -151,9 +150,7 @@ namespace eSword9Converter
                     Debug.WriteLine("Passwords.txt found, loading passwords");
                     StreamReader SR = new StreamReader("Passwords.txt", Encoding.Default);
                     while (!SR.EndOfStream)
-                    {
-                        passwords.Add(SR.ReadLine());
-                    }
+                    { passwords.Add(SR.ReadLine()); }
                     Debug.WriteLine("Loaded " + passwords.Count + " passwords");
                 }
                 ShowPasswordBoxEvent += new ShowPasswordEventHandler(Controller_GetPasswordEvent);
@@ -163,7 +160,7 @@ namespace eSword9Converter
                 Debug.WriteLine("Initalizing Controller Finished");
             }
             catch (Exception ex)
-            { Error.Record("Controller.Initalize", ex); }
+            { Trace.WriteLine(ex); }
         }
 
         private static bool switching;
@@ -213,7 +210,7 @@ namespace eSword9Converter
                     odbcCon.Close();
                     return false;
                 }
-                catch { Debug.Write("yes"); return true; }
+                catch { return true; }
                 finally { odbcCon.Close(); }
             }
         }
@@ -231,10 +228,7 @@ namespace eSword9Converter
                     return true;
                 }
                 catch (Exception ex)
-                {
-                    RaiseLogMessage("Controller.ValidPassword", messageType.Information, ex.ToString());
-                    return false;
-                }
+                { Trace.WriteLine(ex); return false; }
             }
         }
 
@@ -246,7 +240,7 @@ namespace eSword9Converter
             if (SkipPassword) { return ""; }
             if (ValidPassword(path, password))
             {
-                RaiseLogMessage("Controller.GetPassword", messageType.Information, string.Format(Globalization.CurrentLanguage.PasswordFound, path, password));
+                Trace.WriteLine(string.Format(Globalization.CurrentLanguage.PasswordFound, path, password));
                 return password;
             }
             try
@@ -260,7 +254,7 @@ namespace eSword9Converter
                 else { pass = passwords[passCount]; }
                 return GetPassword(path, true, passCount + 1, pass);
             }
-            catch (Exception ex) { RaiseLogMessage("Controller.GetPassword", messageType.Error, ex.Message); return password; }
+            catch (Exception ex) { Trace.WriteLine(ex); return password; }
         }
 
         public static void Begin()
@@ -270,7 +264,7 @@ namespace eSword9Converter
                 Thread T = new Thread(new ThreadStart(Controller.Process));
                 T.Start();
             }
-            catch (Exception ex) { RaiseLogMessage("Controller.Begin", messageType.Error, ex.Message); }
+            catch (Exception ex) { Trace.WriteLine(ex); }
         }
 
 
@@ -323,7 +317,7 @@ namespace eSword9Converter
                             DB = new Tables.VerseList();
                             break;
                         default:
-                            RaiseLogMessage("Controller.Begin", messageType.Error, new InvalidDataException("Invalid filetype added to collection").Message);
+                            Trace.WriteLine(new InvalidDataException("Invalid filetype " + fci.OldExtension + " added to collection"));
                             return;
                     }
                     Debug.WriteLine(string.Format("{0} selected", DB.ToString()));
@@ -335,7 +329,7 @@ namespace eSword9Converter
                     {
                         Debug.WriteLine(string.Format("Need Password: {0} SkipPassword: {1}", needPassword, SkipPassword));
                         bool exist = File.Exists(fci.NewFullPath);
-                        Debug.WriteLine(string.Format("Destination file already exists: ", exist));
+                        Debug.WriteLine("Destination file already exists: " + exist);
                         if ((!exist) || (exist && AutomaticallyOverwrite) || (exist && (ShowMessageBox(string.Format(Globalization.CurrentLanguage.Overwrite, fci.NewFullPath), Globalization.CurrentLanguage.FileExists, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)))
                         {
                             DB.DestDB = fci.NewFullPath;
@@ -345,6 +339,10 @@ namespace eSword9Converter
                             Debug.WriteLine("Conversion finished");
                             DB.Clear();
                         }
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Skipping file " + DB.SourceDB);
                     }
                     if (Stop)
                     {
@@ -356,7 +354,7 @@ namespace eSword9Converter
                 RaiseConversionFinished();
             }
             catch (Exception ex)
-            { RaiseLogMessage("Controller.Process", messageType.Error, ex.Message); }
+            { Trace.WriteLine(ex); }
         }
     }
     public class FileConversionInfo
@@ -375,31 +373,39 @@ namespace eSword9Converter
             {
                 Debug.WriteLine("Creating new FileConversionInfo object");
                 this.OldFullPath = oldPath;
-                Debug.WriteLine("OldFullPath: " + this.OldFullPath);
                 this.NewFullPath = newPath;
-                Debug.WriteLine("NewFullPath: " + this.NewFullPath);
                 string[] oldpath = oldPath.Split('\\');
                 string[] newpath = newPath.Split('\\');
                 this.OldFileName = oldpath[oldpath.Length - 1];
-                Debug.WriteLine("OldFileName: " + this.OldFileName);
                 this.NewFileName = newpath[newpath.Length - 1];
-                Debug.WriteLine("NewFileName: " + this.NewFileName);
                 for (int i = 0; i <= oldpath.Length - 2; i++)
                 { this.OldDirectory += oldpath[i] + @"\"; }
-                Debug.WriteLine("OldDirectory: " + this.OldDirectory);
                 for (int i = 0; i <= newpath.Length - 2; i++)
                 { this.NewDirectory += newpath[i] + @"\"; }
-                Debug.WriteLine("NewDirectory: " + this.NewDirectory);
                 oldpath = oldPath.Split('.');
                 newpath = newPath.Split('.');
                 this.OldExtension = oldpath[oldpath.Length - 1];
-                Debug.WriteLine("OldExtension: " + this.OldExtension);
                 this.NewExtension = newpath[newpath.Length - 1];
-                Debug.WriteLine("NewExtension: " + this.NewExtension);
+                Debug.Write(this);
                 Debug.WriteLine("Creating new FileConversionInfo object Finished");
             }
             catch (Exception ex)
-            { Controller.RaiseLogMessage("FileConversionInfo.New", messageType.Error, ex.Message); }
+            { Trace.WriteLine(ex); }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(this.GetType().ToString());
+            sb.AppendLine("\t OldFullPath: " + this.OldFullPath);
+            sb.AppendLine("\t NewFullPath: " + this.NewFullPath);
+            sb.AppendLine("\t OldFileName: " + this.OldFileName);
+            sb.AppendLine("\t NewFileName: " + this.NewFileName);
+            sb.AppendLine("\t OldDirectory: " + this.OldDirectory);
+            sb.AppendLine("\t NewDirectory: " + this.NewDirectory);
+            sb.AppendLine("\t OldExtension: " + this.OldExtension);
+            sb.AppendLine("\t NewExtension: " + this.NewExtension);
+            return sb.ToString();
         }
     }
 }

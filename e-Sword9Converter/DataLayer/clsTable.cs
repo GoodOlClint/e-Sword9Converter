@@ -17,7 +17,7 @@ namespace eSword9Converter
         public IDatabase DB { get; set; }
 
         private bool stop;
-        
+
         #region Constructor
         public Table()
         {
@@ -54,7 +54,7 @@ namespace eSword9Converter
             this.disposed = false;
         }
         #endregion
-        
+
         public static T LoadFromDatabase(DbProviderFactory Factory, string connectionString, IDatabase Db)
         {
             T Table = new T();
@@ -66,6 +66,8 @@ namespace eSword9Converter
                 {
                     dbCmd.CommandText = string.Format("SELECT COUNT(*) FROM {0};", Table.TableName);
                     int count = (int)dbCmd.ExecuteScalar();
+                    if (count == 0)
+                    { Debug.WriteLine("Skipping empty table " + Table.TableName); return Table; }
                     Controller.RaiseStatusChanged(Table, updateStatus.Loading);
                     Controller.SetMaxValue(Table, count);
                     dbCmd.CommandText = string.Format("SELECT * FROM {0};", Table.TableName);
@@ -73,7 +75,7 @@ namespace eSword9Converter
                     using (DbDataReader reader = dbCmd.ExecuteReader())
                     {
                         bool nextResult = true;
-                        Trace.WriteLine("Begining to read " + count + " entries from " + Table.TableName + " in " + Db.FileName);
+                        Debug.WriteLine("Begining to read " + count + " entries from " + Table.TableName + " in " + Db.FileName);
                         while (nextResult)
                         {
                             while (reader.Read())
@@ -118,7 +120,8 @@ namespace eSword9Converter
                                         //Build useful error message
                                         //string msg = string.Format("{0}\t{1}\tRow:{2}\tColumn:{3}\tType:{4}\tValue:{5}\tMessage:{6}", Db.FileName, Table.TableName, Table.Rows.Count, Column.Name, Column.Type, Convert.ToString(reader[Column.Name]), ex.Message);
                                         string msg = string.Format(Globalization.CurrentLanguage.SqlErrorString, Db.FileName, Table.TableName, Table.Rows.Count, Column.Name, Column.Type, Convert.ToString(reader[Column.Name]), ex.Message);
-                                        Error.Record(Table, new SQLiteException(msg));
+                                        SQLiteException sqlEx = new SQLiteException(msg);
+                                        Trace.WriteLine(sqlEx);//new SQLiteException(msg));
                                     }
                                 }
                                 try
@@ -129,11 +132,11 @@ namespace eSword9Converter
                                     currentCount++;
                                     Controller.RaiseProgressChanged(Table, currentCount);
                                 }
-                                catch (Exception ex) { Error.Record(Table, ex); }
+                                catch (Exception ex) { Trace.WriteLine(ex); }
                             }
                             nextResult = reader.NextResult();
                         }
-                        Trace.WriteLine("Successfully read " + currentCount + " entries out of " + count + "from " + Table.TableName + " in " + Db.FileName);
+                        Debug.WriteLine("Successfully read " + currentCount + " entries out of " + count + " from " + Table.TableName + " in " + Db.FileName);
                     }
                 }
             }
@@ -150,7 +153,7 @@ namespace eSword9Converter
         {
             if (disposed)
             { throw new ObjectDisposedException(this.ToString()); }
-            Trace.WriteLine("Building SqlCreateStatement");
+            Debug.WriteLine("Building SqlCreateStatement");
             TableName = (from TableAttribute ta in (TableAttribute[])this.GetType().GetCustomAttributes(typeof(TableAttribute), false)
                          where ta.Type != tableType.Access
                          select ta.Name).First();
@@ -188,7 +191,7 @@ namespace eSword9Converter
                 }
             }
             /* Finally, return our SQL statment */
-            Trace.WriteLine("Successfully built sql statement: " + sql);
+            Debug.WriteLine("Successfully built sql statement: " + sql);
             return sql;
         }
 
@@ -204,8 +207,11 @@ namespace eSword9Converter
                 {
                     int count = (from ThreadSafeDictionary<string, object> kvp in this.Rows
                                  select kvp).Count();
+                    if (count == 0)
+                    { Debug.WriteLine("Skipping empty table " + this.TableName); return; }
                     Controller.RaiseStatusChanged(this, updateStatus.Saving);
                     Controller.SetMaxValue(this, count);
+                    Debug.WriteLine("Begining to insert " + count + " entries into table " + this.TableName + " in " + this.DB.FileName);
                     string Command = string.Format("INSERT INTO {0} (", TableName);
                     IDictionary<string, IColumn> sqlColumns = (from KeyValuePair<string, IColumn> C in this.Columns
                                                                where C.Value.colType != columnType.Access
@@ -244,10 +250,11 @@ namespace eSword9Converter
                                 if (stop)
                                 { break; }
                             }
-                            catch (Exception ex) { Error.Record(this, ex); }
+                            catch (Exception ex) { Trace.WriteLine(ex); }
                             finally { currentCount++; Controller.RaiseProgressChanged(this, currentCount); }
                         }
                         dbTrans.Commit();
+                        Debug.WriteLine("Successfully inserted " + currentCount + " entries out of " + count + " into table " + this.TableName + " in " + this.DB.FileName);
                     }
                 }
             }
