@@ -38,11 +38,7 @@ namespace eSword9Converter
         {
             try
             {
-                this.grpDest.Enabled = false;
-                this.txtDest.Text = "";
-                this.txtSource.Text = "";
                 this.lblStatus.Text = Globalization.CurrentLanguage.Finished;
-                this.btnConvert.Enabled = false;
                 this.prgMain.Value = 0;
                 this.prgMain.Maximum = 100;
                 MessageBox.Show(Globalization.CurrentLanguage.FinishedConverting);
@@ -156,6 +152,10 @@ namespace eSword9Converter
                 Controller.CurrentForm = this;
                 Controller.AutomaticallyOverwrite = true;
                 Controller.Begin();
+                this.grpDest.Enabled = false;
+                this.txtDest.Text = "";
+                this.txtSource.Text = "";
+                this.btnConvert.Enabled = false;
             }
             catch (Exception ex)
             { Trace.WriteLine(ex); }

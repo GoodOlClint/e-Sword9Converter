@@ -79,7 +79,6 @@
     <Compile Include="clsTraceListener.cs" />
     <Compile Include="DataLayer\Attributes.cs" />
     <Compile Include="DataLayer\clsDatabase.cs" />
-    <Compile Include="clsError.cs" />
     <Compile Include="clsGlobalization.cs" />
     <Compile Include="clsController.cs" />
     <Compile Include="DataLayer\clsTable.cs" />
