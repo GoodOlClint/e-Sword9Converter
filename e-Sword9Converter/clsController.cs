@@ -227,8 +227,8 @@ namespace eSword9Converter
                     odbcCon.Close();
                     return true;
                 }
-                catch (Exception ex)
-                { Trace.WriteLine(ex); return false; }
+                catch
+                { return false; }
             }
         }
 
