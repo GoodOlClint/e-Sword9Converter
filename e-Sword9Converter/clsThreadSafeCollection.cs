@@ -15,17 +15,17 @@ namespace eSword9Converter
         {
             get
             {
+                if (disposed)
+                { throw new ObjectDisposedException(this.GetType().ToString()); }
                 lock (threadLock)
-                {
-                    return this.List[index];
-                }
+                { return this.List[index]; }
             }
             set
             {
+                if (disposed)
+                { throw new ObjectDisposedException(this.GetType().ToString()); }
                 lock (threadLock)
-                {
-                    this.List[index] = value;
-                }
+                { this.List[index] = value; }
             }
         }
         #endregion
@@ -34,47 +34,28 @@ namespace eSword9Converter
 
         public void Add(T item)
         {
-            if (!disposed)
-            {
-                lock (threadLock)
-                {
-                    this.List.Add(item);
-                }
-            }
-            else
-            {
-                throw new ObjectDisposedException(this.GetType().ToString());
-            }
+            if (disposed)
+            { throw new ObjectDisposedException(this.GetType().ToString()); }
+            lock (threadLock)
+            { this.List.Add(item); }
+
         }
 
         public void Clear()
         {
-            if (!disposed)
-            {
-                lock (threadLock)
-                {
-                    this.List.Clear();
-                }
-            }
-            else
-            {
-                throw new ObjectDisposedException(this.GetType().ToString());
-            }
+            if (disposed)
+            { throw new ObjectDisposedException(this.GetType().ToString()); }
+            lock (threadLock)
+            { this.List.Clear(); }
+
         }
 
         public bool Contains(T item)
         {
-            if (!disposed)
-            {
-                lock (threadLock)
-                {
-                    return this.List.Contains(item);
-                }
-            }
-            else
-            {
-                throw new ObjectDisposedException(this.GetType().ToString());
-            }
+            if (disposed)
+            { throw new ObjectDisposedException(this.GetType().ToString()); }
+            lock (threadLock)
+            { return this.List.Contains(item); }
         }
 
         public void CopyTo(T[] array, int arrayIndex)
@@ -178,15 +159,15 @@ namespace eSword9Converter
 
         public void Dispose()
         {
-            if (!disposed)
+            if (disposed)
+            { throw new ObjectDisposedException(this.GetType().ToString()); }
+            foreach (T item in this.List)
             {
-                this.Clear();
-                this.disposed = true;
+                if (item.GetType() == typeof(IDisposable))
+                { ((IDisposable)item).Dispose(); }
             }
-            else
-            {
-                throw new ObjectDisposedException(this.GetType().ToString());
-            }
+            this.Clear();
+            this.disposed = true;
         }
 
         #endregion
@@ -202,7 +183,9 @@ namespace eSword9Converter
             {
                 foreach (T item in this.List)
                 {
-                    if ((item != null)) col.Add(item);
+                    if (item.GetType() == typeof(ICloneable))
+                    { col.Add((T)((ICloneable)item).Clone()); }
+                    else { if ((item != null)) col.Add(item); }
                 }
                 if (clear) this.List.Clear();
                 return (object)col;
