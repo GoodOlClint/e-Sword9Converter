@@ -1,10 +1,9 @@
-﻿using System.IO;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Text;
-using System.Globalization;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace eSword9Converter.Globalization
 {
@@ -74,28 +73,33 @@ namespace eSword9Converter.Globalization
         public static string SaveFileList { get { return Bible + "|*.bblx|" + BibleReadingPlan + "|*.brpx|" + Commentary + "|*.cmtx|" + Dictionary + "|*.dctx|" + Harmony + "|*.harx|" + PrayerRequests + "|*.prlx" + TopicNotes + "|*.topx|" + VerseLists + "|*.lstx|" + Graphics + "|*.mapx|" + Notes + "|*.notx"; } }
         public static string OpenFileList { get { return AlleSwordModules + "*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst|" + Bibles + "|*.bbl|" + Commentaries + "|*.cmt|" + Dictionaries + "|*.dct|" + Harmonies + "|*.har|" + TopicNotes + "|*.top|" + VerseLists + "|*.lst|" + Graphics + "|*.map|" + Notes + "|*.not"; } }
         public static string SqlErrorString { get { return "{0}\t{1}\t" + Row + ":{2}\t" + Column + ":{3}\t" + Type + ":{4}\t" + Value + ":{5}\t" + Message + ":{6}"; } }
+
+
         public static void Initalize()
         {
             Debug.WriteLine("Globalization initalization started");
             Strings = new ThreadSafeDictionary<string, string>();
-            string fileStream = "eSword9Converter.Strings." + CultureInfo.CurrentCulture.TwoLetterISOLanguageName + ".txt";
+            LoadLanguage(CultureInfo.CurrentCulture.TwoLetterISOLanguageName);
+            Debug.WriteLine("Globalization initalization finished");
+        }
+
+        /// <summary>
+        /// Attempts to load <paramref name="ISOLanguageName"/> localized strings from an embeded resource
+        /// </summary>
+        /// <param name="ISOLanguageName">A two letter ISO Language code to try to load</param>
+        /// <remarks>If <paramref name="ISOLanguageName"/> cannot be loaded, it loads English as the default</remarks>
+        static void LoadLanguage(string ISOLanguageName)
+        {
+            string fileStream = "eSword9Converter.Strings." + ISOLanguageName + ".txt";
             Debug.WriteLine("Attempting to load localized strings from " + fileStream);
             Stream stream = typeof(CurrentLanguage).Assembly.GetManifestResourceStream(fileStream);
-
+            /* If the stream is null, that language isn't supported load english instead */
             if (stream == null)
             {
                 stream = typeof(CurrentLanguage).Assembly.GetManifestResourceStream("eSword9Converter.Strings.en.txt");
                 Debug.WriteLine("Loading of " + fileStream + "failed. Falling back on eSword9Converter.Strings.en.txt");
             }
-
-            LoadLanguage(stream);
-            stream.Close();
-            stream.Dispose();
-        }
-
-        static void LoadLanguage(Stream FileStream)
-        {
-            using (StreamReader SR = new StreamReader(FileStream, System.Text.Encoding.Default))
+            using (StreamReader SR = new StreamReader(stream, System.Text.Encoding.Default))
             {
                 Debug.WriteLine("Reading FileStream one line at a time");
                 while (!SR.EndOfStream)
@@ -104,9 +108,13 @@ namespace eSword9Converter.Globalization
                     Strings[dct[0]] = dct[1];
 
                 }
-                Debug.WriteLine("Finished");
+                Debug.WriteLine("Finished loading localized strings");
                 SR.Close();
             }
+            stream.Close();
+            stream.Dispose();
+            /* \r\n is treated as a string litteral when it is loaded as a stream */
+            /* We need to transform it to a new line */
             Regex searchTerm = new Regex(@"\\r\\n");
             var query = from KeyValuePair<string, string> kvp in Strings.ToArray()
                         where searchTerm.Matches(kvp.Value).Count > 0
@@ -116,7 +124,9 @@ namespace eSword9Converter.Globalization
             {
                 Strings[kvp.Key] = searchTerm.Replace(kvp.Value, "\r\n");
             }
-            Debug.WriteLineIf(query.Count() > 0, "Finished");
+            Debug.WriteLineIf(query.Count() > 0, "Finished splitting newlines");
+
+            /* Macros can be embeded in the localization file to reduce chances of something strange popping up in translation */
             searchTerm = new Regex(@"\$\{(.+)\}");
             query = from KeyValuePair<string, string> kvp in Strings.ToArray()
                     where searchTerm.Matches(kvp.Value).Count > 0
@@ -127,21 +137,29 @@ namespace eSword9Converter.Globalization
                 Match match = searchTerm.Match(kvp.Value);
                 Strings[kvp.Key] = ParseString(kvp.Value);
             }
-            Debug.WriteLineIf(query.Count() > 0, "Finished");
+            Debug.WriteLineIf(query.Count() > 0, "Finished transforming strings");
+
+            /* Finally, let any subscribers know we've changed languages */
             Controller.RaiseLanguageChanged();
         }
 
+        /// <summary>
+        /// Takes a string from a globalization file and parses the macros in it
+        /// </summary>
+        /// <param name="inString">A string containing a globalization macro</param>
+        /// <returns>A fully localized string in the currently selected language</returns>
+        /// <remarks>A globalization macro can be created by adding $(<value>PropertyName</value>) to a string</remarks>
         static string ParseString(string inString)
         {
             Regex searchTerm = new Regex(@"\$\{(.+)\}");
-            Match m = searchTerm.Match(inString);
-            if (m.Length > 0)
+            MatchCollection mCol = searchTerm.Matches(inString);
+            string outString = inString;
+            foreach (Match m in mCol)
             {
-                string outString = inString.Replace(m.Groups[0].Value, Strings[m.Groups[1].Value]);
-                return ParseString(outString);
+                outString = outString.Replace(m.Groups[0].Value, Strings[m.Groups[1].Value]);
+                outString = ParseString(outString);
             }
-            else
-            { return inString; }
+            return outString;
         }
     }
 }

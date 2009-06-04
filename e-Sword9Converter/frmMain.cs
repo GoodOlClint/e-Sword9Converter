@@ -192,7 +192,7 @@ namespace eSword9Converter
                 if (this.txtSource.Text == "")
                     return;
                 if (!File.Exists(this.txtSource.Text))
-                { MessageBox.Show("", Globalization.CurrentLanguage.SourceFileNotExist, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+                { MessageBox.Show(Globalization.CurrentLanguage.SourceFileNotExist,this.txtSource.Text, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                 if (!ValidSource(this.txtSource.Text))
                 { MessageBox.Show("", Globalization.CurrentLanguage.SourceFileInvalid, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                 string ext = this.txtSource.Text.Substring(this.txtSource.Text.Length - 4, 4);
@@ -253,7 +253,7 @@ namespace eSword9Converter
                     default:
                         return false;
                 }
-                FileStream fs = new FileStream(path, FileMode.Open);
+                FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
                 BinaryReader br = new BinaryReader(fs);
                 long pos = 0;
                 bool reading = true;

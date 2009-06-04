@@ -10,9 +10,9 @@ namespace eSword9Converter
 {
     public abstract class Table<T> : ITable, IDisposable where T : Table<T>, new()
     {
-        public ThreadSafeDictionary<string, IColumn> Columns = new ThreadSafeDictionary<string, IColumn>();
-        public ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>> Indexes = new ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>();
-        public ThreadSafeCollection<ThreadSafeDictionary<string, object>> Rows = new ThreadSafeCollection<ThreadSafeDictionary<string, object>>();
+        public ThreadSafeDictionary<string, IColumn> Columns;
+        public ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>> Indexes;
+        public ThreadSafeCollection<ThreadSafeDictionary<string, object>> Rows;
         public string TableName { get; set; }
         public IDatabase DB { get; set; }
 
@@ -21,6 +21,10 @@ namespace eSword9Converter
         #region Constructor
         public Table()
         {
+            this.Columns = new ThreadSafeDictionary<string, IColumn>();
+            this.Indexes = new ThreadSafeDictionary<string, ThreadSafeCollection<IColumn>>();
+            this.Rows = new ThreadSafeCollection<ThreadSafeDictionary<string, object>>();
+
             TableName = (from TableAttribute ta in (TableAttribute[])this.GetType().GetCustomAttributes(typeof(TableAttribute), false)
                          where ta.Type != tableType.Sql
                          select ta.Name).First();

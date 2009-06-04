@@ -13,7 +13,7 @@ namespace eSword9Converter
         private ThreadSafeDictionary<string, bool> BooleanProperties;
         private ThreadSafeDictionary<string, string> StringProperties;
         private ThreadSafeDictionary<string, ITable> tables;
-        private object threadLock = new object();
+        private object threadLock;
         private oleDbFactory oleDbFactory;
         private SQLiteDbFactory SQLiteFactory;
         private string SourceConnectionString;
@@ -115,6 +115,7 @@ namespace eSword9Converter
 
         public Database()
         {
+            this.threadLock = new object();
             this.Tables = new ThreadSafeDictionary<string, ITable>();
             this.BooleanProperties = new ThreadSafeDictionary<string, bool>();
             this.StringProperties = new ThreadSafeDictionary<string, string>();
@@ -122,6 +123,7 @@ namespace eSword9Converter
             this.SQLiteFactory = new SQLiteDbFactory();
             this.SourceConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source={file};";
             this.DestConnectionString = "data source=\"{file}\"";
+ 
         }
 
         public void Stop() { Skip = true; }
