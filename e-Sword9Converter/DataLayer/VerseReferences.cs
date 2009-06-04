@@ -103,7 +103,7 @@ namespace eSword9Converter
     {
         public VerseReferences()
         {
-            Trace.WriteLine("Building VerseReferenes Database");
+            Trace.WriteLine("Building VerseReferences Database");
             this.Add(new VerseReference(1, 2, 32, 56));
             this.Add(new VerseReference(1, 3, 57, 80));
             this.Add(new VerseReference(1, 4, 81, 106));

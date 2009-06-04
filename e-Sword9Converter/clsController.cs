@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using System.Diagnostics;
 using eSword9Converter.Globalization;
+using Microsoft.Win32;
+
 namespace eSword9Converter
 {
     public static class Controller
@@ -17,7 +19,20 @@ namespace eSword9Converter
         public static bool SkipPassword { get; set; }
         public static Database DB { get; set; }
         public static Form CurrentForm { get; set; }
-
+        public static string eSwordFolder
+        {
+            get
+            {
+                try
+                {
+                    RegistryKey eSword = Registry.CurrentUser.OpenSubKey(@"Software\VB and VBA Program Settings\e-Sword\Settings");
+                    //RegistryKey eSword = RegistryKey.OpenRemoteBaseKey(RegistryHive.CurrentUser, @"Software\VB and VBA Program Settings\e-Sword");
+                    return eSword.GetValue("path").ToString();
+                }
+                catch (Exception ex)
+                { Trace.WriteLine(ex); return ""; }
+            }
+        }
         #region Private Members
         private static ThreadSafeCollection<string> passwords;
         private static object threadLock;
@@ -86,7 +101,7 @@ namespace eSword9Converter
                 pass = p;
             }
             else
-            { Trace.WriteLine("No Subscribers to GetPasswordEvent"); pass = ""; }
+            { Trace.WriteLine(CurrentLanguage.NoGetPasswordEventSubscribers); pass = ""; }
         }
 
         public delegate void ConversionFinishedEventHandler();
@@ -127,7 +142,7 @@ namespace eSword9Converter
             }
             else
             {
-                Trace.WriteLine("Password dialog box closed");
+                Trace.WriteLine(CurrentLanguage.PasswordBoxClosed);
                 pass = "";
             }
         }
@@ -317,7 +332,7 @@ namespace eSword9Converter
                             DB = new Tables.VerseList();
                             break;
                         default:
-                            Trace.WriteLine(new InvalidDataException("Invalid filetype " + fci.OldExtension + " added to collection"));
+                            Trace.WriteLine(new InvalidDataException(string.Format(CurrentLanguage.InvalidFileType, fci.OldExtension)));
                             return;
                     }
                     Debug.WriteLine(string.Format("{0} selected", DB.ToString()));

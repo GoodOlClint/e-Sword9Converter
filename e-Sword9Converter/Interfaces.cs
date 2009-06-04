@@ -10,6 +10,7 @@ namespace eSword9Converter
         bool NotNull { get; set; }
         string PropertyName { get; set; }
         columnType colType { get; }
+        string Hash { get; }
     }
 
     public interface IIndex

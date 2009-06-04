@@ -5,6 +5,7 @@ using System.Data.SQLite;
 using System.Linq;
 using System.Reflection;
 using System.Diagnostics;
+using eSword9Converter.Globalization;
 
 namespace eSword9Converter
 {
@@ -43,7 +44,7 @@ namespace eSword9Converter
                 foreach (ColumnAttribute ca in (ColumnAttribute[])obj[1])
                 {
                     ca.PropertyName = Prop.Name;
-                    this.Columns.Add(ca.Name, (IColumn)ca);
+                    this.Columns.Add(ca.Hash, (IColumn)ca);
                     if (((object[])obj[2]).Length > 0)
                     {
                         foreach (IIndex index in (object[])obj[2])
@@ -90,7 +91,6 @@ namespace eSword9Converter
                                     if (Db.Skip)
                                     { break; }
                                     IColumn Column = Pair.Value;
-                                    //PropertyInfo Prop = Table.GetType().GetProperty(Column.PropertyName);
                                     try
                                     {
                                         switch (Column.Type)
@@ -108,7 +108,15 @@ namespace eSword9Converter
                                                 break;
                                             case DbType.TEXT:
                                             case DbType.NVARCHAR:
-                                                Row.Add(Column.PropertyName, Convert.ToString(reader[Column.Name]));
+                                                string str = Convert.ToString(reader[Column.Name]);
+                                                if (str == "System.Byte[]")
+                                                {
+                                                    Trace.WriteLine(string.Format(CurrentLanguage.InvalidString, Column.Name, currentCount, Table.TableName));
+                                                    byte[] b = (byte[])reader[Column.Name];
+                                                    str = System.Text.ASCIIEncoding.ASCII.GetString(b);
+                                                }
+                                                Row.Add(Column.PropertyName, str);
+                                                //Row.Add(Column.PropertyName, Convert.ToString(reader[Column.Name]));
                                                 break;
                                             case DbType.REAL:
                                                 Row.Add(Column.PropertyName, Convert.ToDouble(reader[Column.Name]));
@@ -166,7 +174,7 @@ namespace eSword9Converter
             /* We're going to loop through all the columns and append the column name to the sql string */
             foreach (KeyValuePair<string, IColumn> Column in (from KeyValuePair<string, IColumn> C in this.Columns where C.Value.colType != columnType.Access select C))
             {
-                sql += Column.Key;
+                sql += Column.Value.Name;
                 if (Column.Value.NotNull)
                     sql += " NOT NULL";
                 if (Column.Value.Type != DbType.NULL)
@@ -235,7 +243,7 @@ namespace eSword9Converter
                     foreach (KeyValuePair<string, IColumn> Column in sqlColumns)
                     {
                         DbParameter dbParam = dbCmd.CreateParameter();
-                        dbParam.ParameterName = Column.Value.PropertyName;
+                        dbParam.ParameterName = "@" + Column.Value.PropertyName;
                         dbParams.Add(Column.Value.PropertyName, dbParam);
                     }
 

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace eSword9Converter
 {
@@ -14,6 +16,24 @@ namespace eSword9Converter
         public int Length { get { return this.length; } set { this.length = value; } }
         public string Name { get { return this.name; } set { this.name = value; } }
         public bool NotNull { get { return this.notNull; } set { this.notNull = value; } }
+        public string Hash
+        {
+            get
+            {
+                byte[] tmpSource;
+                byte[] tmpHash;
+                //Create a byte array from source data.
+                tmpSource = ASCIIEncoding.ASCII.GetBytes(this.Name + this.PropertyName);
+                tmpHash = new MD5CryptoServiceProvider().ComputeHash(tmpSource);
+                int i;
+                StringBuilder sOutput = new StringBuilder(tmpHash.Length);
+                for (i = 0; i < tmpHash.Length; i++)
+                {
+                    sOutput.Append(tmpHash[i].ToString("X2"));
+                }
+                return sOutput.ToString();
+            }
+        }
         public ColumnAttribute() { }
         public ColumnAttribute(string Name) { this.Name = Name; }
         public ColumnAttribute(string Name, DbType DbType) { this.Name = Name; this.Type = DbType; }

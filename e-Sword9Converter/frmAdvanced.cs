@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Windows.Forms;
+using eSword9Converter.Globalization;
 
 namespace eSword9Converter
 {
     public partial class frmAdvanced : Form
     {
-        private updateStatus CurrentStatus;
+        private string CurrentStatus;
         public frmAdvanced()
         {
             Debug.WriteLine("Initializing frmAdvanced");
@@ -27,22 +28,22 @@ namespace eSword9Converter
         void Controller_LanguageChangedEvent()
         {
             Debug.WriteLine("frmPassword.LanguageChangedEvent");
-            this.Text = Globalization.CurrentLanguage.AdvancedTitle;
-            this.grpDest.Text = Globalization.CurrentLanguage.DestinationDirectory;
-            this.grpSource.Text = Globalization.CurrentLanguage.SourceDirectory;
-            this.btnConvert.Text = Globalization.CurrentLanguage.Convert;
-            this.btnDest.Text = Globalization.CurrentLanguage.Destination;
-            this.btnSource.Text = Globalization.CurrentLanguage.Source;
-            this.lnkNormal.Text = Globalization.CurrentLanguage.Normal;
-            this.chkOverwrite.Text = Globalization.CurrentLanguage.AutomaticallyOverwrite;
-            this.chkSkip.Text = Globalization.CurrentLanguage.SkipPasswordProtectedFiles;
-            this.chkSubDir.Text = Globalization.CurrentLanguage.IncludeSubdirectories;
+            this.Text = CurrentLanguage.AdvancedTitle;
+            this.grpDest.Text = CurrentLanguage.DestinationDirectory;
+            this.grpSource.Text = CurrentLanguage.SourceDirectory;
+            this.btnConvert.Text = CurrentLanguage.Convert;
+            this.btnDest.Text = CurrentLanguage.Destination;
+            this.btnSource.Text = CurrentLanguage.Source;
+            this.lnkNormal.Text = CurrentLanguage.Normal;
+            this.chkOverwrite.Text = CurrentLanguage.AutomaticallyOverwrite;
+            this.chkSkip.Text = CurrentLanguage.SkipPasswordProtectedFiles;
+            this.chkSubDir.Text = CurrentLanguage.IncludeSubdirectories;
             Debug.WriteLine("frmPassword.LanguageChangedEvent Finished");
         }
 
         void Controller_ConversionFinishedEvent()
         {
-            this.Text = Globalization.CurrentLanguage.AdvancedTitle + " " + Globalization.CurrentLanguage.Finished;
+            this.Text = CurrentLanguage.AdvancedTitle + " " + CurrentLanguage.Finished;
             this.grpDest.Enabled = false;
             this.txtDest.Enabled = true;
             this.btnDest.Enabled = true;
@@ -53,15 +54,13 @@ namespace eSword9Converter
             this.chkSkip.Enabled = true;
             this.chkSubDir.Enabled = true;
             this.lnkNormal.Enabled = true;
-            MessageBox.Show(Globalization.CurrentLanguage.FinishedConverting);
+            MessageBox.Show(CurrentLanguage.FinishedConverting);
         }
 
         void Controller_ProgressChangedEvent(object sender, int count)
         {
             this.prgMain.Value = count;
-            //Debug.WriteLine("frmAdvanced.prgMain.Value set to: " + count);
-            this.Text = string.Format("{0}: {3}% {1} {2}", Globalization.CurrentLanguage.AdvancedTitle, this.CurrentStatus.ToString(), Controller.DB.FileName, (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d));
-            //Debug.WriteLine("frmAdvanced.Text set to: " + this.Text);
+            this.Text = string.Format("{0}: {3}% {1} {2}", CurrentLanguage.AdvancedTitle, this.CurrentStatus, Controller.DB.FileName, (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d));
         }
 
         void Controller_MaxValueChangedEvent(object sender, int value)
@@ -73,7 +72,24 @@ namespace eSword9Converter
 
         void Controller_StatusChangedEvent(object sender, updateStatus status)
         {
-            this.CurrentStatus = status;
+            switch (status)
+            {
+                case updateStatus.Loading:
+                    this.CurrentStatus = CurrentLanguage.Loading;
+                    break;
+                case updateStatus.Converting:
+                    this.CurrentStatus = CurrentLanguage.Converting;
+                    break;
+                case updateStatus.Saving:
+                    this.CurrentStatus = CurrentLanguage.Saving;
+                    break;
+                case updateStatus.Optimizing:
+                    this.CurrentStatus = CurrentLanguage.Optimizing;
+                    break;
+                case updateStatus.Finished:
+                    this.CurrentStatus = CurrentLanguage.Finished;
+                    break;
+            }
             Debug.WriteLine("frmAdvanced.CurrentStatus set to: " + status.ToString());
         }
 
@@ -82,7 +98,7 @@ namespace eSword9Converter
         {
             Debug.WriteLine("frmAdvanced.btnSource Clicked");
             if (this.txtSource.Text == "")
-            { this.ofdSource.SelectedPath = @"C:\Program Files\e-Sword"; }
+            { this.ofdSource.SelectedPath = Controller.eSwordFolder; }
             this.ofdSource.ShowNewFolderButton = false;
             if (this.ofdSource.ShowDialog() == DialogResult.OK)
             {

@@ -17,17 +17,17 @@ namespace eSword9Converter.Tables
         {
             [Column("Sunday",DbType.BOOL)]
             public bool Sunday { get; set; }
-            [Column("Sunday", DbType.BOOL)]
+            [Column("Monday", DbType.BOOL)]
             public bool Monday { get; set; }
-            [Column("Sunday", DbType.BOOL)]
+            [Column("Tuesday", DbType.BOOL)]
             public bool Tuesday { get; set; }
-            [Column("Sunday", DbType.BOOL)]
+            [Column("Wednesday", DbType.BOOL)]
             public bool Wednesday { get; set; }
-            [Column("Sunday", DbType.BOOL)]
+            [Column("Thursday", DbType.BOOL)]
             public bool Thursday { get; set; }
-            [Column("Sunday", DbType.BOOL)]
+            [Column("Friday", DbType.BOOL)]
             public bool Friday { get; set; }
-            [Column("Sunday", DbType.BOOL)]
+            [Column("Saturday", DbType.BOOL)]
             public bool Saturday { get; set; }
             [Column("Comments", DbType.TEXT)]
             public string Comments { get; set; }

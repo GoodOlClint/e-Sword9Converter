@@ -123,7 +123,7 @@ namespace eSword9Converter
             this.SQLiteFactory = new SQLiteDbFactory();
             this.SourceConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source={file};";
             this.DestConnectionString = "data source=\"{file}\"";
- 
+
         }
 
         public void Stop() { Skip = true; }
@@ -147,7 +147,7 @@ namespace eSword9Converter
                     Controller.RaiseStatusChanged(this, updateStatus.Finished);
                 this.Running = false;
             }
-            catch (Exception ex) { Trace.WriteLine(ex); } //Error.Record(this, ex); }
+            catch (Exception ex) { Trace.WriteLine(ex); this.Running = false; } //Error.Record(this, ex); }
         }
 
         public void Clear()
@@ -167,28 +167,56 @@ namespace eSword9Converter
             {
                 if (File.Exists(Path))
                     File.Delete(Path);
-
-                using (DbConnection sqlCon = SQLiteFactory.CreateConnection())
+                try
                 {
-                    sqlCon.ConnectionString = this.DestConnectionString.Replace("{file}", Path);
-                    sqlCon.Open();
-                    using (DbCommand sqlCmd = sqlCon.CreateCommand())
+                    using (DbConnection sqlCon = SQLiteFactory.CreateConnection())
                     {
-                        foreach (string str in (from KeyValuePair<string, ITable> Table in this.Tables
-                                                select Table.Value.SQLCreateStatement()))
+                        sqlCon.ConnectionString = this.DestConnectionString.Replace("{file}", Path);
+                        sqlCon.Open();
+                        using (DbCommand sqlCmd = sqlCon.CreateCommand())
                         {
-                            sqlCmd.CommandText = str;
-                            sqlCmd.ExecuteNonQuery();
+                            foreach (string str in (from KeyValuePair<string, ITable> Table in this.Tables
+                                                    select Table.Value.SQLCreateStatement()))
+                            {
+                                sqlCmd.CommandText = str;
+                                sqlCmd.ExecuteNonQuery();
+                            }
                         }
                     }
                 }
-                foreach (KeyValuePair<string, ITable> Table in this.Tables)
+                catch (Exception ex)
+                { Trace.WriteLine(ex); }
+                try
                 {
-                    try
-                    { Table.Value.SaveToDatabase(SQLiteFactory, this.DestConnectionString.Replace("{file}", Path)); }
-                    catch (Exception ex) { Trace.WriteLine(ex); }
+                    foreach (KeyValuePair<string, ITable> Table in this.Tables)
+                    {
+                        try
+                        { Table.Value.SaveToDatabase(SQLiteFactory, this.DestConnectionString.Replace("{file}", Path)); }
+                        catch (Exception ex) { Trace.WriteLine(ex); }
+                    }
                 }
-
+                catch (Exception ex)
+                { Trace.WriteLine(ex); }
+                try
+                {
+                    Controller.RaiseStatusChanged(this, updateStatus.Optimizing);
+                    Controller.RaiseProgressChanged(this, 0);
+                    Controller.RaiseMaxValueChanged(this, 100);
+                    using (DbConnection sqlCon = SQLiteFactory.CreateConnection())
+                    {
+                        sqlCon.ConnectionString = this.DestConnectionString.Replace("{file}", Path);
+                        sqlCon.Open();
+                        using (DbCommand sqlCmd = sqlCon.CreateCommand())
+                        {
+                            sqlCmd.CommandText = "VACUUM";
+                            Controller.RaiseProgressChanged(this, 50);
+                            sqlCmd.ExecuteNonQuery();
+                        }
+                    }
+                    Controller.RaiseProgressChanged(this, 100);
+                }
+                catch (Exception ex)
+                { Trace.WriteLine(ex); }
             }
         }
         public virtual void Load(string Path)

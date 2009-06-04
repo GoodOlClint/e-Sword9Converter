@@ -42,18 +42,23 @@ namespace eSword9Converter.Globalization
         public static string Harmony { get { return Strings["Harmony"]; } }
         public static string Illustrations { get { return Strings["Illustrations"]; } }
         public static string IncludeSubdirectories { get { return Strings["IncludeSubdirectories"]; } }
+        public static string InvalidFileType { get { return Strings["InvalidFileType"]; } }
         public static string InvalidPassword { get { return Strings["InvalidPassword"]; } }
+        public static string InvalidString { get { return Strings["InvalidString"]; } }
         public static string Loading { get { return Strings["Loading"]; } }
         public static string MainTitle { get { return Strings["MainTitle"]; } }
         public static string MemoryVerses { get { return Strings["MemoryVerses"]; } }
         public static string Message { get { return Strings["Message"]; } }
+        public static string NoGetPasswordEventSubscribers { get { return Strings["NoGetPasswordEventSubscribers"]; } }
         public static string Normal { get { return Strings["Normal"]; } }
         public static string Notes { get { return Strings["Notes"]; } }
         public static string Ok { get { return Strings["Ok"]; } }
+        public static string Optimizing { get { return Strings["Optimizing"]; } }
         public static string Overlay { get { return Strings["Overlay"]; } }
         public static string Overwrite { get { return Strings["Overwrite"]; } }
         public static string Password { get { return Strings["Password"]; } }
         public static string PasswordBlank { get { return Strings["PasswordBlank"]; } }
+        public static string PasswordBoxClosed { get { return Strings["PasswordBoxClosed"]; } }
         public static string PasswordFound { get { return Strings["PasswordFound"]; } }
         public static string PrayerRequests { get { return Strings["PrayerRequests"]; } }
         public static string ProgressExceededMax { get { return Strings["ProgressExceededMax"]; } }

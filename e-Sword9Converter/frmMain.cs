@@ -39,9 +39,12 @@ namespace eSword9Converter
             try
             {
                 this.lblStatus.Text = Globalization.CurrentLanguage.Finished;
+                MessageBox.Show(Globalization.CurrentLanguage.FinishedConverting);
+                this.txtDest.Text = "";
+                this.txtSource.Text = "";
                 this.prgMain.Value = 0;
                 this.prgMain.Maximum = 100;
-                MessageBox.Show(Globalization.CurrentLanguage.FinishedConverting);
+                this.lblStatus.Text = "";
             }
             catch (Exception ex)
             { Trace.WriteLine(ex); }
@@ -67,16 +70,7 @@ namespace eSword9Converter
         void Controller_ProgressChangedEvent(object sender, int count)
         {
             try
-            {
-                if (this.prgMain.InvokeRequired)
-                {
-                    this.prgMain.Invoke(new Controller.ProgressChangedEventHandler(this.Controller_ProgressChangedEvent), new object[] { sender, count });
-                }
-                else
-                {
-                    this.prgMain.Value = count;
-                }
-            }
+            { this.prgMain.Value = count; }
             catch (Exception ex)
             { Trace.WriteLine(ex); }
         }
@@ -85,15 +79,8 @@ namespace eSword9Converter
         {
             try
             {
-                if (this.prgMain.InvokeRequired)
-                {
-                    this.prgMain.Invoke(new Controller.MaxValueChangedEventHandler(this.Controller_MaxValueChangedEvent), new object[] { sender, value });
-                }
-                else
-                {
-                    Debug.WriteLine("frmMain.prgMain.Maximum set to: " + value);
-                    this.prgMain.Maximum = value;
-                }
+                Debug.WriteLine("frmMain.prgMain.Maximum set to: " + value);
+                this.prgMain.Maximum = value;
             }
             catch (Exception ex)
             { Trace.WriteLine(ex); }
@@ -103,15 +90,25 @@ namespace eSword9Converter
         {
             try
             {
-                if (this.lblStatus.InvokeRequired)
+                switch (status)
                 {
-                    this.lblStatus.Invoke(new Controller.StatusChangedEventHandler(this.Controller_StatusChangedEvent), new object[] { sender, status });
+                    case updateStatus.Loading:
+                        this.lblStatus.Text = CurrentLanguage.Loading;
+                        break;
+                    case updateStatus.Converting:
+                        this.lblStatus.Text = CurrentLanguage.Converting;
+                        break;
+                    case updateStatus.Saving:
+                        this.lblStatus.Text = CurrentLanguage.Saving;
+                        break;
+                    case updateStatus.Optimizing:
+                        this.lblStatus.Text = CurrentLanguage.Optimizing;
+                        break;
+                    case updateStatus.Finished:
+                        this.lblStatus.Text = CurrentLanguage.Finished;
+                        break;
                 }
-                else
-                {
-                    Debug.WriteLine("frmMain.lblStatus.Text set to: " + status.ToString());
-                    this.lblStatus.Text = status.ToString();
-                }
+                Debug.WriteLine("frmMain.lblStatus.Text set to: " + this.lblStatus.Text);
             }
             catch (Exception ex)
             { Trace.WriteLine(ex); }
@@ -153,8 +150,6 @@ namespace eSword9Converter
                 Controller.AutomaticallyOverwrite = true;
                 Controller.Begin();
                 this.grpDest.Enabled = false;
-                this.txtDest.Text = "";
-                this.txtSource.Text = "";
                 this.btnConvert.Enabled = false;
             }
             catch (Exception ex)
@@ -179,7 +174,8 @@ namespace eSword9Converter
                     this.btnConvert.Enabled = true;
                 }
             }
-            catch (Exception ex) { Trace.WriteLine(ex); }
+            catch (Exception ex)
+            { Trace.WriteLine(ex); }
         }
         #endregion
 
@@ -192,9 +188,9 @@ namespace eSword9Converter
                 if (this.txtSource.Text == "")
                     return;
                 if (!File.Exists(this.txtSource.Text))
-                { MessageBox.Show(Globalization.CurrentLanguage.SourceFileNotExist,this.txtSource.Text, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+                { MessageBox.Show(Globalization.CurrentLanguage.SourceFileNotExist, this.txtSource.Text, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                 if (!ValidSource(this.txtSource.Text))
-                { MessageBox.Show("", Globalization.CurrentLanguage.SourceFileInvalid, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+                { MessageBox.Show(Globalization.CurrentLanguage.SourceFileInvalid, this.txtSource.Text, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                 string ext = this.txtSource.Text.Substring(this.txtSource.Text.Length - 4, 4);
                 string path = this.ConvertFilePath(this.txtSource.Text);
                 this.ofdDest.FileName = this.txtSource.Text.Replace(ext, ext + "x").Replace(path + @"\", "");
