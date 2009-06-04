@@ -29,6 +29,7 @@
         Loading,
         Converting,
         Saving,
+        Optimizing,
         Finished
     }
     public enum messageType
