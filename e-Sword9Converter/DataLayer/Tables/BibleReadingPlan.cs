@@ -48,12 +48,12 @@ namespace eSword9Converter.Tables
             [Index("DayBookChapterIndex")]
             public int BookId { get; set; }
             
-            [AccessColumn("StartChapter", DbType.INT)]
+            [AccessColumn("Start Chapter", DbType.INT)]
             [SqlColumn("ChapterBegin", DbType.INT)]
             [Index("DayBookChapterIndex")]
             public int StartChapter { get; set; }
 
-            [AccessColumn("EndChapter", DbType.INT)]
+            [AccessColumn("End Chapter", DbType.INT)]
             [SqlColumn("ChapterEnd", DbType.INT)]
             public int EndChapter { get; set; }
             

@@ -15,9 +15,7 @@ namespace eSword9Converter
         {
             TraceListener traceListener = new TraceListener("eSword9Converter.log");
             Trace.Listeners.Add(traceListener);
-#if DEBUG   //We don't want to mess with creating a listener/Debug.log if we're in release mode.
-            //TraceListener debugListener = new TraceListener("eSword9Converter.Debug.log");
-            //Debug.Listeners.Add(debugListener);
+#if DEBUG
             using (Process proc = Process.GetCurrentProcess())
             {
                 Debug.WriteLine(string.Format("Application {0} started on computer {1} with process ID of {2}", proc.ProcessName, proc.MachineName, proc.Id));
@@ -26,6 +24,8 @@ namespace eSword9Converter
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Controller.Initalize();
+            frmAbout about = new frmAbout();
+            about.Show();
             Application.Run();
             Debug.WriteLine("Exiting application");
         }

@@ -26,7 +26,6 @@ namespace eSword9Converter
                 try
                 {
                     RegistryKey eSword = Registry.CurrentUser.OpenSubKey(@"Software\VB and VBA Program Settings\e-Sword\Settings");
-                    //RegistryKey eSword = RegistryKey.OpenRemoteBaseKey(RegistryHive.CurrentUser, @"Software\VB and VBA Program Settings\e-Sword");
                     return eSword.GetValue("path").ToString();
                 }
                 catch (Exception ex)
