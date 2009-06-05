@@ -24,8 +24,6 @@ namespace eSword9Converter
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Controller.Initalize();
-            frmAbout about = new frmAbout();
-            about.Show();
             Application.Run();
             Debug.WriteLine("Exiting application");
         }
