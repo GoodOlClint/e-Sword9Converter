@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace eSword9Converter.Tables
 {
@@ -18,7 +19,11 @@ namespace eSword9Converter.Tables
             if (!Skip)
             {
                 ((Details)this.Tables["Details"]).Version = 2;
-                ((Details)this.Tables["Details"]).Strong = false;
+                Regex strongsRegex = new Regex(@"[gGhH]\d+");
+
+                ((Details)this.Tables["Details"]).Strong = ((from ThreadSafeDictionary<string, object> Row in ((DictionaryTable)this.Tables["Dictionary"]).Rows
+                                                             where strongsRegex.Matches((string)Row["Topic"]).Count > 0
+                                                             select Row).Count() > 0);
             }
         }
         [Table("Details")]
@@ -26,16 +31,16 @@ namespace eSword9Converter.Tables
         {
             [Column("Description", DbType.NVARCHAR, 255)]
             public string Description { get { return Convert.ToString(this.Rows[0]["Description"]); } set { this.Rows[0]["Description"] = value; } }
-            
+
             [Column("Abbreviation", DbType.NVARCHAR, 50)]
             public string Abbreviation { get { return Convert.ToString(this.Rows[0]["Abbreviation"]); } set { this.Rows[0]["Abbreviation"] = value; } }
-            
+
             [Column("Comments", DbType.TEXT)]
             public string Comments { get { return Convert.ToString(this.Rows[0]["string"]); } set { this.Rows[0]["Font"] = value; } }
-            
+
             [SqlColumn("Version", DbType.INT)]
             public int Version { get { return Convert.ToInt32(this.Rows[0]["Version"]); } set { this.Rows[0]["Version"] = value; } }
-            
+
             [SqlColumn("Strong", DbType.BOOL)]
             public bool Strong { get { return Convert.ToBoolean(this.Rows[0]["Strong"]); } set { this.Rows[0]["Strong"] = value; } }
         }
@@ -49,7 +54,7 @@ namespace eSword9Converter.Tables
             [Column("Topic", DbType.TEXT, 100)]
             [Index("TopicIndex")]
             public string Topic { get; set; }
-            
+
             [Column("Definition", DbType.TEXT)]
             public string Definition { get; set; }
         }
