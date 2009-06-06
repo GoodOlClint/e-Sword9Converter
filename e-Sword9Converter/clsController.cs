@@ -1,4 +1,25 @@
-﻿using System;
+﻿/*
+ * Copyright (c) 2009, GoodOlClint All rights reserved.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted
+ * provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions
+ * and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions
+ * and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of the e-Sword Users nor the names of its contributors may be used to endorse
+ * or promote products derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+
+using System;
 using System.Collections.Generic;
 using System.Data.OleDb;
 using System.IO;
@@ -18,7 +39,7 @@ namespace eSword9Converter
         public static bool AutomaticallyOverwrite { get; set; }
         public static bool SkipPassword { get; set; }
         public static Database DB { get; set; }
-        public static Form CurrentForm { get; set; }
+        public static IForm CurrentForm { get; set; }
         public static string eSwordFolder
         {
             get
@@ -184,6 +205,7 @@ namespace eSword9Converter
             switching = true;
             try
             {
+                Controller.ConversionFinishedEvent -= new ConversionFinishedEventHandler(CurrentForm.Controller_ConversionFinishedEvent);
                 if (CurrentForm == MainForm)
                 {
                     Debug.WriteLine("Switching from MainForm to AdvancedForm");
@@ -192,6 +214,7 @@ namespace eSword9Converter
                     MainForm.Close();
                     AdvancedForm.Show();
                     CurrentForm = AdvancedForm;
+                    MainForm.Dispose();
                 }
                 else
                 {
@@ -201,6 +224,7 @@ namespace eSword9Converter
                     AdvancedForm.Close();
                     MainForm.Show();
                     CurrentForm = MainForm;
+                    AdvancedForm.Dispose();
                 }
             }
             finally { switching = false; }
@@ -289,8 +313,13 @@ namespace eSword9Converter
             {
                 foreach (FileConversionInfo fci in Controller.FileNames)
                 {
+                    bool skip = false;
                     switch (fci.OldExtension)
                     {
+                        default:
+                            Trace.WriteLine(new InvalidDataException(string.Format(CurrentLanguage.InvalidFileType, fci.OldExtension)));
+                            skip = true;
+                            break;
                         case "bbl":
                             DB = new Tables.Bible();
                             break;
@@ -330,38 +359,52 @@ namespace eSword9Converter
                         case "lst":
                             DB = new Tables.VerseList();
                             break;
-                        default:
-                            Trace.WriteLine(new InvalidDataException(string.Format(CurrentLanguage.InvalidFileType, fci.OldExtension)));
-                            return;
+
                     }
-                    Debug.WriteLine(string.Format("{0} selected", DB.ToString()));
-                    DB.SourceDB = fci.OldFullPath;
-                    Debug.WriteLine(string.Format("Source File is {0}", DB.SourceDB));
-                    bool needPassword = NeedPassword(fci.OldFullPath);
-                    Debug.WriteLine(string.Format("Source File Needs Password: {0}", needPassword));
-                    if ((needPassword && !SkipPassword) || !needPassword)
+                    if (!skip)
                     {
-                        Debug.WriteLine(string.Format("Need Password: {0} SkipPassword: {1}", needPassword, SkipPassword));
-                        bool exist = File.Exists(fci.NewFullPath);
-                        Debug.WriteLine("Destination file already exists: " + exist);
-                        if ((!exist) || (exist && AutomaticallyOverwrite) || (exist && (ShowMessageBox(string.Format(Globalization.CurrentLanguage.Overwrite, fci.NewFullPath), Globalization.CurrentLanguage.FileExists, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)))
+                        try
                         {
-                            DB.DestDB = fci.NewFullPath;
-                            Debug.WriteLine("Destination File is " + DB.DestDB);
-                            Debug.WriteLine("Begining conversion");
-                            DB.ConvertFormat();
-                            Debug.WriteLine("Conversion finished");
-                            DB.Clear();
+                            Debug.WriteLine(string.Format("{0} selected", DB.ToString()));
+                            DB.SourceDB = fci.OldFullPath;
+                            Debug.WriteLine(string.Format("Source File is {0}", DB.SourceDB));
+                            bool needPassword = NeedPassword(fci.OldFullPath);
+                            Debug.WriteLine(string.Format("Source File Needs Password: {0}", needPassword));
+                            if ((needPassword && !SkipPassword) || !needPassword)
+                            {
+                                Debug.WriteLine(string.Format("Need Password: {0} SkipPassword: {1}", needPassword, SkipPassword));
+                                bool exist = File.Exists(fci.NewFullPath);
+                                Debug.WriteLine("Destination file already exists: " + exist);
+                                if ((!exist) || (exist && AutomaticallyOverwrite) || (exist && (ShowMessageBox(string.Format(Globalization.CurrentLanguage.Overwrite, fci.NewFullPath), Globalization.CurrentLanguage.FileExists, MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)))
+                                {
+                                    DB.DestDB = fci.NewFullPath;
+                                    Debug.WriteLine("Destination File is " + DB.DestDB);
+                                    Debug.WriteLine("Begining conversion");
+                                    if (!Directory.Exists(fci.NewDirectory))
+                                    {
+                                        Debug.WriteLine("Creating new directory: " + fci.NewDirectory);
+                                        Directory.CreateDirectory(fci.NewDirectory);
+                                    }
+                                    DB.ConvertFormat();
+                                    Debug.WriteLine("Conversion finished");
+                                    DB.Clear();
+                                }
+                                else
+                                { Trace.WriteLine("Skipping already existing file " + DB.SourceDB); }
+                            }
+                            else
+                            { Trace.WriteLine("Skipping password protected file " + DB.SourceDB); }
+                            if (Stop)
+                            {
+                                Debug.WriteLine("Exiting batch conversion");
+                                break;
+                            }
                         }
-                    }
-                    else
-                    {
-                        Debug.WriteLine("Skipping file " + DB.SourceDB);
-                    }
-                    if (Stop)
-                    {
-                        Debug.WriteLine("Exiting batch conversion");
-                        break;
+                        catch (Exception ex)
+                        {
+                            Trace.WriteLine(ex);
+                            MessageBox.Show(ex.Message + "\r\n" + ex.StackTrace, ex.Source, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
                 }
                 Controller.FileNames.Clear();

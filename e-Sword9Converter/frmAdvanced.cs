@@ -1,4 +1,24 @@
-﻿using System;
+﻿/*
+ * Copyright (c) 2009, GoodOlClint All rights reserved.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted
+ * provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions
+ * and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions
+ * and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of the e-Sword Users nor the names of its contributors may be used to endorse
+ * or promote products derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -7,7 +27,7 @@ using eSword9Converter.Globalization;
 
 namespace eSword9Converter
 {
-    public partial class frmAdvanced : Form
+    public partial class frmAdvanced : Form, IForm
     {
         private string CurrentStatus;
         public frmAdvanced()
@@ -25,7 +45,7 @@ namespace eSword9Converter
             Debug.WriteLine("Initializing frmAdvanced Finished");
         }
 
-        void Controller_LanguageChangedEvent()
+        public void Controller_LanguageChangedEvent()
         {
             Debug.WriteLine("frmPassword.LanguageChangedEvent");
             this.Text = CurrentLanguage.AdvancedTitle;
@@ -41,7 +61,7 @@ namespace eSword9Converter
             Debug.WriteLine("frmPassword.LanguageChangedEvent Finished");
         }
 
-        void Controller_ConversionFinishedEvent()
+        public void Controller_ConversionFinishedEvent()
         {
             this.Text = CurrentLanguage.AdvancedTitle + " " + CurrentLanguage.Finished;
             this.grpDest.Enabled = false;
@@ -54,6 +74,7 @@ namespace eSword9Converter
             this.chkSkip.Enabled = true;
             this.chkSubDir.Enabled = true;
             this.lnkNormal.Enabled = true;
+            this.chkMirror.Enabled = this.chkSubDir.Checked;
             MessageBox.Show(CurrentLanguage.FinishedConverting);
         }
 
@@ -153,13 +174,18 @@ namespace eSword9Converter
             this.chkSkip.Enabled = false;
             this.chkSubDir.Enabled = false;
             this.lnkNormal.Enabled = false;
+            this.chkMirror.Enabled = false;
             DirectoryInfo di = new DirectoryInfo(this.txtSource.Text);
             FileInfo[] files = GetFiles(di, "*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst", ';');
             foreach (FileInfo fi in files)
             {
                 if (!fi.Extension.EndsWith("x"))
                 {
-                    string DestPath = fi.FullName.Replace(ConvertFilePath(fi.FullName), this.txtDest.Text) + "x";
+                    string DestPath;
+                    if (this.chkMirror.Checked)
+                    { DestPath = fi.FullName.Replace(this.txtSource.Text, this.txtDest.Text) + "x"; }
+                    else
+                    { DestPath = fi.FullName.Replace(ConvertFilePath(fi.FullName), this.txtDest.Text) + "x"; }
                     FileConversionInfo fci = new FileConversionInfo(fi.FullName, DestPath);
                     Controller.FileNames.Add(fci);
                 }
@@ -222,5 +248,11 @@ namespace eSword9Converter
             { Trace.WriteLine(ex); }
             return files.ToArray();
         }
+
+        private void chkSubDir_CheckedChanged(object sender, EventArgs e)
+        {
+            this.chkMirror.Enabled = this.chkSubDir.Checked;
+        }
+
     }
 }

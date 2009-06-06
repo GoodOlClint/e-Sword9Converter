@@ -1,5 +1,5 @@
-﻿AdvancedTitle:=${MainTitle}: Batch Mode
-AlleSwordModules:=All ${e-Sword} Modules
+﻿AdvancedTitle:=e-Sword 9 Converter: Batch Mode
+AlleSwordModules:=All e-Sword Modules
 AutomaticallyOverwrite:=Automatically Overwrite
 BatchMode:=Batch Mode
 Bible:=Bible
@@ -33,7 +33,7 @@ InvalidFileType:=Invalid filetype {0} added to collection
 InvalidPassword:=Invalid Password
 InvalidString:={0} on record number {1} in database {2} is invalid, attempting to convert
 Loading:=Loading
-MainTitle:=${e-Sword} 9 Converter
+MainTitle:=e-Sword 9 Converter
 MemoryVerses:=Memory Verses
 Message:=Message
 NoGetPasswordEventSubscribers:=No Subscribers to GetPasswordEvent
