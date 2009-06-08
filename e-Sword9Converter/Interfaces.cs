@@ -25,7 +25,7 @@ namespace eSword9Converter
     public interface IForm
     {
         void Controller_LanguageChangedEvent();
-        void Controller_ConversionFinishedEvent();
+        void Controller_ConversionFinishedEvent(bool error);
         void AddOwnedForm(System.Windows.Forms.Form form);
     }
     public interface IColumn

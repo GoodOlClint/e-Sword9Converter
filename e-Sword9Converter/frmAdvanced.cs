@@ -61,9 +61,13 @@ namespace eSword9Converter
             Debug.WriteLine("frmPassword.LanguageChangedEvent Finished");
         }
 
-        public void Controller_ConversionFinishedEvent()
+        public void Controller_ConversionFinishedEvent(bool error)
         {
-            this.Text = CurrentLanguage.AdvancedTitle + " " + CurrentLanguage.Finished;
+            if (!error)
+            {
+                this.Text = CurrentLanguage.AdvancedTitle + " " + CurrentLanguage.Finished;
+                MessageBox.Show(CurrentLanguage.FinishedConverting);
+            }
             this.grpDest.Enabled = false;
             this.txtDest.Enabled = true;
             this.btnDest.Enabled = true;
@@ -75,7 +79,7 @@ namespace eSword9Converter
             this.chkSubDir.Enabled = true;
             this.lnkNormal.Enabled = true;
             this.chkMirror.Enabled = this.chkSubDir.Checked;
-            MessageBox.Show(CurrentLanguage.FinishedConverting);
+            
         }
 
         void Controller_ProgressChangedEvent(object sender, int count)
@@ -87,6 +91,7 @@ namespace eSword9Converter
         void Controller_MaxValueChangedEvent(object sender, int value)
         {
             this.prgMain.Maximum = value;
+            this.prgMain.Value = 0;
             Debug.WriteLine("frmAdvanced.prgMain.Maximum set to: " + value);
         }
 
@@ -176,10 +181,11 @@ namespace eSword9Converter
             this.lnkNormal.Enabled = false;
             this.chkMirror.Enabled = false;
             DirectoryInfo di = new DirectoryInfo(this.txtSource.Text);
-            FileInfo[] files = GetFiles(di, "*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst", ';');
+            string validExtension = "*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst";
+            FileInfo[] files = GetFiles(di, validExtension, ';');
             foreach (FileInfo fi in files)
             {
-                if (!fi.Extension.EndsWith("x"))
+                if (!validExtension.Contains(fi.Extension.ToLower()))
                 {
                     string DestPath;
                     if (this.chkMirror.Checked)

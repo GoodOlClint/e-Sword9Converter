@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace eSword9Converter.Tables
 {
@@ -42,22 +43,46 @@ namespace eSword9Converter.Tables
                                                                           where ((string)Row["Scripture"]) == ""
                                                                           select Row).ToArray();
                 Controller.RaiseStatusChanged(this, updateStatus.Converting);
-                Controller.SetMaxValue(this, rows.Count());
+                Controller.SetMaxValue(this, rows.Count()+6);
                 int count = 0;
+                Regex strongsRegex = new Regex(@"[gGhH]\d+");
+
+                ((Details)this.Tables["Details"]).Strong = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
+                                                                              where strongsRegex.Matches((string)Row["Scripture"]).Count > 0
+                                                                              select Row).Count() > 0); ;
+                count++;
+                Controller.RaiseProgressChanged(this, count);
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     ((BibleTable)this.Tables["Bible"]).Rows.Remove(Row);
-                        count++;
+                    count++;
                     Controller.RaiseProgressChanged(this, count);
                 }
+                
                 ((Details)this.Tables["Details"]).NT = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
                                                                           where ((int)Row["BookID"]) == 66
                                                                           select Row).Count() > 0);
+                count++;
+                Controller.RaiseProgressChanged(this, count);
                 ((Details)this.Tables["Details"]).OT = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
                                                                           where ((int)Row["BookID"]) == 1
                                                                           select Row).Count() > 0);
+                count++;
+                Controller.RaiseProgressChanged(this, count);
+
                 ((Details)this.Tables["Details"]).Version = 2;
+                
+                count++;
+                Controller.RaiseProgressChanged(this, count);
                 ((Details)this.Tables["Details"]).RightToLeft = (((Details)this.Tables["Details"]).Font.ToUpper() == "HEBREW");
+
+                count++;
+                Controller.RaiseProgressChanged(this, count);
+                ((Details)this.Tables["Details"]).Apocrypha = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
+                                                                                 where ((int)Row["BookID"]) > 66
+                                                                                 select Row).Count() > 0);
+                count++;
+                Controller.RaiseProgressChanged(this, count);
             }
         }
         [Table("Details")]

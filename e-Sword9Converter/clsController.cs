@@ -124,13 +124,13 @@ namespace eSword9Converter
             { Trace.WriteLine(CurrentLanguage.NoGetPasswordEventSubscribers); pass = ""; }
         }
 
-        public delegate void ConversionFinishedEventHandler();
+        public delegate void ConversionFinishedEventHandler(bool error);
         public static event ConversionFinishedEventHandler ConversionFinishedEvent;
-        public static void RaiseConversionFinished()
+        public static void RaiseConversionFinished(bool error)
         {
             Debug.WriteLine("RaiseConversionFinished called");
             if (ConversionFinishedEvent != null)
-            { sync.Send(new SendOrPostCallback(delegate { ConversionFinishedEvent(); }), null); }
+            { sync.Send(new SendOrPostCallback(delegate { ConversionFinishedEvent(error); }), null); }
         }
         #endregion
 
@@ -299,6 +299,12 @@ namespace eSword9Converter
         {
             try
             {
+                if (Controller.FileNames.Count == 0)
+                {
+                    MessageBox.Show("Nothing to convert!");
+                    RaiseConversionFinished(true);
+                    return;
+                }
                 Thread T = new Thread(new ThreadStart(Controller.Process));
                 T.Start();
             }
@@ -314,7 +320,7 @@ namespace eSword9Converter
                 foreach (FileConversionInfo fci in Controller.FileNames)
                 {
                     bool skip = false;
-                    switch (fci.OldExtension)
+                    switch (fci.OldExtension.ToLower())
                     {
                         default:
                             Trace.WriteLine(new InvalidDataException(string.Format(CurrentLanguage.InvalidFileType, fci.OldExtension)));
@@ -408,7 +414,7 @@ namespace eSword9Converter
                     }
                 }
                 Controller.FileNames.Clear();
-                RaiseConversionFinished();
+                RaiseConversionFinished(false);
             }
             catch (Exception ex)
             { Trace.WriteLine(ex); }

@@ -54,14 +54,17 @@ namespace eSword9Converter
 
         #region Event Handlers
 
-        public void Controller_ConversionFinishedEvent()
+        public void Controller_ConversionFinishedEvent(bool error)
         {
             try
             {
-                this.lblStatus.Text = Globalization.CurrentLanguage.Finished;
-                MessageBox.Show(Globalization.CurrentLanguage.FinishedConverting);
-                this.txtDest.Text = "";
-                this.txtSource.Text = "";
+                if (!error)
+                {
+                    this.lblStatus.Text = Globalization.CurrentLanguage.Finished;
+                    MessageBox.Show(Globalization.CurrentLanguage.FinishedConverting);
+                    this.txtDest.Text = "";
+                    this.txtSource.Text = "";
+                }
                 this.prgMain.Value = 0;
                 this.prgMain.Maximum = 100;
                 this.lblStatus.Text = "";
@@ -101,6 +104,7 @@ namespace eSword9Converter
             {
                 Debug.WriteLine("frmMain.prgMain.Maximum set to: " + value);
                 this.prgMain.Maximum = value;
+                this.prgMain.Value = 0;
             }
             catch (Exception ex)
             { Trace.WriteLine(ex); }
@@ -213,7 +217,7 @@ namespace eSword9Converter
                 { MessageBox.Show(Globalization.CurrentLanguage.SourceFileInvalid, this.txtSource.Text, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                 string ext = this.txtSource.Text.Substring(this.txtSource.Text.Length - 4, 4);
                 string path = this.ConvertFilePath(this.txtSource.Text);
-                this.ofdDest.FileName = this.txtSource.Text.Replace(ext, ext + "x").Replace(path + @"\", "");
+                this.ofdDest.FileName = this.txtSource.Text.Replace(ext, ext.ToLower() + "x").Replace(path + @"\", "");
                 this.ofdDest.InitialDirectory = path;
                 this.grpDest.Enabled = true;
             }
