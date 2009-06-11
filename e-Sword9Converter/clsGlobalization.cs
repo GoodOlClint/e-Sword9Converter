@@ -100,7 +100,7 @@ namespace eSword9Converter.Globalization
         public static string VerseLists { get { return Strings["VerseLists"]; } }
         public static string Warning { get { return Strings["Warning"]; } }
 
-        public static string SaveFileList { get { return Bible + "|*.bblx|" + BibleReadingPlan + "|*.brpx|" + Commentary + "|*.cmtx|" + Dictionary + "|*.dctx|" + Harmony + "|*.harx|" + PrayerRequests + "|*.prlx" + TopicNotes + "|*.topx|" + VerseLists + "|*.lstx|" + Graphics + "|*.mapx|" + Notes + "|*.notx"; } }
+        public static string SaveFileList { get { return Bible + "|*.bblx|" + BibleReadingPlan + "|*.brpx|" + Commentary + "|*.cmtx|" + Dictionary + "|*.dctx|" + Harmony + "|*.harx|" + PrayerRequests + "|*.prlx|" + TopicNotes + "|*.topx|" + VerseLists + "|*.lstx|" + Graphics + "|*.mapx|" + Notes + "|*.notx"; } }
         public static string OpenFileList { get { return AlleSwordModules + "|*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst|" + Bibles + "|*.bbl|" + Commentaries + "|*.cmt|" + Dictionaries + "|*.dct|" + Harmonies + "|*.har|" + TopicNotes + "|*.top|" + VerseLists + "|*.lst|" + Graphics + "|*.map|" + Notes + "|*.not"; } }
         public static string SqlErrorString { get { return "{0}\t{1}\t" + Row + ":{2}\t" + Column + ":{3}\t" + Type + ":{4}\t" + Value + ":{5}\t" + Message + ":{6}"; } }
 
