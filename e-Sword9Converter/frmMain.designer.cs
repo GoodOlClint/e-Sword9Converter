@@ -58,7 +58,7 @@ namespace eSword9Converter
             this.txtDest = new System.Windows.Forms.TextBox();
             this.prgMain = new System.Windows.Forms.ProgressBar();
             this.btnConvert = new System.Windows.Forms.Button();
-            this.ofdDest = new System.Windows.Forms.SaveFileDialog();
+            this.sfdDest = new System.Windows.Forms.SaveFileDialog();
             this.ofdSource = new System.Windows.Forms.OpenFileDialog();
             this.lnkBatch = new System.Windows.Forms.LinkLabel();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
@@ -158,10 +158,11 @@ namespace eSword9Converter
             this.btnConvert.UseVisualStyleBackColor = true;
             this.btnConvert.Click += new System.EventHandler(this.btnConvert_Click);
             // 
-            // ofdDest
+            // sfdDest
             // 
-            this.ofdDest.Filter = "Bibles|*.bblx|Commentaries|*.cmtx|Dictionaries|*.dctx|Harmonies|*.harx|Topic Note" +
+            this.sfdDest.Filter = "Bibles|*.bblx|Commentaries|*.cmtx|Dictionaries|*.dctx|Harmonies|*.harx|Topic Note" +
                 "s|*.topx|Verse Lists|*.lstx|Graphics|*.mapx|Notes|*.notx";
+            this.sfdDest.FileOk += new System.ComponentModel.CancelEventHandler(this.sfdDest_FileOk);
             // 
             // ofdSource
             // 
@@ -220,7 +221,7 @@ namespace eSword9Converter
         private System.Windows.Forms.TextBox txtDest;
         private System.Windows.Forms.ProgressBar prgMain;
         private System.Windows.Forms.Button btnConvert;
-        private System.Windows.Forms.SaveFileDialog ofdDest;
+        private System.Windows.Forms.SaveFileDialog sfdDest;
         private System.Windows.Forms.OpenFileDialog ofdSource;
         private System.Windows.Forms.LinkLabel lnkBatch;
         private System.Windows.Forms.TextBox txtSource;

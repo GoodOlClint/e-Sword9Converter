@@ -396,10 +396,10 @@ namespace eSword9Converter
                                     DB.Clear();
                                 }
                                 else
-                                { Trace.WriteLine("Skipping already existing file " + DB.SourceDB); }
+                                { Trace.WriteLine(string.Format(CurrentLanguage.SkippingExistingFile, DB.SourceDB)); }
                             }
                             else
-                            { Trace.WriteLine("Skipping password protected file " + DB.SourceDB); }
+                            { Trace.WriteLine(string.Format(CurrentLanguage.SkippingPasswordFile, DB.SourceDB)); }
                             if (Stop)
                             {
                                 Debug.WriteLine("Exiting batch conversion");

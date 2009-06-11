@@ -39,11 +39,14 @@ namespace eSword9Converter
 
         void Controller_LanguageChangedEvent()
         {
-            Debug.WriteLine("frmPassword.LanguageChangedEvent");
-            this.Text = Globalization.CurrentLanguage.Password;
-            this.btnCancel.Text = Globalization.CurrentLanguage.Cancel;
-            this.btnOk.Text = Globalization.CurrentLanguage.Ok;
-            Debug.WriteLine("frmPassword.LanguageChangedEvent Finished");
+            try
+            {
+                this.Text = Globalization.CurrentLanguage.Password;
+                this.btnCancel.Text = Globalization.CurrentLanguage.Cancel;
+                this.btnOk.Text = Globalization.CurrentLanguage.Ok;
+            }
+            catch (Exception ex)
+            { Trace.WriteLine(ex); }
         }
 
         public string FileName

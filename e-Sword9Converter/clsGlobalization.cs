@@ -38,6 +38,7 @@ namespace eSword9Converter.Globalization
         public static string Bible { get { return Strings["Bible"]; } }
         public static string BibleReadingPlan { get { return Strings["BibleReadingPlan"]; } }
         public static string Bibles { get { return Strings["Bibles"]; } }
+        public static string BuildVerseReferences { get { return Strings["BuildVerseReferences"]; } }
         public static string Cancel { get { return Strings["Cancel"]; } }
         public static string Column { get { return Strings["Column"]; } }
         public static string Commentaries { get { return Strings["Commentaries"]; } }
@@ -56,6 +57,7 @@ namespace eSword9Converter.Globalization
         public static string FileExists { get { return Strings["FileExists"]; } }
         public static string FileToConvert { get { return Strings["FileToConvert"]; } }
         public static string Finished { get { return Strings["Finished"]; } }
+        public static string FinishedBuildingVerseReferences { get { return Strings["FinishedBuildingVerseReferences"]; } }
         public static string FinishedConverting { get { return Strings["FinishedConverting"]; } }
         public static string Graphics { get { return Strings["Graphics"]; } }
         public static string Harmonies { get { return Strings["Harmonies"]; } }
@@ -69,6 +71,7 @@ namespace eSword9Converter.Globalization
         public static string MainTitle { get { return Strings["MainTitle"]; } }
         public static string MemoryVerses { get { return Strings["MemoryVerses"]; } }
         public static string Message { get { return Strings["Message"]; } }
+        public static string MirrorDirectoryStructure { get { return Strings["MirrorDirectoryStructure"]; } }
         public static string NoGetPasswordEventSubscribers { get { return Strings["NoGetPasswordEventSubscribers"]; } }
         public static string Normal { get { return Strings["Normal"]; } }
         public static string Notes { get { return Strings["Notes"]; } }
@@ -85,6 +88,8 @@ namespace eSword9Converter.Globalization
         public static string Row { get { return Strings["Row"]; } }
         public static string Saving { get { return Strings["Saving"]; } }
         public static string SkipPasswordProtectedFiles { get { return Strings["SkipPasswordProtectedFiles"]; } }
+        public static string SkippingExistingFile { get { return Strings["SkippingExistingFile"]; } }
+        public static string SkippingPasswordFile { get { return Strings["SkippingPasswordFile"]; } }
         public static string Source { get { return Strings["Source"]; } }
         public static string SourceDirectory { get { return Strings["SourceDirectory"]; } }
         public static string SourceFileInvalid { get { return Strings["SourceFileInvalid"]; } }
@@ -96,7 +101,7 @@ namespace eSword9Converter.Globalization
         public static string Warning { get { return Strings["Warning"]; } }
 
         public static string SaveFileList { get { return Bible + "|*.bblx|" + BibleReadingPlan + "|*.brpx|" + Commentary + "|*.cmtx|" + Dictionary + "|*.dctx|" + Harmony + "|*.harx|" + PrayerRequests + "|*.prlx" + TopicNotes + "|*.topx|" + VerseLists + "|*.lstx|" + Graphics + "|*.mapx|" + Notes + "|*.notx"; } }
-        public static string OpenFileList { get { return AlleSwordModules + "*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst|" + Bibles + "|*.bbl|" + Commentaries + "|*.cmt|" + Dictionaries + "|*.dct|" + Harmonies + "|*.har|" + TopicNotes + "|*.top|" + VerseLists + "|*.lst|" + Graphics + "|*.map|" + Notes + "|*.not"; } }
+        public static string OpenFileList { get { return AlleSwordModules + "|*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst|" + Bibles + "|*.bbl|" + Commentaries + "|*.cmt|" + Dictionaries + "|*.dct|" + Harmonies + "|*.har|" + TopicNotes + "|*.top|" + VerseLists + "|*.lst|" + Graphics + "|*.map|" + Notes + "|*.not"; } }
         public static string SqlErrorString { get { return "{0}\t{1}\t" + Row + ":{2}\t" + Column + ":{3}\t" + Type + ":{4}\t" + Value + ":{5}\t" + Message + ":{6}"; } }
 
 
@@ -113,8 +118,9 @@ namespace eSword9Converter.Globalization
         /// </summary>
         /// <param name="ISOLanguageName">A two letter ISO Language code to try to load</param>
         /// <remarks>If <paramref name="ISOLanguageName"/> cannot be loaded, it loads English as the default</remarks>
-        static void LoadLanguage(string ISOLanguageName)
+        public static void LoadLanguage(string ISOLanguageName)
         {
+            Strings.Clear();
             string fileStream = "eSword9Converter.Strings." + ISOLanguageName + ".txt";
             Debug.WriteLine("Attempting to load localized strings from " + fileStream);
             Stream stream = typeof(CurrentLanguage).Assembly.GetManifestResourceStream(fileStream);

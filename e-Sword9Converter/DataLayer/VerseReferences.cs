@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-
+using eSword9Converter.Globalization;
 namespace eSword9Converter
 {
     #region Verse List
@@ -123,7 +123,7 @@ namespace eSword9Converter
     {
         public VerseReferences()
         {
-            Trace.WriteLine("Building VerseReferences Database");
+            Trace.WriteLine(CurrentLanguage.BuildVerseReferences);
             this.Add(new VerseReference(1, 1, 1, 31));
             this.Add(new VerseReference(1, 2, 32, 56));
             this.Add(new VerseReference(1, 3, 57, 80));
@@ -1452,7 +1452,7 @@ namespace eSword9Converter
             this.Add(new VerseReference(73, 13, 35089, 35114));
             this.Add(new VerseReference(73, 14, 35115, 35160));
             this.Add(new VerseReference(73, 15, 35161, 35199));
-            Trace.WriteLine("Finished adding " + this.Count + " to VerseReferences Database");
+            Trace.WriteLine(string.Format(CurrentLanguage.FinishedBuildingVerseReferences, this.Count));
         }
     }
     #endregion

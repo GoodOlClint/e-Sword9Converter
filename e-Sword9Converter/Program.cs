@@ -33,7 +33,8 @@ namespace eSword9Converter
         [STAThread]
         static void Main(string[] Args)
         {
-            TraceListener traceListener = new TraceListener("eSword9Converter.log");
+
+            TraceListener traceListener = new TraceListener(Application.StartupPath + @"\eSword9Converter.log");
             Trace.Listeners.Add(traceListener);
 #if DEBUG
             using (Process proc = Process.GetCurrentProcess())

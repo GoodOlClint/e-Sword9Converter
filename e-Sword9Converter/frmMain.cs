@@ -23,6 +23,7 @@ using System.IO;
 using System.Windows.Forms;
 using System.Diagnostics;
 using eSword9Converter.Globalization;
+using System.Text;
 
 namespace eSword9Converter
 {
@@ -85,6 +86,8 @@ namespace eSword9Converter
                 this.btnDest.Text = Globalization.CurrentLanguage.Destination;
                 this.btnSource.Text = Globalization.CurrentLanguage.Source;
                 this.lnkBatch.Text = Globalization.CurrentLanguage.BatchMode;
+                this.ofdSource.Filter = Globalization.CurrentLanguage.OpenFileList;
+                this.sfdDest.Filter = Globalization.CurrentLanguage.SaveFileList;
             }
             catch (Exception ex)
             { Trace.WriteLine(ex); }
@@ -191,9 +194,9 @@ namespace eSword9Converter
             Debug.WriteLine("frmMain.btnDest clicked");
             try
             {
-                if (this.ofdDest.ShowDialog() == DialogResult.OK)
+                if (this.sfdDest.ShowDialog() == DialogResult.OK)
                 {
-                    this.txtDest.Text = this.ofdDest.FileName;
+                    this.txtDest.Text = this.sfdDest.FileName;
                     this.prgMain.Enabled = true;
                     this.btnConvert.Enabled = true;
                 }
@@ -217,8 +220,8 @@ namespace eSword9Converter
                 { MessageBox.Show(Globalization.CurrentLanguage.SourceFileInvalid, this.txtSource.Text, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                 string ext = this.txtSource.Text.Substring(this.txtSource.Text.Length - 4, 4);
                 string path = this.ConvertFilePath(this.txtSource.Text);
-                this.ofdDest.FileName = this.txtSource.Text.Replace(ext, ext.ToLower() + "x").Replace(path + @"\", "");
-                this.ofdDest.InitialDirectory = path;
+                this.sfdDest.FileName = this.txtSource.Text.Replace(ext, ext.ToLower() + "x").Replace(path + @"\", "");
+                this.sfdDest.InitialDirectory = path;
                 this.grpDest.Enabled = true;
             }
             catch (Exception ex) { Trace.WriteLine(ex); }
@@ -232,43 +235,43 @@ namespace eSword9Converter
                 switch (fi.Extension.ToLower())
                 {
                     case ".bbl":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.bblx", CurrentLanguage.eSword, CurrentLanguage.Bible);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.bblx", CurrentLanguage.eSword, CurrentLanguage.Bible);
                         break;
                     case ".brp":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.brpx", CurrentLanguage.eSword, CurrentLanguage.BibleReadingPlan);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.brpx", CurrentLanguage.eSword, CurrentLanguage.BibleReadingPlan);
                         break;
                     case ".cmt":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.cmtx", CurrentLanguage.eSword, CurrentLanguage.Commentary);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.cmtx", CurrentLanguage.eSword, CurrentLanguage.Commentary);
                         break;
                     case ".dct":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.dctx", CurrentLanguage.eSword, CurrentLanguage.Dictionary);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.dctx", CurrentLanguage.eSword, CurrentLanguage.Dictionary);
                         break;
                     case ".dev":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.devx", CurrentLanguage.eSword, CurrentLanguage.Devotional);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.devx", CurrentLanguage.eSword, CurrentLanguage.Devotional);
                         break;
                     case ".map":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.mapx", CurrentLanguage.eSword, CurrentLanguage.Graphics);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.mapx", CurrentLanguage.eSword, CurrentLanguage.Graphics);
                         break;
                     case ".har":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.harx", CurrentLanguage.eSword, CurrentLanguage.Harmony);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.harx", CurrentLanguage.eSword, CurrentLanguage.Harmony);
                         break;
                     case ".not":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.notx", CurrentLanguage.eSword, CurrentLanguage.Notes);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.notx", CurrentLanguage.eSword, CurrentLanguage.Notes);
                         break;
                     case ".mem":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.memx", CurrentLanguage.eSword, CurrentLanguage.MemoryVerses);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.memx", CurrentLanguage.eSword, CurrentLanguage.MemoryVerses);
                         break;
                     case ".ovl":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.ovlx", CurrentLanguage.eSword, CurrentLanguage.Overlay);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.ovlx", CurrentLanguage.eSword, CurrentLanguage.Overlay);
                         break;
                     case ".prl":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.prlx", CurrentLanguage.eSword, CurrentLanguage.PrayerRequests);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.prlx", CurrentLanguage.eSword, CurrentLanguage.PrayerRequests);
                         break;
                     case ".top":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.topx", CurrentLanguage.eSword, CurrentLanguage.TopicNotes);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.topx", CurrentLanguage.eSword, CurrentLanguage.TopicNotes);
                         break;
                     case ".lst":
-                        this.ofdDest.Filter = string.Format("{0} {1}|*.lstx", CurrentLanguage.eSword, CurrentLanguage.VerseLists);
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.lstx", CurrentLanguage.eSword, CurrentLanguage.VerseLists);
                         break;
                     default:
                         return false;
@@ -329,6 +332,11 @@ namespace eSword9Converter
         ~frmMain()
         {
             Controller.ConversionFinishedEvent -= new Controller.ConversionFinishedEventHandler(this.Controller_ConversionFinishedEvent);
+        }
+
+        private void sfdDest_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
         }
     }
 

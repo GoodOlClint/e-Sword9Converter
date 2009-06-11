@@ -58,6 +58,7 @@ namespace eSword9Converter
             this.chkOverwrite.Text = CurrentLanguage.AutomaticallyOverwrite;
             this.chkSkip.Text = CurrentLanguage.SkipPasswordProtectedFiles;
             this.chkSubDir.Text = CurrentLanguage.IncludeSubdirectories;
+            this.chkMirror.Text = CurrentLanguage.MirrorDirectoryStructure;
             Debug.WriteLine("frmPassword.LanguageChangedEvent Finished");
         }
 
