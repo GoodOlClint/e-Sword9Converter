@@ -186,13 +186,14 @@ namespace eSword9Converter
             FileInfo[] files = GetFiles(di, validExtension, ';');
             foreach (FileInfo fi in files)
             {
-                if (!validExtension.Contains(fi.Extension.ToLower()))
+                if (validExtension.Contains(fi.Extension.ToLower()))
                 {
                     string DestPath;
                     if (this.chkMirror.Checked)
                     { DestPath = fi.FullName.Replace(this.txtSource.Text, this.txtDest.Text) + "x"; }
                     else
                     { DestPath = fi.FullName.Replace(ConvertFilePath(fi.FullName), this.txtDest.Text) + "x"; }
+                    DestPath = DestPath.Replace(fi.Extension + "x", fi.Extension.ToLower() + "x");
                     FileConversionInfo fci = new FileConversionInfo(fi.FullName, DestPath);
                     Controller.FileNames.Add(fci);
                 }
