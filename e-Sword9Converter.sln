@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "e-Sword9Converter", "e-Sword9Converter\e-Sword9Converter.csproj", "{5306DC3F-FEAB-4D58-83DA-0E537B991989}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildZip", "BuildZip\BuildZip.csproj", "{2A57AF23-FEDC-49DB-B746-4ACB3900A7B4}"
-EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
@@ -19,10 +17,6 @@ Global
 		{5306DC3F-FEAB-4D58-83DA-0E537B991989}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5306DC3F-FEAB-4D58-83DA-0E537B991989}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5306DC3F-FEAB-4D58-83DA-0E537B991989}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2A57AF23-FEDC-49DB-B746-4ACB3900A7B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2A57AF23-FEDC-49DB-B746-4ACB3900A7B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2A57AF23-FEDC-49DB-B746-4ACB3900A7B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2A57AF23-FEDC-49DB-B746-4ACB3900A7B4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
