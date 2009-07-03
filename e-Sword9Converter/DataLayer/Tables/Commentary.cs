@@ -48,9 +48,12 @@ namespace eSword9Converter.Tables
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
                     Row["ChapterEnd"] = Row["ChapterBegin"];
+                    Row["Comments"] = ((string)Row["Comments"]).Trim();
                     count++;
                     Controller.RaiseProgressChanged(this, count);
                 }
+                ((Details)this.Tables["Details"]).Description = ((Details)this.Tables["Details"]).Description.Trim();
+                ((Details)this.Tables["Details"]).Comments = ((Details)this.Tables["Details"]).Comments.Trim();
             }
         }
         [Table("Details")]

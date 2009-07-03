@@ -190,7 +190,7 @@ namespace eSword9Converter
                          where ta.Type != tableType.Access
                          select ta.Name).First();
             string sql = "";
-            sql = string.Format("CREATE TABLE '{0}' (", TableName);
+            sql = string.Format("CREATE TABLE {0} (", TableName);
             /* We're going to loop through all the columns and append the column name to the sql string */
             foreach (KeyValuePair<string, IColumn> Column in (from KeyValuePair<string, IColumn> C in this.Columns where C.Value.colType != columnType.Access select C))
             {

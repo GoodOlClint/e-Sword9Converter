@@ -40,10 +40,9 @@ namespace eSword9Converter.Tables
             {
                 //Remove Invalid Scripture Entries;
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
-                                                                          where ((string)Row["Scripture"]) == ""
                                                                           select Row).ToArray();
                 Controller.RaiseStatusChanged(this, updateStatus.Converting);
-                Controller.SetMaxValue(this, rows.Count()+6);
+                Controller.SetMaxValue(this, rows.Count() + 7);
                 int count = 0;
                 Regex strongsRegex = new Regex(@"[gGhH]\d+");
 
@@ -54,11 +53,14 @@ namespace eSword9Converter.Tables
                 Controller.RaiseProgressChanged(this, count);
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
-                    ((BibleTable)this.Tables["Bible"]).Rows.Remove(Row);
+                    if ((string)(Row["Scripture"]) == "")
+                    { ((BibleTable)this.Tables["Bible"]).Rows.Remove(Row); }
+                    else
+                    { Row["Scripture"] = string.Format(" {0} ", ((string)Row["Scripture"]).Trim()); }
                     count++;
                     Controller.RaiseProgressChanged(this, count);
                 }
-                
+
                 ((Details)this.Tables["Details"]).NT = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
                                                                           where ((int)Row["BookID"]) == 66
                                                                           select Row).Count() > 0);
@@ -71,7 +73,7 @@ namespace eSword9Converter.Tables
                 Controller.RaiseProgressChanged(this, count);
 
                 ((Details)this.Tables["Details"]).Version = 2;
-                
+
                 count++;
                 Controller.RaiseProgressChanged(this, count);
                 ((Details)this.Tables["Details"]).RightToLeft = (((Details)this.Tables["Details"]).Font.ToUpper() == "HEBREW");
@@ -81,6 +83,9 @@ namespace eSword9Converter.Tables
                 ((Details)this.Tables["Details"]).Apocrypha = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
                                                                                  where ((int)Row["BookID"]) > 66
                                                                                  select Row).Count() > 0);
+                count++;
+                Controller.RaiseProgressChanged(this, count);
+                ((Details)this.Tables["Details"]).Description = ((Details)this.Tables["Details"]).Description.Trim();
                 count++;
                 Controller.RaiseProgressChanged(this, count);
             }

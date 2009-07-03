@@ -199,6 +199,7 @@ namespace eSword9Converter
             this.Controls.Add(this.prgMain);
             this.Controls.Add(this.grpDest);
             this.Controls.Add(this.grpSource);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

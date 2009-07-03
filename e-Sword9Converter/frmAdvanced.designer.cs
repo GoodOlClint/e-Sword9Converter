@@ -49,6 +49,7 @@ namespace eSword9Converter
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAdvanced));
             this.lnkNormal = new System.Windows.Forms.LinkLabel();
             this.btnDest = new System.Windows.Forms.Button();
             this.btnConvert = new System.Windows.Forms.Button();
@@ -230,6 +231,7 @@ namespace eSword9Converter
             this.Controls.Add(this.prgMain);
             this.Controls.Add(this.grpDest);
             this.Controls.Add(this.grpSource);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "frmAdvanced";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

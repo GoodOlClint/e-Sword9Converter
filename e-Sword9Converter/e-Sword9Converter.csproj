@@ -31,6 +31,7 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -111,10 +112,10 @@
       <DependentUpon>frmAdvanced.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <Resource Include="frmPassword.resx">
+    <EmbeddedResource Include="frmPassword.resx">
       <DependentUpon>frmPassword.cs</DependentUpon>
       <SubType>Designer</SubType>
-    </Resource>
+    </EmbeddedResource>
     <Compile Include="DataLayer\Tables\Bible.cs" />
     <Compile Include="DataLayer\Tables\Commentary.cs" />
     <Compile Include="DataLayer\Tables\BibleReadingPlan.cs" />
@@ -177,6 +178,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="app.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
