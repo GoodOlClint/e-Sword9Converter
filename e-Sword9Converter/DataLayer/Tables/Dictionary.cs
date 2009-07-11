@@ -38,12 +38,48 @@ namespace eSword9Converter.Tables
             base.Load(File);
             if (!Skip)
             {
+                IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((DictionaryTable)this.Tables["Dictionary"]).Rows
+                                                                          orderby Row["Topic"] ascending
+                                                                          select Row).ToArray();
+
                 ((Details)this.Tables["Details"]).Version = 2;
                 Regex strongsRegex = new Regex(@"[gGhH]\d+");
 
-                ((Details)this.Tables["Details"]).Strong = ((from ThreadSafeDictionary<string, object> Row in ((DictionaryTable)this.Tables["Dictionary"]).Rows
-                                                             where strongsRegex.Matches((string)Row["Topic"]).Count > 0
-                                                             select Row).Count() > 0);
+
+                bool strong = ((from ThreadSafeDictionary<string, object> Row in ((DictionaryTable)this.Tables["Dictionary"]).Rows
+                                where strongsRegex.Matches((string)Row["Topic"]).Count > 0
+                                select Row).Count() > 0);
+
+                ((Details)this.Tables["Details"]).Strong = strong;
+
+                if (!strong)
+                {
+                    ((DictionaryTable)this.Tables["Dictionary"]).Rows.Clear();
+
+                    ((DictionaryTable)this.Tables["Dictionary"]).Rows.FromArray(rows.ToArray());
+                }
+                else
+                {
+                    rows = (from ThreadSafeDictionary<string, object> Row in ((DictionaryTable)this.Tables["Dictionary"]).Rows
+                            where strongsRegex.Matches((string)Row["Topic"]).Count == 0
+                            select Row).ToArray();
+
+                    IEnumerable<ThreadSafeDictionary<string, object>> HebRows = (from ThreadSafeDictionary<string, object> Row in ((DictionaryTable)this.Tables["Dictionary"]).Rows
+                                                                                 where ((string)Row["Topic"]).ToUpper().StartsWith("H")
+                                                                                 where strongsRegex.Matches((string)Row["Topic"]).Count > 0
+                                                                                 orderby Convert.ToInt32(((string)Row["Topic"]).Remove(0, 1)) ascending
+                                                                                 select Row).ToArray();
+
+                    IEnumerable<ThreadSafeDictionary<string, object>> GreRows = (from ThreadSafeDictionary<string, object> Row in ((DictionaryTable)this.Tables["Dictionary"]).Rows
+                                                                                 where ((string)Row["Topic"]).ToUpper().StartsWith("G")
+                                                                                 where strongsRegex.Matches((string)Row["Topic"]).Count > 0
+                                                                                 orderby Convert.ToInt32(((string)Row["Topic"]).Remove(0, 1)) ascending
+                                                                                 select Row).ToArray();
+                    ((DictionaryTable)this.Tables["Dictionary"]).Rows.Clear();
+                    ((DictionaryTable)this.Tables["Dictionary"]).Rows.FromArray(rows.ToArray());
+                    ((DictionaryTable)this.Tables["Dictionary"]).Rows.FromArray(HebRows.ToArray());
+                    ((DictionaryTable)this.Tables["Dictionary"]).Rows.FromArray(GreRows.ToArray());
+                }
             }
         }
         [Table("Details")]

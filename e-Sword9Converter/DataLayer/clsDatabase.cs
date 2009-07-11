@@ -142,7 +142,7 @@ namespace eSword9Converter
             this.oleDbFactory = new oleDbFactory();
             this.SQLiteFactory = new SQLiteDbFactory();
             this.SourceConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source={file};";
-            this.DestConnectionString = "data source=\"{file}\"";
+            this.DestConnectionString = "data source=\"{file}\";UseUTF16Encoding=True";
 
         }
 

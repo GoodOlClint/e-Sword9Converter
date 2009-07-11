@@ -40,6 +40,9 @@ namespace eSword9Converter.Tables
             {
                 //Remove Invalid Scripture Entries;
                 IEnumerable<ThreadSafeDictionary<string, object>> rows = (from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
+                                                                          orderby Row["Verse"]
+                                                                          orderby Row["Chapter"]
+                                                                          orderby Row["BookID"]
                                                                           select Row).ToArray();
                 Controller.RaiseStatusChanged(this, updateStatus.Converting);
                 Controller.SetMaxValue(this, rows.Count() + 7);
@@ -51,16 +54,17 @@ namespace eSword9Converter.Tables
                                                                               select Row).Count() > 0); ;
                 count++;
                 Controller.RaiseProgressChanged(this, count);
+                ((BibleTable)this.Tables["Bible"]).Rows.Clear();
                 foreach (ThreadSafeDictionary<string, object> Row in rows)
                 {
-                    if ((string)(Row["Scripture"]) == "")
-                    { ((BibleTable)this.Tables["Bible"]).Rows.Remove(Row); }
-                    else
-                    { Row["Scripture"] = string.Format(" {0} ", ((string)Row["Scripture"]).Trim()); }
+                    if ((string)(Row["Scripture"]) != "")
+                    {
+                        Row["Scripture"] = string.Format(" {0}\r ", ((string)Row["Scripture"]).Trim());
+                    }
                     count++;
                     Controller.RaiseProgressChanged(this, count);
                 }
-
+                ((BibleTable)this.Tables["Bible"]).Rows.FromArray(rows.ToArray());
                 ((Details)this.Tables["Details"]).NT = Convert.ToBoolean((from ThreadSafeDictionary<string, object> Row in ((BibleTable)this.Tables["Bible"]).Rows
                                                                           where ((int)Row["BookID"]) == 66
                                                                           select Row).Count() > 0);
@@ -105,7 +109,7 @@ namespace eSword9Converter.Tables
             [SqlColumn("Version", DbType.INT)]
             public int Version { get { return Convert.ToInt32(this.Rows[0]["Version"]); } set { this.Rows[0]["Version"] = value; } }
 
-            [Column("Font", DbType.TEXT)]
+            [Column("Font", DbType.NVARCHAR, 50)]
             public string Font { get { return Convert.ToString(this.Rows[0]["Font"]); } set { this.Rows[0]["Font"] = value; } }
 
             [SqlColumn("RightToLeft", DbType.BOOL)]
