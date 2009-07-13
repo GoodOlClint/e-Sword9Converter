@@ -23,7 +23,6 @@ using System.Data.OleDb;
 using System.Data.SQLite;
 using System.Security;
 using System.Security.Permissions;
-using SQLITEPLUS50;
 
 namespace eSword9Converter
 {

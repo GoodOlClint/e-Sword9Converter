@@ -223,5 +223,11 @@ namespace eSword9Converter
         }
 
         #endregion
+
+        public void FromArray(T[] array)
+        {
+            foreach (T item in array)
+            { this.Add(item); }
+        }
     }
 }

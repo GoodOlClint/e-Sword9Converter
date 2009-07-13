@@ -66,7 +66,7 @@ namespace eSword9Converter.Tables
             public string Abbreviation { get { return Convert.ToString(this.Rows[0]["Abbreviation"]); } set { this.Rows[0]["Abbreviation"] = value; } }
 
             [Column("Comments", DbType.TEXT)]
-            public string Comments { get { return Convert.ToString(this.Rows[0]["string"]); } set { this.Rows[0]["Font"] = value; } }
+            public string Comments { get { return Convert.ToString(this.Rows[0]["Comments"]); } set { this.Rows[0]["Comments"] = value; } }
 
             [SqlColumn("Version", DbType.INT)]
             public int Version { get { return Convert.ToInt32(this.Rows[0]["Version"]); } set { this.Rows[0]["Version"] = value; } }
