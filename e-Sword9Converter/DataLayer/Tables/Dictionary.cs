@@ -62,6 +62,7 @@ namespace eSword9Converter.Tables
                 {
                     rows = (from ThreadSafeDictionary<string, object> Row in ((DictionaryTable)this.Tables["Dictionary"]).Rows
                             where strongsRegex.Matches((string)Row["Topic"]).Count == 0
+                            orderby ((string)Row["Topic"]) ascending
                             select Row).ToArray();
 
                     IEnumerable<ThreadSafeDictionary<string, object>> HebRows = (from ThreadSafeDictionary<string, object> Row in ((DictionaryTable)this.Tables["Dictionary"]).Rows
