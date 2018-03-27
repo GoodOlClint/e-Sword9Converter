@@ -1,4 +1,24 @@
-﻿namespace eSword9Converter
+﻿/*
+ * Copyright (c) 2009, GoodOlClint All rights reserved.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted
+ * provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions
+ * and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions
+ * and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of the e-Sword Users nor the names of its contributors may be used to endorse
+ * or promote products derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+namespace eSword9Converter
 {
     partial class frmAdvanced
     {
@@ -29,6 +49,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAdvanced));
             this.lnkNormal = new System.Windows.Forms.LinkLabel();
             this.btnDest = new System.Windows.Forms.Button();
             this.btnConvert = new System.Windows.Forms.Button();
@@ -44,6 +65,7 @@
             this.chkOverwrite = new System.Windows.Forms.CheckBox();
             this.chkSubDir = new System.Windows.Forms.CheckBox();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.chkMirror = new System.Windows.Forms.CheckBox();
             this.grpDest.SuspendLayout();
             this.grpSource.SuspendLayout();
             this.SuspendLayout();
@@ -58,6 +80,7 @@
             this.lnkNormal.TabIndex = 12;
             this.lnkNormal.TabStop = true;
             this.lnkNormal.Text = "Normal";
+            this.lnkNormal.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkNormal_LinkClicked);
             // 
             // btnDest
             // 
@@ -181,12 +204,25 @@
             this.chkSubDir.TabIndex = 15;
             this.chkSubDir.Text = "Include Subdirectories";
             this.chkSubDir.UseVisualStyleBackColor = true;
+            this.chkSubDir.CheckedChanged += new System.EventHandler(this.chkSubDir_CheckedChanged);
+            // 
+            // chkMirror
+            // 
+            this.chkMirror.AutoSize = true;
+            this.chkMirror.Enabled = false;
+            this.chkMirror.Location = new System.Drawing.Point(155, 63);
+            this.chkMirror.Name = "chkMirror";
+            this.chkMirror.Size = new System.Drawing.Size(143, 17);
+            this.chkMirror.TabIndex = 16;
+            this.chkMirror.Text = "Mirror Directory Structure";
+            this.chkMirror.UseVisualStyleBackColor = true;
             // 
             // frmAdvanced
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(428, 198);
+            this.Controls.Add(this.chkMirror);
             this.Controls.Add(this.chkSubDir);
             this.Controls.Add(this.chkOverwrite);
             this.Controls.Add(this.chkSkip);
@@ -195,11 +231,11 @@
             this.Controls.Add(this.prgMain);
             this.Controls.Add(this.grpDest);
             this.Controls.Add(this.grpSource);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "frmAdvanced";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "e-Sword 9 Converter: Batch Mode";
-            this.Load += new System.EventHandler(this.frmAdvanced_Load);
             this.grpDest.ResumeLayout(false);
             this.grpDest.PerformLayout();
             this.grpSource.ResumeLayout(false);
@@ -226,6 +262,7 @@
         private System.Windows.Forms.CheckBox chkSubDir;
         public System.Windows.Forms.LinkLabel lnkNormal;
         private System.Windows.Forms.ToolTip toolTip;
+        private System.Windows.Forms.CheckBox chkMirror;
 
 
     }

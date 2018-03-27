@@ -1,174 +1,212 @@
-﻿using System;
-using System.Collections;
-using System.Data.OleDb;
+﻿/*
+ * Copyright (c) 2009, GoodOlClint All rights reserved.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted
+ * provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions
+ * and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions
+ * and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of the e-Sword Users nor the names of its contributors may be used to endorse
+ * or promote products derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+using System;
 using System.IO;
-using System.Text;
-using System.Threading;
 using System.Windows.Forms;
+using System.Diagnostics;
+using eSword9Converter.Globalization;
+using System.Text;
 
 namespace eSword9Converter
 {
-    public partial class frmMain : Form
+    public partial class frmMain : Form, IForm
     {
+
         #region Constructor
         public frmMain()
         {
-            InitializeComponent();
-            this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
-            passwordForm = new frmPassword();
-            advancedForm = new frmAdvanced();
-            this.AddOwnedForm(passwordForm);
-            this.advancedForm.lnkNormal.Click += new EventHandler(lnkNormal_Click);
-            this.advancedForm.FormClosed += new FormClosedEventHandler(advancedForm_FormClosed);
-            this.FormClosing += new FormClosingEventHandler(frmMain_FormClosing);
-            Controller.StatusChangedEvent += new Controller.StatusChangedEventHandler(Controller_StatusChangedEvent);
-            Controller.MaxValueChangedEvent += new Controller.MaxValueChangedEventHandler(Controller_MaxValueChangedEvent);
-            Controller.ProgressChangedEvent += new Controller.ProgressChangedEventHandler(Controller_ProgressChangedEvent);
+            try
+            {
+                Debug.WriteLine("Initializing frmMain");
+                InitializeComponent();
+                this.Controller_LanguageChangedEvent();
+                Debug.WriteLine("Registering frmMain event handlers");
+                this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
+                Controller.StatusChangedEvent += new Controller.StatusChangedEventHandler(Controller_StatusChangedEvent);
+                Controller.MaxValueChangedEvent += new Controller.MaxValueChangedEventHandler(Controller_MaxValueChangedEvent);
+                Controller.ProgressChangedEvent += new Controller.ProgressChangedEventHandler(Controller_ProgressChangedEvent);
+                Controller.LanguageChangedEvent += new Controller.LanguageChangedEventHandler(Controller_LanguageChangedEvent);
+                Controller.ConversionFinishedEvent += new Controller.ConversionFinishedEventHandler(Controller_ConversionFinishedEvent);
+                Debug.WriteLine("Initializing frmMain Finished");
+            }
+            catch (Exception ex)
+            { Trace.WriteLine(ex); }
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        public void Controller_ConversionFinishedEvent(bool error)
+        {
+            try
+            {
+                if (!error)
+                {
+                    this.lblStatus.Text = Globalization.CurrentLanguage.Finished;
+                    MessageBox.Show(Globalization.CurrentLanguage.FinishedConverting);
+                    this.txtDest.Text = "";
+                    this.txtSource.Text = "";
+                }
+                this.prgMain.Value = 0;
+                this.prgMain.Maximum = 100;
+                this.lblStatus.Text = "";
+            }
+            catch (Exception ex)
+            { Trace.WriteLine(ex); }
+        }
+
+
+        public void Controller_LanguageChangedEvent()
+        {
+            try
+            {
+                this.Text = Globalization.CurrentLanguage.MainTitle;
+                this.grpDest.Text = Globalization.CurrentLanguage.ConvertedFile;
+                this.grpSource.Text = Globalization.CurrentLanguage.FileToConvert;
+                this.btnConvert.Text = Globalization.CurrentLanguage.Convert;
+                this.btnDest.Text = Globalization.CurrentLanguage.Destination;
+                this.btnSource.Text = Globalization.CurrentLanguage.Source;
+                this.lnkBatch.Text = Globalization.CurrentLanguage.BatchMode;
+                this.ofdSource.Filter = Globalization.CurrentLanguage.OpenFileList;
+                this.sfdDest.Filter = Globalization.CurrentLanguage.SaveFileList;
+            }
+            catch (Exception ex)
+            { Trace.WriteLine(ex); }
         }
 
         void Controller_ProgressChangedEvent(object sender, int count)
         {
-            if (this.prgMain.InvokeRequired)
-            {
-                this.prgMain.Invoke(new Controller.ProgressChangedEventHandler(this.Controller_ProgressChangedEvent), new object[] { sender, count });
-            }
-            else
-            {
-                this.prgMain.Value = count;
-            }
+            try
+            { this.prgMain.Value = count; }
+            catch (Exception ex)
+            { Trace.WriteLine(ex); }
         }
 
         void Controller_MaxValueChangedEvent(object sender, int value)
         {
-            if (this.prgMain.InvokeRequired)
+            try
             {
-                this.prgMain.Invoke(new Controller.MaxValueChangedEventHandler(this.Controller_MaxValueChangedEvent), new object[] { sender, value });
-            }
-            else
-            {
+                Debug.WriteLine("frmMain.prgMain.Maximum set to: " + value);
                 this.prgMain.Maximum = value;
+                this.prgMain.Value = 0;
             }
+            catch (Exception ex)
+            { Trace.WriteLine(ex); }
         }
 
         void Controller_StatusChangedEvent(object sender, updateStatus status)
         {
-            if (this.lblStatus.InvokeRequired)
-            {
-                this.lblStatus.Invoke(new Controller.StatusChangedEventHandler(this.Controller_StatusChangedEvent), new object[] { sender, status });
-            }
-            else
-            {
-                this.lblStatus.Text = status.ToString();
-            }
-        }
-
-        void frmMain_FormClosing(object sender, FormClosingEventArgs e)
-        {
             try
             {
-                this.advancedForm.Dispose();
-                this.passwordForm.Dispose();
+                switch (status)
+                {
+                    case updateStatus.Loading:
+                        this.lblStatus.Text = CurrentLanguage.Loading;
+                        break;
+                    case updateStatus.Converting:
+                        this.lblStatus.Text = CurrentLanguage.Converting;
+                        break;
+                    case updateStatus.Saving:
+                        this.lblStatus.Text = CurrentLanguage.Saving;
+                        break;
+                    case updateStatus.Optimizing:
+                        this.lblStatus.Text = CurrentLanguage.Optimizing;
+                        break;
+                    case updateStatus.Finished:
+                        this.lblStatus.Text = CurrentLanguage.Finished;
+                        break;
+                }
+                Debug.WriteLine("frmMain.lblStatus.Text set to: " + this.lblStatus.Text);
             }
-            catch { }
-        }
-        #endregion
-
-        object threadLock = new object();
-        private int progress;
-        updateStatus status;
-        public int Progress { get { lock (threadLock) { return progress; } } set { lock (threadLock) { progress = value; } } }
-        public updateStatus Status { get { lock (threadLock) { return status; } } set { lock (threadLock) { status = value; } } }
-        private frmPassword passwordForm;
-        private frmAdvanced advancedForm;
-
-        #region Event Handlers
-        void advancedForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            try
-            {
-                this.Close();
-            }
-            catch { }
-        }
-
-        void lnkNormal_Click(object sender, EventArgs e)
-        {
-            this.Show();
-            this.advancedForm.Hide();
+            catch (Exception ex)
+            { Trace.WriteLine(ex); }
         }
 
         void prgMain_MouseHover(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmMain.prgMain hovered");
             try
             {
                 int Percent = (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d);
                 this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% {1}", Percent, Globalization.CurrentLanguage.Completed));
             }
-            catch (Exception ex) { Error.Record(this, ex); }
+            catch (Exception ex) { Trace.WriteLine(ex); }
         }
+
         private void btnSource_Click(object sender, EventArgs e)
         {
-            if (this.ofdSource.ShowDialog() == DialogResult.OK)
+            Debug.WriteLine("frmMain.btnSource clicked");
+            try
             {
-                this.txtSource.Text = this.ofdSource.FileName;
-                this.ValidateSource();
+                if (this.ofdSource.ShowDialog() == DialogResult.OK)
+                {
+                    this.txtSource.Text = this.ofdSource.FileName;
+                    this.ValidateSource();
+                }
             }
+            catch (Exception ex)
+            { Trace.WriteLine(ex); }
         }
         private void btnConvert_Click(object sender, EventArgs e)
         {
-            FileConversionInfo FCI = new FileConversionInfo(this.txtSource.Text, this.txtDest.Text);
-            Controller.FileNames.Add(FCI);
-            Controller.CurrentForm = this;
-            Controller.AutomaticallyOverwrite = true;
-            Controller.Begin();
+            Debug.WriteLine("frmMain.btnConvert clicked");
+            try
+            {
+                FileConversionInfo FCI = new FileConversionInfo(this.txtSource.Text, this.txtDest.Text);
+                Controller.FileNames.Add(FCI);
+                Controller.CurrentForm = this;
+                Controller.AutomaticallyOverwrite = true;
+                Controller.Begin();
+                this.grpDest.Enabled = false;
+                this.btnConvert.Enabled = false;
+            }
+            catch (Exception ex)
+            { Trace.WriteLine(ex); }
         }
 
         private void lnkBatch_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            advancedForm.Show();
-            this.Hide();
+            Debug.WriteLine("frmMain.lnkBatch clicked");
+            Controller.SwitchForms();
         }
-        #endregion
 
-
-        #region IParent Members
-        private delegate void SetMaxValueDelegate(int value, updateStatus Status);
-        private delegate void UpdateStatusDelegate();
-        private delegate bool GetPasswordDelegate(string path, out string password);
-
-        public void SetMaxValue(int value, updateStatus Status)
+        private void btnDest_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmMain.btnDest clicked");
             try
             {
-                if (this.prgMain.InvokeRequired)
+                if (this.sfdDest.ShowDialog() == DialogResult.OK)
                 {
-                    this.prgMain.Invoke(new SetMaxValueDelegate(SetMaxValue), value, Status);
-                }
-                else
-                {
-                    this.prgMain.Maximum = value + 1;
-                    this.Progress = 0;
-                    this.lblStatus.Text = Status.ToString();
-                    this.Status = Status;
+                    this.txtDest.Text = this.sfdDest.FileName;
+                    this.prgMain.Enabled = true;
+                    this.btnConvert.Enabled = true;
                 }
             }
-            catch (Exception ex) { Error.Record(this, ex); }
+            catch (Exception ex)
+            { Trace.WriteLine(ex); }
         }
-
-        public void UpdateStatus()
-        {
-            this.Progress++;
-            //if (this.prgMain.InvokeRequired)
-            //{
-            //    this.prgMain.Invoke(new UpdateStatusDelegate(UpdateStatus));
-            //}
-            //else
-            //{
-            //    this.prgMain.Value++;
-            //}
-        }
-
         #endregion
+
+        object threadLock = new object();
 
         private void ValidateSource()
         {
@@ -177,16 +215,16 @@ namespace eSword9Converter
                 if (this.txtSource.Text == "")
                     return;
                 if (!File.Exists(this.txtSource.Text))
-                { MessageBox.Show("", Globalization.CurrentLanguage.SourceFileNotExist, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+                { MessageBox.Show(Globalization.CurrentLanguage.SourceFileNotExist, this.txtSource.Text, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                 if (!ValidSource(this.txtSource.Text))
-                { MessageBox.Show("", Globalization.CurrentLanguage.SourceFileInvalid, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+                { MessageBox.Show(Globalization.CurrentLanguage.SourceFileInvalid, this.txtSource.Text, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
                 string ext = this.txtSource.Text.Substring(this.txtSource.Text.Length - 4, 4);
                 string path = this.ConvertFilePath(this.txtSource.Text);
-                this.ofdDest.FileName = this.txtSource.Text.Replace(ext, ext + "x").Replace(path + @"\", "");
-                this.ofdDest.InitialDirectory = path;
+                this.sfdDest.FileName = this.txtSource.Text.Replace(ext, ext.ToLower() + "x").Replace(path + @"\", "");
+                this.sfdDest.InitialDirectory = path;
                 this.grpDest.Enabled = true;
             }
-            catch (Exception ex) { Error.Record(this, ex); }
+            catch (Exception ex) { Trace.WriteLine(ex); }
         }
 
         private bool ValidSource(string path)
@@ -194,52 +232,52 @@ namespace eSword9Converter
             try
             {
                 FileInfo fi = new FileInfo(path);
-                switch (fi.Extension)
+                switch (fi.Extension.ToLower())
                 {
                     case ".bbl":
-                        this.ofdDest.Filter = "e-Sword Bible|*.bblx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.bblx", CurrentLanguage.eSword, CurrentLanguage.Bible);
                         break;
                     case ".brp":
-                        this.ofdDest.Filter = "e-Sword Bible Reading Plan|*.brpx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.brpx", CurrentLanguage.eSword, CurrentLanguage.BibleReadingPlan);
                         break;
                     case ".cmt":
-                        this.ofdDest.Filter = "e-Sword Commentary|*.cmtx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.cmtx", CurrentLanguage.eSword, CurrentLanguage.Commentary);
                         break;
                     case ".dct":
-                        this.ofdDest.Filter = "e-Sword Dictionary|*.dctx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.dctx", CurrentLanguage.eSword, CurrentLanguage.Dictionary);
                         break;
                     case ".dev":
-                        this.ofdDest.Filter = "e-Sword Devotional|*.devx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.devx", CurrentLanguage.eSword, CurrentLanguage.Devotional);
                         break;
                     case ".map":
-                        this.ofdDest.Filter = "e-Sword Graphics|*.mapx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.mapx", CurrentLanguage.eSword, CurrentLanguage.Graphics);
                         break;
                     case ".har":
-                        this.ofdDest.Filter = "e-Sword Gospel Harmony|*.harx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.harx", CurrentLanguage.eSword, CurrentLanguage.Harmony);
                         break;
                     case ".not":
-                        this.ofdDest.Filter = "e-Sword Notes|*.notx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.notx", CurrentLanguage.eSword, CurrentLanguage.Notes);
                         break;
                     case ".mem":
-                        this.ofdDest.Filter = "e-Sword Memory Verses|*.memx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.memx", CurrentLanguage.eSword, CurrentLanguage.MemoryVerses);
                         break;
                     case ".ovl":
-                        this.ofdDest.Filter = "e-Sword Overlay|*.ovlx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.ovlx", CurrentLanguage.eSword, CurrentLanguage.Overlay);
                         break;
                     case ".prl":
-                        this.ofdDest.Filter = "e-Sword Prayer Requests|*.prlx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.prlx", CurrentLanguage.eSword, CurrentLanguage.PrayerRequests);
                         break;
                     case ".top":
-                        this.ofdDest.Filter = "e-Sword Topic|*.topx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.topx", CurrentLanguage.eSword, CurrentLanguage.TopicNotes);
                         break;
                     case ".lst":
-                        this.ofdDest.Filter = "e-Sword Verse List|*.lstx";
+                        this.sfdDest.Filter = string.Format("{0} {1}|*.lstx", CurrentLanguage.eSword, CurrentLanguage.VerseLists);
                         break;
                     default:
                         return false;
                 }
-                FileStream fs = new FileStream(path, FileMode.Open);
-                System.IO.BinaryReader br = new BinaryReader(fs);
+                FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
+                BinaryReader br = new BinaryReader(fs);
                 long pos = 0;
                 bool reading = true;
                 string header = "";
@@ -253,7 +291,7 @@ namespace eSword9Converter
                 br.Close();
                 return (header == "Standard Jet DB");
             }
-            catch (Exception ex) { Error.Record(this, ex); return false; }
+            catch (Exception ex) { Trace.WriteLine(ex); return false; }
         }
 
         private bool ValidDestination(string path)
@@ -261,7 +299,7 @@ namespace eSword9Converter
             try
             {
                 FileInfo fi = new FileInfo(path);
-                switch (fi.Extension)
+                switch (fi.Extension.ToLower())
                 {
                     case ".bblx":
                     case ".brpx":
@@ -281,105 +319,24 @@ namespace eSword9Converter
                         return false;
                 }
             }
-            catch (Exception ex) { Error.Record(this, ex); return false; }
+            catch (Exception ex) { Trace.WriteLine(ex); return false; }
         }
 
-        private void ValidateDestination()
-        { this.ValidateDestination(false); }
-
-        private void ValidateDestination(bool ofd)
-        {
-            try
-            {
-                if (!ofd && File.Exists(this.txtDest.Text))
-                {
-                    this.txtDest.Text = "";
-                    this.prgMain.Enabled = false;
-                    this.btnConvert.Enabled = false;
-                    return;
-                }
-                this.prgMain.Enabled = true;
-                this.btnConvert.Enabled = true;
-            }
-            catch (Exception ex) { Error.Record(this, ex); }
-        }
-
-        private void WatchStatus()
-        {
-            try
-            {
-                if (this.Status != updateStatus.Finished)
-                {
-                    this.UpdateProgress();
-                    Thread.Sleep(100);
-                    WatchStatus();
-                }
-            }
-            catch (Exception ex) { Error.Record(this, ex); }
-        }
-        void UpdateProgress()
-        {
-            try
-            {
-                if (this.prgMain.InvokeRequired)
-                {
-                    this.prgMain.Invoke(new UpdateStatusDelegate(this.UpdateProgress));
-                }
-                else
-                {
-                    this.prgMain.Value = this.progress;
-                }
-            }
-            catch (Exception ex) { Error.Record(this, ex); }
-        }
-
-        private void btnDest_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                if (this.ofdDest.ShowDialog() == DialogResult.OK)
-                {
-                    this.txtDest.Text = this.ofdDest.FileName;
-                    ValidateDestination(true);
-                }
-            }
-            catch (Exception ex) { Error.Record(this, ex); }
-        }
         private string ConvertFilePath(string OldPath)
         {
             try
-            {
-                return new FileInfo(OldPath).DirectoryName;
-            }
-            catch (Exception ex) { Error.Record(this, ex); return OldPath; }
-        }
-        public delegate void ProcessParametersDelegate(object sender, string[] args);
-        public void ProcessParameters(object sender, string[] args)
-        {
-            // The form has loaded, and initialization will have been be done.
-
-            // Add the command-line arguments to our textbox, just to confirm that
-            // it reached here.
-            if (args != null && args.Length != 0)
-            {
-                //txtArgs.Text += DateTime.Now.ToString("mm:ss.ff") + " ";
-                //for (int i = 0; i < args.Length; i++)
-                {
-                    //txtArgs.Text += args[i] + " ";
-                }
-                //txtArgs.Text += "\r\n";
-            }
+            { return new FileInfo(OldPath).DirectoryName; }
+            catch (Exception ex) { Trace.WriteLine(ex); return OldPath; }
         }
 
-        private void frmMain_Load(object sender, EventArgs e)
+        ~frmMain()
         {
-            this.Text = Globalization.CurrentLanguage.MainTitle;
-            this.grpDest.Text = Globalization.CurrentLanguage.ConvertedFile;
-            this.grpSource.Text = Globalization.CurrentLanguage.FileToConvert;
-            this.btnConvert.Text = Globalization.CurrentLanguage.Convert;
-            this.btnDest.Text = Globalization.CurrentLanguage.Destination;
-            this.btnSource.Text = Globalization.CurrentLanguage.Source;
-            this.lnkBatch.Text = Globalization.CurrentLanguage.BatchMode;
+            Controller.ConversionFinishedEvent -= new Controller.ConversionFinishedEventHandler(this.Controller_ConversionFinishedEvent);
+        }
+
+        private void sfdDest_FileOk(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+
         }
     }
 

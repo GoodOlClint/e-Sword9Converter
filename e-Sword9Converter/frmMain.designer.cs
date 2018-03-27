@@ -1,4 +1,24 @@
-﻿namespace eSword9Converter
+﻿/*
+ * Copyright (c) 2009, GoodOlClint All rights reserved.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted
+ * provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions
+ * and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions
+ * and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of the e-Sword Users nor the names of its contributors may be used to endorse
+ * or promote products derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+namespace eSword9Converter
 {
     partial class frmMain
     {
@@ -38,7 +58,7 @@
             this.txtDest = new System.Windows.Forms.TextBox();
             this.prgMain = new System.Windows.Forms.ProgressBar();
             this.btnConvert = new System.Windows.Forms.Button();
-            this.ofdDest = new System.Windows.Forms.SaveFileDialog();
+            this.sfdDest = new System.Windows.Forms.SaveFileDialog();
             this.ofdSource = new System.Windows.Forms.OpenFileDialog();
             this.lnkBatch = new System.Windows.Forms.LinkLabel();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
@@ -138,10 +158,11 @@
             this.btnConvert.UseVisualStyleBackColor = true;
             this.btnConvert.Click += new System.EventHandler(this.btnConvert_Click);
             // 
-            // ofdDest
+            // sfdDest
             // 
-            this.ofdDest.Filter = "Bibles|*.bblx|Commentaries|*.cmtx|Dictionaries|*.dctx|Harmonies|*.harx|Topic Note" +
+            this.sfdDest.Filter = "Bibles|*.bblx|Commentaries|*.cmtx|Dictionaries|*.dctx|Harmonies|*.harx|Topic Note" +
                 "s|*.topx|Verse Lists|*.lstx|Graphics|*.mapx|Notes|*.notx";
+            this.sfdDest.FileOk += new System.ComponentModel.CancelEventHandler(this.sfdDest_FileOk);
             // 
             // ofdSource
             // 
@@ -178,11 +199,11 @@
             this.Controls.Add(this.prgMain);
             this.Controls.Add(this.grpDest);
             this.Controls.Add(this.grpSource);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "frmMain";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "e-Sword 9 Converter";
-            this.Load += new System.EventHandler(this.frmMain_Load);
             this.grpSource.ResumeLayout(false);
             this.grpSource.PerformLayout();
             this.grpDest.ResumeLayout(false);
@@ -201,7 +222,7 @@
         private System.Windows.Forms.TextBox txtDest;
         private System.Windows.Forms.ProgressBar prgMain;
         private System.Windows.Forms.Button btnConvert;
-        private System.Windows.Forms.SaveFileDialog ofdDest;
+        private System.Windows.Forms.SaveFileDialog sfdDest;
         private System.Windows.Forms.OpenFileDialog ofdSource;
         private System.Windows.Forms.LinkLabel lnkBatch;
         private System.Windows.Forms.TextBox txtSource;

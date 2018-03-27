@@ -230,9 +230,13 @@ namespace eSword9Converter
         public void FromArray(T[] array)
         {
             foreach (T item in array)
+<<<<<<< HEAD
             {
                 this.Add(item);
             }
+=======
+            { this.Add(item); }
+>>>>>>> Test
         }
     }
 }

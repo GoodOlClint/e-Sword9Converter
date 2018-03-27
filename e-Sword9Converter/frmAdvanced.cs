@@ -1,46 +1,131 @@
-﻿using System;
-using System.Collections;
+﻿/*
+ * Copyright (c) 2009, GoodOlClint All rights reserved.
+ * Redistribution and use in source and binary forms, with or without modification, are permitted
+ * provided that the following conditions are met:
+ * Redistributions of source code must retain the above copyright notice, this list of conditions
+ * and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright notice, this list of conditions
+ * and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ * Neither the name of the e-Sword Users nor the names of its contributors may be used to endorse
+ * or promote products derived from this software without specific prior written permission.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS
+ * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+ * AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
+ * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+using System;
 using System.Collections.Generic;
-using System.Data.OleDb;
+using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Windows.Forms;
-using System.Threading;
+using eSword9Converter.Globalization;
 
 namespace eSword9Converter
 {
-    public partial class frmAdvanced : Form
+    public partial class frmAdvanced : Form, IForm
     {
-        private updateStatus CurrentStatus;
+        private string CurrentStatus;
         public frmAdvanced()
         {
+            Debug.WriteLine("Initializing frmAdvanced");
             InitializeComponent();
+            Debug.WriteLine("Registering frmMain event handlers");
+            this.Controller_LanguageChangedEvent();
             this.prgMain.MouseHover += new EventHandler(prgMain_MouseHover);
             Controller.StatusChangedEvent += new Controller.StatusChangedEventHandler(Controller_StatusChangedEvent);
             Controller.MaxValueChangedEvent += new Controller.MaxValueChangedEventHandler(Controller_MaxValueChangedEvent);
             Controller.ProgressChangedEvent += new Controller.ProgressChangedEventHandler(Controller_ProgressChangedEvent);
+            Controller.ConversionFinishedEvent += new Controller.ConversionFinishedEventHandler(Controller_ConversionFinishedEvent);
+            Controller.LanguageChangedEvent += new Controller.LanguageChangedEventHandler(Controller_LanguageChangedEvent);
+            Debug.WriteLine("Initializing frmAdvanced Finished");
+        }
+
+        public void Controller_LanguageChangedEvent()
+        {
+            Debug.WriteLine("frmPassword.LanguageChangedEvent");
+            this.Text = CurrentLanguage.AdvancedTitle;
+            this.grpDest.Text = CurrentLanguage.DestinationDirectory;
+            this.grpSource.Text = CurrentLanguage.SourceDirectory;
+            this.btnConvert.Text = CurrentLanguage.Convert;
+            this.btnDest.Text = CurrentLanguage.Destination;
+            this.btnSource.Text = CurrentLanguage.Source;
+            this.lnkNormal.Text = CurrentLanguage.Normal;
+            this.chkOverwrite.Text = CurrentLanguage.AutomaticallyOverwrite;
+            this.chkSkip.Text = CurrentLanguage.SkipPasswordProtectedFiles;
+            this.chkSubDir.Text = CurrentLanguage.IncludeSubdirectories;
+            this.chkMirror.Text = CurrentLanguage.MirrorDirectoryStructure;
+            Debug.WriteLine("frmPassword.LanguageChangedEvent Finished");
+        }
+
+        public void Controller_ConversionFinishedEvent(bool error)
+        {
+            if (!error)
+            {
+                this.Text = CurrentLanguage.AdvancedTitle + " " + CurrentLanguage.Finished;
+                MessageBox.Show(CurrentLanguage.FinishedConverting);
+            }
+            this.grpDest.Enabled = false;
+            this.txtDest.Enabled = true;
+            this.btnDest.Enabled = true;
+            this.txtDest.Text = "";
+            this.btnSource.Enabled = true;
+            this.txtSource.Enabled = true;
+            this.chkOverwrite.Enabled = true;
+            this.chkSkip.Enabled = true;
+            this.chkSubDir.Enabled = true;
+            this.lnkNormal.Enabled = true;
+            this.chkMirror.Enabled = this.chkSubDir.Checked;
+            
         }
 
         void Controller_ProgressChangedEvent(object sender, int count)
-        { this.prgMain.Value = count;
-        FileInfo fi = new FileInfo(Controller.DB.SourceDB);
-        this.Text = string.Format("{0}: {3}% {1} {2}", Globalization.CurrentLanguage.AdvancedTitle, this.CurrentStatus.ToString(), Controller.DB.FileName.Replace(fi.DirectoryName + @"\", ""), (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d));
+        {
+            this.prgMain.Value = count;
+            this.Text = string.Format("{0}: {3}% {1} {2}", CurrentLanguage.AdvancedTitle, this.CurrentStatus, Controller.DB.FileName, (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d));
         }
 
         void Controller_MaxValueChangedEvent(object sender, int value)
-        { this.prgMain.Maximum = value; }
+        {
+            this.prgMain.Maximum = value;
+            this.prgMain.Value = 0;
+            Debug.WriteLine("frmAdvanced.prgMain.Maximum set to: " + value);
+        }
 
 
         void Controller_StatusChangedEvent(object sender, updateStatus status)
         {
-            this.CurrentStatus = status;
+            switch (status)
+            {
+                case updateStatus.Loading:
+                    this.CurrentStatus = CurrentLanguage.Loading;
+                    break;
+                case updateStatus.Converting:
+                    this.CurrentStatus = CurrentLanguage.Converting;
+                    break;
+                case updateStatus.Saving:
+                    this.CurrentStatus = CurrentLanguage.Saving;
+                    break;
+                case updateStatus.Optimizing:
+                    this.CurrentStatus = CurrentLanguage.Optimizing;
+                    break;
+                case updateStatus.Finished:
+                    this.CurrentStatus = CurrentLanguage.Finished;
+                    break;
+            }
+            Debug.WriteLine("frmAdvanced.CurrentStatus set to: " + status.ToString());
         }
 
 
         private void btnSource_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmAdvanced.btnSource Clicked");
             if (this.txtSource.Text == "")
-            { this.ofdSource.SelectedPath = @"C:\Program Files\e-Sword"; }
+            { this.ofdSource.SelectedPath = Controller.eSwordFolder; }
             this.ofdSource.ShowNewFolderButton = false;
             if (this.ofdSource.ShowDialog() == DialogResult.OK)
             {
@@ -53,6 +138,7 @@ namespace eSword9Converter
 
         private void btnDest_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmAdvanced.btnDest Clicked");
             this.sfdDest.SelectedPath = this.txtDest.Text;
             if (this.sfdDest.ShowDialog() == DialogResult.OK)
             {
@@ -64,7 +150,21 @@ namespace eSword9Converter
 
         private void btnConvert_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("frmAdvanced.btnConvert Clicked");
             this.RunBatch();
+        }
+
+        void prgMain_MouseHover(object sender, EventArgs e)
+        {
+            Debug.WriteLine("frmAdvanced.prgMain Hovered");
+            int Percent = (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d);
+            this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% {1}", Percent, Globalization.CurrentLanguage.Completed));
+        }
+
+        private void lnkNormal_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Debug.WriteLine("frmAdvanced.lnkNormal Clicked");
+            Controller.SwitchForms();
         }
 
 
@@ -80,34 +180,31 @@ namespace eSword9Converter
             this.chkSkip.Enabled = false;
             this.chkSubDir.Enabled = false;
             this.lnkNormal.Enabled = false;
+            this.chkMirror.Enabled = false;
             DirectoryInfo di = new DirectoryInfo(this.txtSource.Text);
-            FileInfo[] files = GetFiles(di, "*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst", ';');
+            string validExtension = "*.bbl;*.brp;*.cmt;*.dct;*.dev;*.map;*.har;*.not;*.mem;*.ovl;*.prl;*.top;*.lst";
+            FileInfo[] files = GetFiles(di, validExtension, ';');
             foreach (FileInfo fi in files)
             {
-                if (!fi.Extension.EndsWith("x"))
+                if (validExtension.Contains(fi.Extension.ToLower()))
                 {
-                    string DestPath = fi.FullName.Replace(ConvertFilePath(fi.FullName), this.txtDest.Text) + "x";
+                    string DestPath;
+                    if (this.chkMirror.Checked)
+                    { DestPath = fi.FullName.Replace(this.txtSource.Text, this.txtDest.Text) + "x"; }
+                    else
+                    { DestPath = fi.FullName.Replace(ConvertFilePath(fi.FullName), this.txtDest.Text) + "x"; }
+                    DestPath = DestPath.Replace(fi.Extension + "x", fi.Extension.ToLower() + "x");
                     FileConversionInfo fci = new FileConversionInfo(fi.FullName, DestPath);
                     Controller.FileNames.Add(fci);
                 }
             }
+            Controller.SkipPassword = this.chkSkip.Checked;
             Controller.AutomaticallyOverwrite = this.chkOverwrite.Checked;
             Controller.Begin();
-            //this.Text = Globalization.CurrentLanguage.AdvancedTitle + " " + Globalization.CurrentLanguage.Finished;
-            this.grpDest.Enabled = false;
-            this.txtDest.Enabled = true;
-            this.btnDest.Enabled = true;
-            this.txtDest.Text = "";
-            this.btnSource.Enabled = true;
-            this.txtSource.Enabled = true;
-            this.chkOverwrite.Enabled = true;
-            this.chkSkip.Enabled = true;
-            this.chkSubDir.Enabled = true;
-            this.lnkNormal.Enabled = true;
-
         }
         private bool ValidateSource(string path)
         {
+            Debug.WriteLine("Checking that " + path + " is a valid access database");
             try
             {
                 FileStream fs = new FileStream(path, FileMode.Open);
@@ -123,19 +220,18 @@ namespace eSword9Converter
                     reading = !(pos >= 19);
                 }
                 br.Close();
-                return (header == "Standard Jet DB");
+                bool ret = (header == "Standard Jet DB");
+                Debug.WriteLineIf(!ret, path + " is not a valid Jet Database");
+                Debug.WriteLineIf(!ret, "File header is " + header);
+                return ret;
             }
-            catch (Exception ex) { Error.Record(this, ex); return false; }
+            catch (Exception ex) { Trace.WriteLine(ex); return false; }
         }
 
         private bool ValidateDest(string path)
         { return !File.Exists(path); }
 
-        void prgMain_MouseHover(object sender, EventArgs e)
-        {
-            int Percent = (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d);
-            this.toolTip.SetToolTip(this.prgMain, string.Format("{0}% {1}", Percent, Globalization.CurrentLanguage.Completed));
-        }
+
 
         private string ConvertFilePath(string OldPath)
         { return new FileInfo(OldPath).DirectoryName; }
@@ -157,59 +253,14 @@ namespace eSword9Converter
                 }
             }
             catch (Exception ex)
-            { Error.Record(this, ex); }
+            { Trace.WriteLine(ex); }
             return files.ToArray();
         }
 
-        private void WatchStatus()
+        private void chkSubDir_CheckedChanged(object sender, EventArgs e)
         {
-            //if (DB.Running)
-            {
-                this.UpdateProgress();
-                Thread.Sleep(100);
-                WatchStatus();
-            }
-        }
-        void UpdateProgress()
-        {
-            //if (this.prgMain.InvokeRequired)
-            //{
-            // //   this.prgMain.Invoke(new UpdateStatusDelegate(this.UpdateProgress));
-            //}
-            //else
-            //{
-            //   // if (DB.Running)
-            //    {
-            //     //   if (this.Progress > this.prgMain.Maximum)
-            //       // { this.prgMain.Value = this.prgMain.Maximum; Error.Record(this, new Exception(Globalization.CurrentLanguage.ProgressExceededMax)); }
-            //        //else
-            //        //{ this.prgMain.Value = this.Progress; }
-            //        FileInfo fi = new FileInfo(DB.FileName);
-            //        this.Text = string.Format("{0}: {3}% {1} {2}", Globalization.CurrentLanguage.AdvancedTitle, Status.ToString(), DB.FileName.Replace(fi.DirectoryName + @"\", ""), (int)(((double)this.prgMain.Value / (double)this.prgMain.Maximum) * 100d));
-            //        Application.DoEvents();
-            //    }
-            //    else
-            //    {
-            //        this.prgMain.Value = 0;
-            //        this.prgMain.Maximum = 100;
-            //        this.Text = Globalization.CurrentLanguage.AdvancedTitle + " " + Globalization.CurrentLanguage.Finished;
-            //    }
-            //}
+            this.chkMirror.Enabled = this.chkSubDir.Checked;
         }
 
-        private void frmAdvanced_Load(object sender, EventArgs e)
-        {
-            this.Text = Globalization.CurrentLanguage.AdvancedTitle;
-            this.grpDest.Text = Globalization.CurrentLanguage.DestinationDirectory;
-            this.grpSource.Text = Globalization.CurrentLanguage.SourceDirectory;
-            this.btnConvert.Text = Globalization.CurrentLanguage.Convert;
-            this.btnDest.Text = Globalization.CurrentLanguage.Destination;
-            this.btnSource.Text = Globalization.CurrentLanguage.Source;
-            this.lnkNormal.Text = Globalization.CurrentLanguage.Normal;
-            this.chkOverwrite.Text = Globalization.CurrentLanguage.AutomaticallyOverwrite;
-            this.chkSkip.Text = Globalization.CurrentLanguage.SkipPasswordProtectedFiles;
-            this.chkSubDir.Text = Globalization.CurrentLanguage.IncludeSubdirectories;
-
-        }
     }
 }
